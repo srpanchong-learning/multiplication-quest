@@ -194,14 +194,14 @@
               <div class="w-20 h-20 bg-gradient-to-br from-red-400 to-orange-500 rounded-full flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform pulse-glow">3</div>
               <div class="flex-1"><div class="flex gap-1"><span class="text-amber-400">⭐</span><span class="text-amber-400">⭐</span><span class="text-gray-300">⭐</span></div></div>
             </div>
-            <div class="flex items-center gap-4 opacity-50">
+            <div onclick="startLevel(4)" class="flex items-center gap-4 cursor-pointer group">
               <div class="flex-1 text-right"><span class="text-sm text-gray-500">Level 4</span><p class="font-bold text-gray-700">Brain Blitz</p></div>
-              <div class="w-20 h-20 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full flex items-center justify-center text-3xl shadow-lg">🔒</div>
+              <div class="w-20 h-20 bg-gradient-to-br from-indigo-400 to-blue-500 rounded-full flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform">4</div>
               <div class="flex-1"><div class="flex gap-1"><span class="text-gray-300">⭐</span><span class="text-gray-300">⭐</span><span class="text-gray-300">⭐</span></div></div>
             </div>
-            <div class="flex items-center gap-4 opacity-50">
+            <div onclick="startLevel(5)" class="flex items-center gap-4 cursor-pointer group">
               <div class="flex-1 text-right"><span class="text-sm text-gray-500">Boss Level</span><p class="font-bold text-gray-700">Master The Table</p></div>
-              <div class="w-20 h-20 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full flex items-center justify-center text-3xl shadow-lg">👑</div>
+              <div class="w-20 h-20 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform">👑</div>
               <div class="flex-1"><div class="flex gap-1"><span class="text-gray-300">⭐</span><span class="text-gray-300">⭐</span><span class="text-gray-300">⭐</span></div></div>
             </div>
           </div>
@@ -308,7 +308,8 @@
       currentQuestion: 0,
       totalQuestions: 5,
       quizScore: 0,
-      playerRecord: null
+      playerRecord: null,
+      unlockedLevels: 1
     };
 
     let allPlayerRecords = [];
@@ -456,8 +457,63 @@
       }
     };
 
+    function generateLevelQuestions(grade, level) {
+      const templates = [];
+      const ranges = {
+        1: [2, 7],
+        2: [4, 11],
+        3: [5, 12],
+        4: [6, 12],
+        5: [2, 12]
+      };
+      const [min, max] = ranges[level] || [2, 12];
+
+      const nums = [];
+      for (let n = min; n <= max; n++) nums.push(n);
+      const picks = nums.sort(() => Math.random() - 0.5).slice(0, 5);
+
+      return picks.map((n, idx) => {
+        const answer = grade * n;
+        if (idx % 2 === 0) {
+          const wrongs = new Set();
+          while (wrongs.size < 3) {
+            const delta = Math.floor(Math.random() * 5) + 1;
+            const sign = Math.random() > 0.5 ? 1 : -1;
+            const wrong = Math.max(1, answer + delta * sign);
+            if (wrong !== answer) wrongs.add(String(wrong));
+          }
+          const options = [String(answer), ...wrongs].sort(() => Math.random() - 0.5);
+          return {
+            type: 'mcq',
+            question: `${grade} × ${n} = ?`,
+            options,
+            correct: options.indexOf(String(answer)),
+            emoji: level >= 4 ? '🚀' : '🔥'
+          };
+        }
+
+        if (idx === 3) {
+          return {
+            type: 'fill',
+            question: `___ × ${grade} = ${answer}`,
+            correct: String(n),
+            emoji: level >= 4 ? '🧠' : '❓'
+          };
+        }
+
+        return {
+          type: 'fill',
+          question: `${grade} × ${n} = ?`,
+          correct: String(answer),
+          emoji: level >= 4 ? '⚡' : '❓'
+        };
+      });
+    }
+
     function getQuizQuestions() {
-      return quizQuestionsByGradeAndLevel[gameState.currentGrade]?.[gameState.currentLevel] || [];
+      const staticQuestions = quizQuestionsByGradeAndLevel[gameState.currentGrade]?.[gameState.currentLevel];
+      if (staticQuestions && staticQuestions.length) return staticQuestions;
+      return generateLevelQuestions(gameState.currentGrade, gameState.currentLevel);
     }
 
     function showScreen(screenId) {
@@ -532,6 +588,7 @@
       }
     }
     initDataSdk();
+    window.addEventListener('DOMContentLoaded', renderLevelPath);
 
     async function startAdventure() {
       const nameInput = document.getElementById('student-name');
@@ -545,6 +602,7 @@
         gameState.stars = parseInt(existingPlayer.total_stars) || 0;
         gameState.coins = parseInt(existingPlayer.total_coins) || 0;
         gameState.currentGrade = parseInt(existingPlayer.times_table) || 2;
+        gameState.unlockedLevels = parseInt(existingPlayer.unlocked_levels) || 1;
       } else {
         await saveNewPlayer();
       }
@@ -563,12 +621,14 @@
         total_stars: 0,
         total_coins: 0,
         levels_completed: 0,
+        unlocked_levels: 1,
         last_updated: new Date().toISOString()
       };
 
       const result = await window.dataSdk.create(newPlayer);
       if (result.isOk) {
         gameState.playerRecord = result.data || newPlayer;
+        gameState.unlockedLevels = parseInt(gameState.playerRecord.unlocked_levels) || 1;
       }
     }
 
@@ -591,6 +651,7 @@
         total_stars: gameState.stars,
         total_coins: gameState.coins,
         levels_completed: Math.max(parseInt(gameState.playerRecord?.levels_completed) || 0, gameState.currentLevel),
+        unlocked_levels: gameState.unlockedLevels,
         last_updated: new Date().toISOString()
       };
 
@@ -604,14 +665,20 @@
       gameState.currentGrade = grade;
       document.getElementById('grade-title').textContent = `Times Table ${grade} - Levels`;
       if (gameState.playerRecord) updatePlayerProgress();
+      renderLevelPath();
       showScreen('level-screen');
     }
 
     function startLevel(level) {
+      if (level > gameState.unlockedLevels) {
+        alert(`Level ${level === 5 ? 'Boss' : level} is still locked. Complete the earlier level with at least 80% to unlock it.`);
+        return;
+      }
       gameState.currentLevel = level;
       gameState.currentQuestion = 0;
       gameState.quizScore = 0;
       currentDropItems = [];
+      gameState.totalQuestions = getQuizQuestions().length || 5;
       updateQuizStats();
       showScreen('quiz-screen');
       loadQuestion();
@@ -796,14 +863,22 @@
       const bonusCoins = 50;
       const percent = Math.round((gameState.quizScore / gameState.totalQuestions) * 100);
       const isPerfect = gameState.quizScore === gameState.totalQuestions;
+      const passedLevel = percent >= 80;
 
       gameState.stars += bonusStars;
       gameState.coins += bonusCoins;
+
+      if (passedLevel && gameState.currentLevel < 5) {
+        gameState.unlockedLevels = Math.max(gameState.unlockedLevels, gameState.currentLevel + 1);
+      }
+
       updateStats();
       await updatePlayerProgress();
       updateLeaderboard();
 
-      document.getElementById('celebration-message').textContent = `Amazing job, ${gameState.playerName}!`;
+      document.getElementById('celebration-message').textContent = passedLevel
+        ? `Amazing job, ${gameState.playerName}! New level unlocked!`
+        : `Nice try, ${gameState.playerName}! Score 80% or more to unlock the next level.`;
       document.getElementById('celebration-score').textContent = `${percent}%`;
       document.getElementById('celebration-coins-text').textContent = `+${bonusCoins} Coins`;
       document.getElementById('celebration-stars-text').textContent = `${bonusStars} Stars`;
@@ -811,14 +886,18 @@
       document.getElementById('new-badge').classList.toggle('hidden', !isPerfect);
 
       const nextBtn = document.getElementById('next-level-btn');
-      if (gameState.currentLevel < 3) {
-        nextBtn.innerHTML = '▶️ Next Level';
+      if (passedLevel && gameState.currentLevel < 5) {
+        nextBtn.innerHTML = `▶️ Go to ${gameState.currentLevel + 1 === 5 ? 'Boss Level' : 'Level ' + (gameState.currentLevel + 1)}`;
         nextBtn.onclick = () => startLevel(gameState.currentLevel + 1);
       } else {
         nextBtn.innerHTML = '📚 Back to Levels';
-        nextBtn.onclick = () => showScreen('level-screen');
+        nextBtn.onclick = () => {
+          renderLevelPath();
+          showScreen('level-screen');
+        };
       }
 
+      renderLevelPath();
       showScreen('celebration-screen');
       createConfetti();
     }
@@ -841,6 +920,32 @@
 
     function exitQuiz() {
       showScreen('level-screen');
+    }
+
+    function renderLevelPath() {
+      const levelConfigs = [
+        { level: 1, label: 'Level 1', title: 'Times Table Basics', color: 'from-green-400 to-emerald-500', icon: '1' },
+        { level: 2, label: 'Level 2', title: 'Speed Challenge', color: 'from-violet-400 to-purple-500', icon: '2' },
+        { level: 3, label: 'Level 3', title: 'Mixed Challenges', color: 'from-red-400 to-orange-500', icon: '3' },
+        { level: 4, label: 'Level 4', title: 'Brain Blitz', color: 'from-indigo-400 to-blue-500', icon: '4' },
+        { level: 5, label: 'Boss Level', title: 'Master The Table', color: 'from-yellow-400 to-amber-500', icon: '👑' }
+      ];
+
+      const holder = document.querySelector('#level-screen .relative.z-10.space-y-6');
+      if (!holder) return;
+
+      holder.innerHTML = levelConfigs.map(cfg => {
+        const unlocked = cfg.level <= gameState.unlockedLevels;
+        const completed = cfg.level < gameState.unlockedLevels;
+        const leftText = `<div class="flex-1 text-right"><span class="text-sm text-gray-500">${cfg.label}</span><p class="font-bold text-gray-700">${cfg.title}</p></div>`;
+        const rightStars = `<div class="flex-1"><div class="flex gap-1">${completed ? '<span class="text-amber-400">⭐</span><span class="text-amber-400">⭐</span><span class="text-amber-400">⭐</span>' : unlocked ? '<span class="text-amber-400">⭐</span><span class="text-gray-300">⭐</span><span class="text-gray-300">⭐</span>' : '<span class="text-gray-300">⭐</span><span class="text-gray-300">⭐</span><span class="text-gray-300">⭐</span>'}</div></div>`;
+        const circle = unlocked
+          ? `<div class="w-20 h-20 bg-gradient-to-br ${cfg.color} rounded-full flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform ${cfg.level === gameState.unlockedLevels ? 'pulse-glow' : ''}">${completed ? '✓' : cfg.icon}</div>`
+          : `<div class="w-20 h-20 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full flex items-center justify-center text-3xl shadow-lg">🔒</div>`;
+        const wrapperClass = unlocked ? 'flex items-center gap-4 cursor-pointer group' : 'flex items-center gap-4 opacity-50';
+        const action = unlocked ? `onclick="startLevel(${cfg.level})"` : '';
+        return `<div ${action} class="${wrapperClass}">${leftText}${circle}${rightStars}</div>`;
+      }).join('');
     }
 
     function updateLeaderboard() {
