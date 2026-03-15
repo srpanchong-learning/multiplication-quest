@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Multiplication Master Quest</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -50,7 +52,6 @@
     .bounce-in { animation: bounce-in 0.5s ease-out forwards; }
     .shake { animation: shake 0.5s ease-in-out; }
     .slide-up { animation: slide-up 0.4s ease-out forwards; }
-    .progress-fill { transition: width 0.3s ease-out; }
 
     .confetti {
       position: absolute;
@@ -74,8 +75,20 @@
       transform: scale(0.95);
     }
 
-    .timer-warning {
-      animation: pulse-glow 0.8s ease-in-out infinite;
+    .progress-fill {
+      transition: width 0.4s ease-out;
+    }
+
+    .draggable {
+      cursor: grab;
+      user-select: none;
+    }
+    .draggable:active {
+      cursor: grabbing;
+    }
+    .drag-over {
+      background: #E8F5E9 !important;
+      border-color: #81C784 !important;
     }
   </style>
 </head>
@@ -84,8 +97,8 @@
     <div id="welcome-screen" class="min-h-full flex flex-col items-center justify-center p-6">
       <div class="text-center mb-8 slide-up">
         <div class="text-6xl mb-4 float-animation">🚀</div>
-        <h1 class="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-violet-600 via-pink-500 to-orange-400 bg-clip-text text-transparent mb-2">Multiplication Master Quest</h1>
-        <p class="text-lg text-gray-600">Train, race the timer, and climb the live leaderboard.</p>
+        <h1 id="main-title" class="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-violet-600 via-pink-500 to-orange-400 bg-clip-text text-transparent mb-2">Multiplication Master Quest</h1>
+        <p id="welcome-text" class="text-lg text-gray-600">Welcome, multiplication hero! Master the times tables!</p>
       </div>
 
       <div class="bg-white rounded-3xl p-8 shadow-xl max-w-md w-full slide-up" style="animation-delay: 0.2s;">
@@ -94,14 +107,15 @@
         </div>
         <label class="block text-gray-700 font-bold mb-2 text-center">What's your name, adventurer?</label>
         <input type="text" id="student-name" placeholder="Enter your name..." class="w-full px-5 py-4 rounded-2xl border-2 border-violet-200 focus:border-violet-400 focus:outline-none text-center text-xl font-semibold text-gray-700 transition-all mb-4">
-        <p id="firebase-status" class="text-center text-sm text-gray-500 mb-5">Connecting to Firebase leaderboard...</p>
+        <label class="block text-gray-700 font-bold mb-2 text-center">Class / Team</label>
+        <input type="text" id="student-class" placeholder="Example: Year 4A" class="w-full px-5 py-4 rounded-2xl border-2 border-sky-200 focus:border-sky-400 focus:outline-none text-center text-lg font-semibold text-gray-700 transition-all mb-6">
         <button id="start-btn" onclick="startAdventure()" class="w-full bg-gradient-to-r from-violet-500 to-pink-500 text-white font-bold py-4 px-8 rounded-2xl text-xl shadow-lg hover:shadow-xl transition-all btn-press pulse-glow">🎮 Start Adventure!</button>
       </div>
 
       <div class="flex gap-4 mt-8 slide-up flex-wrap justify-center" style="animation-delay: 0.4s;">
         <div class="bg-white/80 rounded-2xl px-4 py-2 flex items-center gap-2"><span class="text-2xl">⭐</span><span class="font-bold text-gray-700">Earn Stars</span></div>
-        <div class="bg-white/80 rounded-2xl px-4 py-2 flex items-center gap-2"><span class="text-2xl">⏱️</span><span class="font-bold text-gray-700">Beat the Timer</span></div>
-        <div class="bg-white/80 rounded-2xl px-4 py-2 flex items-center gap-2"><span class="text-2xl">🏆</span><span class="font-bold text-gray-700">Live Leaderboard</span></div>
+        <div class="bg-white/80 rounded-2xl px-4 py-2 flex items-center gap-2"><span class="text-2xl">🪙</span><span class="font-bold text-gray-700">Collect Coins</span></div>
+        <div class="bg-white/80 rounded-2xl px-4 py-2 flex items-center gap-2"><span class="text-2xl">🏆</span><span class="font-bold text-gray-700">Beat Your Class</span></div>
       </div>
     </div>
 
@@ -114,27 +128,40 @@
           <div>
             <p class="text-gray-500 text-sm">Welcome back,</p>
             <p id="player-name-display" class="font-bold text-xl text-gray-800">Explorer</p>
+            <p id="player-class-display" class="text-sm text-sky-600 font-semibold">No class yet</p>
           </div>
         </div>
-        <div class="flex gap-3">
+        <div class="flex gap-3 flex-wrap">
           <div class="bg-white rounded-2xl px-4 py-2 flex items-center gap-2 shadow-md"><span class="text-xl">⭐</span><span id="star-count" class="font-bold text-amber-500">0</span></div>
           <div class="bg-white rounded-2xl px-4 py-2 flex items-center gap-2 shadow-md"><span class="text-xl">🪙</span><span id="coin-count" class="font-bold text-yellow-500">0</span></div>
-          <button onclick="openLeaderboard()" class="bg-white rounded-2xl px-4 py-2 shadow-md hover:shadow-lg transition-all btn-press"><span class="text-xl">🏆</span></button>
+          <button onclick="showScreen('daily-screen')" class="bg-white rounded-2xl px-4 py-2 shadow-md hover:shadow-lg transition-all btn-press">⚔️ Daily</button>
+          <button onclick="showScreen('leaderboard-screen'); updateLeaderboard();" class="bg-white rounded-2xl px-4 py-2 shadow-md hover:shadow-lg transition-all btn-press">🏆</button>
         </div>
       </header>
 
       <div class="text-center mb-8">
         <h2 class="text-3xl font-extrabold text-gray-800 mb-2">Choose Your Times Table</h2>
-        <p class="text-gray-600">Each table has its own progress, unlocks, and leaderboard score.</p>
+        <p class="text-gray-600">Now upgraded to tables 2–12.</p>
       </div>
 
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-        <div onclick="selectGrade(2)" class="bg-gradient-to-br from-rose-100 to-rose-200 rounded-3xl p-6 text-center card-hover cursor-pointer border-4 border-transparent hover:border-rose-400"><div class="text-5xl mb-3">×2</div><h3 class="text-2xl font-bold text-rose-600">Twos</h3><p class="text-rose-500 text-sm mt-1">Steady start</p></div>
-        <div onclick="selectGrade(3)" class="bg-gradient-to-br from-orange-100 to-orange-200 rounded-3xl p-6 text-center card-hover cursor-pointer border-4 border-transparent hover:border-orange-400"><div class="text-5xl mb-3">×3</div><h3 class="text-2xl font-bold text-orange-600">Threes</h3><p class="text-orange-500 text-sm mt-1">Build rhythm</p></div>
-        <div onclick="selectGrade(4)" class="bg-gradient-to-br from-amber-100 to-amber-200 rounded-3xl p-6 text-center card-hover cursor-pointer border-4 border-transparent hover:border-amber-400"><div class="text-5xl mb-3">×4</div><h3 class="text-2xl font-bold text-amber-600">Fours</h3><p class="text-amber-500 text-sm mt-1">Pattern power</p></div>
-        <div onclick="selectGrade(5)" class="bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-3xl p-6 text-center card-hover cursor-pointer border-4 border-transparent hover:border-emerald-400"><div class="text-5xl mb-3">×5</div><h3 class="text-2xl font-bold text-emerald-600">Fives</h3><p class="text-emerald-500 text-sm mt-1">Fast favorites</p></div>
-        <div onclick="selectGrade(6)" class="bg-gradient-to-br from-sky-100 to-sky-200 rounded-3xl p-6 text-center card-hover cursor-pointer border-4 border-transparent hover:border-sky-400"><div class="text-5xl mb-3">×6</div><h3 class="text-2xl font-bold text-sky-600">Sixes</h3><p class="text-sky-500 text-sm mt-1">Trickier jumps</p></div>
-        <div onclick="selectGrade(7)" class="bg-gradient-to-br from-violet-100 to-violet-200 rounded-3xl p-6 text-center card-hover cursor-pointer border-4 border-transparent hover:border-violet-400"><div class="text-5xl mb-3">×7</div><h3 class="text-2xl font-bold text-violet-600">Sevens</h3><p class="text-violet-500 text-sm mt-1">Champion mode</p></div>
+      <div id="table-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-5 max-w-6xl mx-auto"></div>
+
+      <div class="mt-10 max-w-5xl mx-auto grid md:grid-cols-3 gap-4">
+        <div class="bg-white rounded-3xl p-5 shadow-md text-center">
+          <div class="text-3xl mb-2">⚡</div>
+          <p class="font-bold text-gray-700">Speed Levels</p>
+          <p class="text-sm text-gray-500">Higher levels have shorter timers.</p>
+        </div>
+        <div class="bg-white rounded-3xl p-5 shadow-md text-center">
+          <div class="text-3xl mb-2">🏫</div>
+          <p class="font-bold text-gray-700">Class Competition</p>
+          <p class="text-sm text-gray-500">See who leads your class.</p>
+        </div>
+        <div class="bg-white rounded-3xl p-5 shadow-md text-center">
+          <div class="text-3xl mb-2">🎯</div>
+          <p class="font-bold text-gray-700">Daily Challenge</p>
+          <p class="text-sm text-gray-500">Beat the random challenge of the day.</p>
+        </div>
       </div>
     </div>
 
@@ -145,7 +172,7 @@
         </button>
         <div class="text-center">
           <h2 id="grade-title" class="text-2xl font-bold text-gray-800">Times Table 2 - Levels</h2>
-          <p id="level-subtitle" class="text-sm text-gray-500">Pass each level with 80% to unlock the next one.</p>
+          <p id="level-subtitle" class="text-sm text-gray-500">Choose your challenge.</p>
         </div>
         <div class="flex gap-3">
           <div class="bg-white rounded-2xl px-4 py-2 flex items-center gap-2 shadow-md"><span class="text-xl">⭐</span><span id="star-count-level" class="font-bold text-amber-500">0</span></div>
@@ -158,26 +185,27 @@
           <svg class="absolute top-0 left-1/2 transform -translate-x-1/2 w-4 h-full z-0" style="height: calc(100% - 50px);">
             <line x1="8" y1="0" x2="8" y2="100%" stroke="#E5E7EB" stroke-width="4" stroke-dasharray="10,10" />
           </svg>
-          <div id="level-path" class="relative z-10 space-y-6"></div>
+          <div class="relative z-10 space-y-6" id="level-path-holder"></div>
         </div>
       </div>
     </div>
 
     <div id="quiz-screen" class="min-h-full p-6 hidden">
-      <header class="flex justify-between items-center mb-6 gap-3 flex-wrap">
+      <header class="flex justify-between items-center mb-6 gap-4 flex-wrap">
         <button onclick="exitQuiz()" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press">
           <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
-        <div class="flex-1 mx-2 min-w-[220px]">
+        <div class="flex-1 mx-4 min-w-[220px]">
           <div class="bg-gray-200 rounded-full h-4 overflow-hidden">
             <div id="quiz-progress" class="bg-gradient-to-r from-violet-500 to-pink-500 h-full progress-fill" style="width: 20%"></div>
           </div>
           <p class="text-center text-sm text-gray-600 mt-1">Question <span id="question-num">1</span> of <span id="total-questions">5</span></p>
         </div>
-        <div class="flex gap-2 flex-wrap justify-end">
-          <div id="timer-box" class="bg-white rounded-xl px-3 py-1 flex items-center gap-1 shadow-md"><span>⏱️</span><span id="timer-value" class="font-bold text-sky-600">∞</span></div>
+        <div class="flex gap-2 flex-wrap">
           <div class="bg-white rounded-xl px-3 py-1 flex items-center gap-1 shadow-md"><span>⭐</span><span id="quiz-stars" class="font-bold text-amber-500">0</span></div>
           <div class="bg-white rounded-xl px-3 py-1 flex items-center gap-1 shadow-md"><span>🪙</span><span id="quiz-coins" class="font-bold text-yellow-500">0</span></div>
+          <div class="bg-white rounded-xl px-3 py-1 flex items-center gap-1 shadow-md"><span>⏱️</span><span id="quiz-timer" class="font-bold text-rose-500">--</span></div>
+          <div class="bg-white rounded-xl px-3 py-1 flex items-center gap-1 shadow-md"><span>🔥</span><span id="quiz-streak" class="font-bold text-orange-500">0</span></div>
         </div>
       </header>
 
@@ -195,144 +223,451 @@
         <h1 class="text-4xl font-extrabold text-gray-800 mb-2">Level Complete!</h1>
         <p id="celebration-message" class="text-xl text-gray-600 mb-8">Amazing job, Explorer!</p>
         <div class="bg-white rounded-3xl p-8 shadow-xl max-w-md w-full mb-6">
-          <h3 class="text-lg font-bold text-gray-700 mb-4">Your Result</h3>
-          <div class="grid grid-cols-2 gap-4 mb-6">
-            <div class="bg-violet-50 rounded-2xl p-4">
-              <p class="text-sm text-gray-500">Score</p>
-              <p id="celebration-score" class="text-3xl font-extrabold text-violet-600">0%</p>
+          <h3 class="text-lg font-bold text-gray-700 mb-4">Your Rewards</h3>
+          <div class="grid grid-cols-3 gap-4 mb-6 text-center">
+            <div>
+              <div id="celebration-stars-visual" class="flex justify-center gap-1 mb-2"></div>
+              <p id="celebration-stars-text" class="text-gray-600 font-semibold">0 Stars</p>
             </div>
-            <div class="bg-sky-50 rounded-2xl p-4">
-              <p class="text-sm text-gray-500">Time</p>
-              <p id="celebration-time" class="text-3xl font-extrabold text-sky-600">0s</p>
+            <div>
+              <div class="text-3xl mb-2 bounce-in">🪙</div>
+              <p id="celebration-coins-text" class="text-gray-600 font-semibold">+0 Coins</p>
             </div>
-            <div class="bg-amber-50 rounded-2xl p-4">
-              <p class="text-sm text-gray-500">Stars</p>
-              <p id="celebration-stars-text" class="text-3xl font-extrabold text-amber-500">0</p>
-            </div>
-            <div class="bg-emerald-50 rounded-2xl p-4">
-              <p class="text-sm text-gray-500">Coins</p>
-              <p id="celebration-coins-text" class="text-3xl font-extrabold text-emerald-600">0</p>
+            <div>
+              <div class="text-3xl mb-2 bounce-in">⏱️</div>
+              <p id="celebration-time-text" class="text-gray-600 font-semibold">0s</p>
             </div>
           </div>
           <div id="new-badge" class="bg-gradient-to-r from-amber-100 to-orange-100 rounded-2xl p-4 mb-4 hidden bounce-in">
-            <p class="text-sm text-amber-600 font-semibold mb-2">🏅 Badge Unlocked</p>
-            <div class="flex items-center justify-center gap-3"><span class="text-4xl">🎯</span><span class="font-bold text-amber-700">Perfect Score!</span></div>
+            <p class="text-sm text-amber-600 font-semibold mb-2">🏅 New Badge Unlocked!</p>
+            <div class="flex items-center justify-center gap-3">
+              <span class="text-4xl">🎯</span>
+              <span class="font-bold text-amber-700">Perfect Score!</span>
+            </div>
           </div>
-          <div id="result-note" class="text-sm text-gray-500"></div>
+          <div class="text-center space-y-1">
+            <p class="text-gray-500 text-sm">Score: <span id="celebration-score" class="font-bold text-violet-600">0%</span></p>
+            <p id="celebration-note" class="text-xs text-gray-500"></p>
+          </div>
         </div>
         <div class="flex gap-4 justify-center flex-wrap">
-          <button onclick="showScreen('level-screen')" class="bg-white text-gray-700 font-bold py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transition-all btn-press">📚 Back to Levels</button>
+          <button onclick="showScreen('level-screen'); renderLevelPath();" class="bg-white text-gray-700 font-bold py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transition-all btn-press">📚 Back to Levels</button>
           <button id="next-level-btn" class="bg-gradient-to-r from-violet-500 to-pink-500 text-white font-bold py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transition-all btn-press">▶️ Next Level</button>
         </div>
       </div>
     </div>
 
     <div id="leaderboard-screen" class="min-h-full p-6 hidden">
-      <header class="flex items-center gap-4 mb-8">
+      <header class="flex items-center gap-4 mb-6 flex-wrap">
         <button onclick="showScreen('grade-screen')" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press">
           <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
         </button>
-        <div>
-          <h2 class="text-3xl font-extrabold text-gray-800">🏆 Leaderboard</h2>
-          <p id="leaderboard-title" class="text-sm text-gray-500">Top players for this table</p>
+        <h2 class="text-3xl font-extrabold text-gray-800">🏆 Leaderboard</h2>
+        <div class="ml-auto flex gap-2 flex-wrap">
+          <button onclick="showScreen('teacher-screen'); renderTeacherDashboard();" class="bg-white text-gray-700 rounded-2xl px-4 py-2 shadow-md">📊 Teacher</button>
+          <button onclick="setLeaderboardMode('overall')" id="lb-overall" class="bg-violet-500 text-white rounded-2xl px-4 py-2 shadow-md">Overall</button>
+          <button onclick="setLeaderboardMode('class')" id="lb-class" class="bg-white text-gray-700 rounded-2xl px-4 py-2 shadow-md">My Class</button>
         </div>
       </header>
 
-      <div class="max-w-2xl mx-auto">
+      <div class="max-w-3xl mx-auto">
+        <p id="leaderboard-title" class="text-center text-gray-600 mb-4">Top players for the selected table.</p>
         <div id="podium" class="flex justify-center items-end gap-4 mb-8 flex-wrap"></div>
         <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
           <div id="leaderboard-list" class="divide-y divide-gray-100"></div>
         </div>
       </div>
     </div>
+
+    <div id="daily-screen" class="min-h-full p-6 hidden">
+      <header class="flex items-center gap-4 mb-8 flex-wrap">
+        <button onclick="showScreen('grade-screen')" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press">
+          <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+        </button>
+        <h2 class="text-3xl font-extrabold text-gray-800">⚔️ Daily Challenge</h2>
+      </header>
+      <div class="max-w-xl mx-auto bg-white rounded-3xl p-8 shadow-xl text-center">
+        <div class="text-6xl mb-4">🎯</div>
+        <h3 class="text-2xl font-bold text-gray-800 mb-2">Beat today’s random challenge</h3>
+        <p id="daily-info" class="text-gray-600 mb-6">A fresh challenge appears each day.</p>
+        <div class="grid grid-cols-2 gap-4 mb-6 text-left">
+          <div class="bg-violet-50 rounded-2xl p-4">
+            <p class="text-sm text-gray-500">Table</p>
+            <p id="daily-table" class="font-bold text-violet-700 text-xl">×6</p>
+          </div>
+          <div class="bg-rose-50 rounded-2xl p-4">
+            <p class="text-sm text-gray-500">Timer</p>
+            <p id="daily-timer" class="font-bold text-rose-700 text-xl">6s</p>
+          </div>
+        </div>
+        <button onclick="startDailyChallenge()" class="bg-gradient-to-r from-violet-500 to-pink-500 text-white font-bold py-4 px-8 rounded-2xl text-xl shadow-lg hover:shadow-xl transition-all btn-press">▶️ Start Daily Challenge</button>
+      </div>
+    </div>
+
+    <div id="teacher-screen" class="min-h-full p-6 hidden">
+      <header class="flex items-center gap-4 mb-8 flex-wrap">
+        <button onclick="showScreen('grade-screen')" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press">
+          <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+        </button>
+        <h2 class="text-3xl font-extrabold text-gray-800">📊 Teacher Dashboard</h2>
+      </header>
+
+      <div class="max-w-6xl mx-auto space-y-6">
+        <div class="grid md:grid-cols-4 gap-4">
+          <div class="bg-white rounded-3xl p-5 shadow-md text-center">
+            <p class="text-sm text-gray-500">Total Players</p>
+            <p id="teacher-total-players" class="text-3xl font-extrabold text-violet-600">0</p>
+          </div>
+          <div class="bg-white rounded-3xl p-5 shadow-md text-center">
+            <p class="text-sm text-gray-500">Active Classes</p>
+            <p id="teacher-total-classes" class="text-3xl font-extrabold text-sky-600">0</p>
+          </div>
+          <div class="bg-white rounded-3xl p-5 shadow-md text-center">
+            <p class="text-sm text-gray-500">Top Table</p>
+            <p id="teacher-top-table" class="text-3xl font-extrabold text-emerald-600">×0</p>
+          </div>
+          <div class="bg-white rounded-3xl p-5 shadow-md text-center">
+            <p class="text-sm text-gray-500">Weakest Table</p>
+            <p id="teacher-weak-table" class="text-3xl font-extrabold text-rose-600">×0</p>
+          </div>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-6">
+          <div class="bg-white rounded-3xl p-6 shadow-xl">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">🏫 Class Rankings</h3>
+            <div id="teacher-class-list" class="space-y-3"></div>
+          </div>
+          <div class="bg-white rounded-3xl p-6 shadow-xl">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">🧠 Table Mastery Overview</h3>
+            <div id="teacher-table-list" class="space-y-3"></div>
+          </div>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-6">
+          <div class="bg-white rounded-3xl p-6 shadow-xl">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">⭐ Top Pupils</h3>
+            <div id="teacher-student-list" class="space-y-3"></div>
+          </div>
+          <div class="bg-white rounded-3xl p-6 shadow-xl">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">🚩 Priority Support</h3>
+            <div id="teacher-support-list" class="space-y-3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      doc,
-      getDoc,
-      getDocs,
-      setDoc,
-      addDoc,
-      query,
-      where,
-      orderBy,
-      limit,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBQjpBHH-cYSll8bPYpLVfVXmgpHRXmpHA",
-      authDomain: "multiplication-quest.firebaseapp.com",
-      projectId: "multiplication-quest",
-      storageBucket: "multiplication-quest.firebasestorage.app",
-      messagingSenderId: "64140074912",
-      appId: "1:64140074912:web:23d7c3087dc12208454ec5"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    window.firebaseApi = {
-      db,
-      collection,
-      doc,
-      getDoc,
-      getDocs,
-      setDoc,
-      addDoc,
-      query,
-      where,
-      orderBy,
-      limit,
-      serverTimestamp
-    };
-
-    const status = document.getElementById('firebase-status');
-    status.textContent = 'Firebase leaderboard ready.';
-    status.className = 'text-center text-sm text-emerald-600 mb-5';
-  </script>
-
   <script>
+    const defaultConfig = {
+      app_title: 'Multiplication Master Quest',
+      welcome_message: 'Welcome, multiplication hero! Master the times tables!',
+      correct_message: 'Brilliant! You\'ve got it!',
+      incorrect_message: 'Not quite! Try again!',
+      background_color: '#FDF8F3',
+      surface_color: '#FFFFFF',
+      text_color: '#374151',
+      primary_action: '#8B5CF6',
+      secondary_action: '#EC4899'
+    };
+
+    const TABLE_META = {
+      2: ['Twos', '2, 4, 6, 8...', 'from-rose-100 to-rose-200', 'text-rose-600', 'text-rose-500'],
+      3: ['Threes', '3, 6, 9, 12...', 'from-orange-100 to-orange-200', 'text-orange-600', 'text-orange-500'],
+      4: ['Fours', '4, 8, 12, 16...', 'from-amber-100 to-amber-200', 'text-amber-600', 'text-amber-500'],
+      5: ['Fives', '5, 10, 15, 20...', 'from-emerald-100 to-emerald-200', 'text-emerald-600', 'text-emerald-500'],
+      6: ['Sixes', '6, 12, 18, 24...', 'from-sky-100 to-sky-200', 'text-sky-600', 'text-sky-500'],
+      7: ['Sevens', '7, 14, 21, 28...', 'from-violet-100 to-violet-200', 'text-violet-600', 'text-violet-500'],
+      8: ['Eights', '8, 16, 24, 32...', 'from-fuchsia-100 to-fuchsia-200', 'text-fuchsia-600', 'text-fuchsia-500'],
+      9: ['Nines', '9, 18, 27, 36...', 'from-cyan-100 to-cyan-200', 'text-cyan-600', 'text-cyan-500'],
+      10: ['Tens', '10, 20, 30, 40...', 'from-lime-100 to-lime-200', 'text-lime-700', 'text-lime-600'],
+      11: ['Elevens', '11, 22, 33, 44...', 'from-blue-100 to-blue-200', 'text-blue-700', 'text-blue-500'],
+      12: ['Twelves', '12, 24, 36, 48...', 'from-pink-100 to-pink-200', 'text-pink-600', 'text-pink-500']
+    };
+
     const LEVELS = {
-      1: { label: 'Level 1', title: 'Practice', timer: 0, count: 5, passScore: 80, mode: 'practice', color: 'from-green-400 to-emerald-500', icon: '1' },
-      2: { label: 'Level 2', title: 'Speed Round', timer: 8, count: 5, passScore: 80, mode: 'speed', color: 'from-violet-400 to-purple-500', icon: '2' },
-      3: { label: 'Level 3', title: 'Mixed Mode', timer: 7, count: 6, passScore: 80, mode: 'mixed', color: 'from-red-400 to-orange-500', icon: '3' },
-      4: { label: 'Level 4', title: 'Brain Blitz', timer: 5, count: 6, passScore: 80, mode: 'blitz', color: 'from-indigo-400 to-blue-500', icon: '4' },
-      5: { label: 'Boss Level', title: 'Table Master', timer: 4, count: 8, passScore: 90, mode: 'boss', color: 'from-yellow-400 to-amber-500', icon: '👑' }
+      1: { label: 'Level 1', title: 'Practice Path', timer: 0, passScore: 80, questionCount: 5, mode: 'practice', color: 'from-green-400 to-emerald-500', icon: '1', subtitle: 'No timer. Warm up and learn the pattern.' },
+      2: { label: 'Level 2', title: 'Speed Round', timer: 8, passScore: 80, questionCount: 5, mode: 'speed', color: 'from-violet-400 to-purple-500', icon: '2', subtitle: '8 seconds per question.' },
+      3: { label: 'Level 3', title: 'Mixed Mode', timer: 7, passScore: 80, questionCount: 6, mode: 'mixed', color: 'from-red-400 to-orange-500', icon: '3', subtitle: 'MCQ and fill-in mixed together.' },
+      4: { label: 'Level 4', title: 'Brain Blitz', timer: 5, passScore: 80, questionCount: 6, mode: 'blitz', color: 'from-indigo-400 to-blue-500', icon: '4', subtitle: 'Harder numbers and less time.' },
+      5: { label: 'Boss Level', title: 'Master The Table', timer: 4, passScore: 90, questionCount: 8, mode: 'boss', color: 'from-yellow-400 to-amber-500', icon: '👑', subtitle: 'Final challenge. Near-perfect required.' }
     };
 
     let gameState = {
       playerName: 'Explorer',
+      playerClass: 'No class',
       currentGrade: 2,
       currentLevel: 1,
-      unlockedLevels: 1,
       stars: 0,
       coins: 0,
-      bestScore: 0,
-      bestTime: null,
       currentQuestion: 0,
       totalQuestions: 5,
       quizScore: 0,
       streak: 0,
-      playerDocId: '',
-      currentQuestions: [],
-      sessionStartTime: null,
-      questionTimeLimit: 0,
-      timeRemaining: 0,
-      timerInterval: null,
-      lastResult: null
+      unlockedLevels: 1,
+      timerRemaining: 0,
+      timerId: null,
+      questionSet: [],
+      leaderboardMode: 'overall',
+      dailyChallenge: null,
+      dailyMode: false,
+      playerRecord: null
     };
 
-    function sanitizeKey(text) {
-      return String(text || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'player';
+    let allPlayerRecords = [];
+    let currentDropItems = [];
+    let draggedValue = null;
+
+    const quizQuestionsByGradeAndLevel = {
+      2: {
+        1: [
+          { type: 'mcq', question: '2 × 3 = ?', options: ['5', '6', '8', '4'], correct: 1, emoji: '✖️' },
+          { type: 'mcq', question: '2 × 7 = ?', options: ['12', '14', '16', '10'], correct: 1, emoji: '✖️' },
+          { type: 'fill', question: '2 × ___ = 10', correct: '5', emoji: '❓' },
+          { type: 'mcq', question: '2 × 9 = ?', options: ['16', '18', '20', '17'], correct: 1, emoji: '✖️' },
+          { type: 'mcq', question: '2 × 6 = ?', options: ['10', '14', '12', '8'], correct: 2, emoji: '✖️' }
+        ],
+        2: [
+          { type: 'fill', question: '2 × 4 = ?', correct: '8', emoji: '⚡' },
+          { type: 'mcq', question: '___ × 2 = 14', options: ['6', '7', '8', '9'], correct: 1, emoji: '⚡' },
+          { type: 'mcq', question: '2 × 11 = ?', options: ['20', '22', '24', '26'], correct: 1, emoji: '⚡' },
+          { type: 'fill', question: '2 × 8 = ?', correct: '16', emoji: '❓' },
+          { type: 'mcq', question: '___ × 2 = 12', options: ['4', '5', '6', '7'], correct: 2, emoji: '⚡' }
+        ],
+        3: [
+          { type: 'mcq', question: '2 × 5 = ?', options: ['8', '10', '12', '14'], correct: 1, emoji: '🔥' },
+          { type: 'fill', question: '2 × 12 = ?', correct: '24', emoji: '🔥' },
+          { type: 'mcq', question: '___ × 2 = 18', options: ['8', '9', '10', '11'], correct: 1, emoji: '❓' },
+          { type: 'mcq', question: '2 × 10 = ?', options: ['18', '20', '22', '24'], correct: 1, emoji: '🔥' },
+          { type: 'fill', question: '___ × 2 = 4', correct: '2', emoji: '✖️' }
+        ]
+      },
+      3: {
+        1: [
+          { type: 'mcq', question: '3 × 2 = ?', options: ['5', '6', '8', '4'], correct: 1, emoji: '✖️' },
+          { type: 'mcq', question: '3 × 4 = ?', options: ['12', '10', '15', '9'], correct: 0, emoji: '✖️' },
+          { type: 'fill', question: '3 × ___ = 15', correct: '5', emoji: '❓' },
+          { type: 'mcq', question: '3 × 6 = ?', options: ['16', '18', '20', '22'], correct: 1, emoji: '✖️' },
+          { type: 'mcq', question: '3 × 7 = ?', options: ['20', '21', '24', '25'], correct: 1, emoji: '✖️' }
+        ],
+        2: [
+          { type: 'fill', question: '3 × 8 = ?', correct: '24', emoji: '⚡' },
+          { type: 'mcq', question: '___ × 3 = 27', options: ['8', '9', '10', '11'], correct: 1, emoji: '⚡' },
+          { type: 'mcq', question: '3 × 11 = ?', options: ['30', '33', '36', '39'], correct: 1, emoji: '⚡' },
+          { type: 'fill', question: '3 × 9 = ?', correct: '27', emoji: '❓' },
+          { type: 'mcq', question: '___ × 3 = 18', options: ['4', '5', '6', '7'], correct: 2, emoji: '⚡' }
+        ],
+        3: [
+          { type: 'mcq', question: '3 × 10 = ?', options: ['25', '30', '35', '40'], correct: 1, emoji: '🔥' },
+          { type: 'fill', question: '3 × 12 = ?', correct: '36', emoji: '🔥' },
+          { type: 'mcq', question: '___ × 3 = 21', options: ['6', '7', '8', '9'], correct: 1, emoji: '❓' },
+          { type: 'mcq', question: '3 × 11 = ?', options: ['30', '33', '36', '39'], correct: 1, emoji: '🔥' },
+          { type: 'fill', question: '___ × 3 = 9', correct: '3', emoji: '✖️' }
+        ]
+      },
+      4: {
+        1: [
+          { type: 'mcq', question: '4 × 2 = ?', options: ['6', '8', '10', '12'], correct: 1, emoji: '✖️' },
+          { type: 'mcq', question: '4 × 3 = ?', options: ['10', '12', '14', '16'], correct: 1, emoji: '✖️' },
+          { type: 'fill', question: '4 × ___ = 20', correct: '5', emoji: '❓' },
+          { type: 'mcq', question: '4 × 6 = ?', options: ['20', '24', '28', '32'], correct: 1, emoji: '✖️' },
+          { type: 'mcq', question: '4 × 7 = ?', options: ['24', '28', '32', '36'], correct: 1, emoji: '✖️' }
+        ],
+        2: [
+          { type: 'fill', question: '4 × 8 = ?', correct: '32', emoji: '⚡' },
+          { type: 'mcq', question: '___ × 4 = 36', options: ['8', '9', '10', '11'], correct: 1, emoji: '⚡' },
+          { type: 'mcq', question: '4 × 11 = ?', options: ['40', '44', '48', '52'], correct: 1, emoji: '⚡' },
+          { type: 'fill', question: '4 × 9 = ?', correct: '36', emoji: '❓' },
+          { type: 'mcq', question: '___ × 4 = 24', options: ['5', '6', '7', '8'], correct: 1, emoji: '⚡' }
+        ],
+        3: [
+          { type: 'mcq', question: '4 × 10 = ?', options: ['35', '40', '45', '50'], correct: 1, emoji: '🔥' },
+          { type: 'fill', question: '4 × 12 = ?', correct: '48', emoji: '🔥' },
+          { type: 'mcq', question: '___ × 4 = 28', options: ['6', '7', '8', '9'], correct: 1, emoji: '❓' },
+          { type: 'mcq', question: '4 × 11 = ?', options: ['40', '44', '48', '52'], correct: 1, emoji: '🔥' },
+          { type: 'fill', question: '___ × 4 = 8', correct: '2', emoji: '✖️' }
+        ]
+      },
+      5: {
+        1: [
+          { type: 'mcq', question: '5 × 2 = ?', options: ['8', '10', '12', '15'], correct: 1, emoji: '✖️' },
+          { type: 'mcq', question: '5 × 3 = ?', options: ['12', '15', '18', '20'], correct: 1, emoji: '✖️' },
+          { type: 'fill', question: '5 × ___ = 25', correct: '5', emoji: '❓' },
+          { type: 'mcq', question: '5 × 6 = ?', options: ['25', '30', '35', '40'], correct: 1, emoji: '✖️' },
+          { type: 'mcq', question: '5 × 7 = ?', options: ['30', '35', '40', '45'], correct: 1, emoji: '✖️' }
+        ],
+        2: [
+          { type: 'fill', question: '5 × 8 = ?', correct: '40', emoji: '⚡' },
+          { type: 'mcq', question: '___ × 5 = 45', options: ['8', '9', '10', '11'], correct: 1, emoji: '⚡' },
+          { type: 'mcq', question: '5 × 11 = ?', options: ['50', '55', '60', '65'], correct: 1, emoji: '⚡' },
+          { type: 'fill', question: '5 × 9 = ?', correct: '45', emoji: '❓' },
+          { type: 'mcq', question: '___ × 5 = 30', options: ['5', '6', '7', '8'], correct: 1, emoji: '⚡' }
+        ],
+        3: [
+          { type: 'mcq', question: '5 × 10 = ?', options: ['45', '50', '55', '60'], correct: 1, emoji: '🔥' },
+          { type: 'fill', question: '5 × 12 = ?', correct: '60', emoji: '🔥' },
+          { type: 'mcq', question: '___ × 5 = 35', options: ['6', '7', '8', '9'], correct: 1, emoji: '❓' },
+          { type: 'mcq', question: '5 × 11 = ?', options: ['50', '55', '60', '65'], correct: 1, emoji: '🔥' },
+          { type: 'fill', question: '___ × 5 = 10', correct: '2', emoji: '✖️' }
+        ]
+      },
+      6: {
+        1: [
+          { type: 'mcq', question: '6 × 2 = ?', options: ['10', '12', '14', '16'], correct: 1, emoji: '✖️' },
+          { type: 'mcq', question: '6 × 3 = ?', options: ['15', '18', '21', '24'], correct: 1, emoji: '✖️' },
+          { type: 'fill', question: '6 × ___ = 30', correct: '5', emoji: '❓' },
+          { type: 'mcq', question: '6 × 6 = ?', options: ['30', '36', '42', '48'], correct: 1, emoji: '✖️' },
+          { type: 'mcq', question: '6 × 7 = ?', options: ['36', '42', '48', '54'], correct: 1, emoji: '✖️' }
+        ],
+        2: [
+          { type: 'fill', question: '6 × 8 = ?', correct: '48', emoji: '⚡' },
+          { type: 'mcq', question: '___ × 6 = 54', options: ['8', '9', '10', '11'], correct: 1, emoji: '⚡' },
+          { type: 'mcq', question: '6 × 11 = ?', options: ['60', '66', '72', '78'], correct: 1, emoji: '⚡' },
+          { type: 'fill', question: '6 × 9 = ?', correct: '54', emoji: '❓' },
+          { type: 'mcq', question: '___ × 6 = 36', options: ['5', '6', '7', '8'], correct: 1, emoji: '⚡' }
+        ],
+        3: [
+          { type: 'mcq', question: '6 × 10 = ?', options: ['54', '60', '66', '72'], correct: 1, emoji: '🔥' },
+          { type: 'fill', question: '6 × 12 = ?', correct: '72', emoji: '🔥' },
+          { type: 'mcq', question: '___ × 6 = 42', options: ['6', '7', '8', '9'], correct: 1, emoji: '❓' },
+          { type: 'mcq', question: '6 × 11 = ?', options: ['60', '66', '72', '78'], correct: 1, emoji: '🔥' },
+          { type: 'fill', question: '___ × 6 = 12', correct: '2', emoji: '✖️' }
+        ]
+      },
+      7: {
+        1: [
+          { type: 'mcq', question: '7 × 2 = ?', options: ['12', '14', '16', '18'], correct: 1, emoji: '✖️' },
+          { type: 'mcq', question: '7 × 3 = ?', options: ['18', '21', '24', '27'], correct: 1, emoji: '✖️' },
+          { type: 'fill', question: '7 × ___ = 35', correct: '5', emoji: '❓' },
+          { type: 'mcq', question: '7 × 6 = ?', options: ['36', '42', '48', '54'], correct: 1, emoji: '✖️' },
+          { type: 'mcq', question: '7 × 7 = ?', options: ['42', '49', '56', '63'], correct: 1, emoji: '✖️' }
+        ],
+        2: [
+          { type: 'fill', question: '7 × 8 = ?', correct: '56', emoji: '⚡' },
+          { type: 'mcq', question: '___ × 7 = 63', options: ['8', '9', '10', '11'], correct: 1, emoji: '⚡' },
+          { type: 'mcq', question: '7 × 11 = ?', options: ['70', '77', '84', '91'], correct: 1, emoji: '⚡' },
+          { type: 'fill', question: '7 × 9 = ?', correct: '63', emoji: '❓' },
+          { type: 'mcq', question: '___ × 7 = 42', options: ['5', '6', '7', '8'], correct: 1, emoji: '⚡' }
+        ],
+        3: [
+          { type: 'mcq', question: '7 × 10 = ?', options: ['63', '70', '77', '84'], correct: 1, emoji: '🔥' },
+          { type: 'fill', question: '7 × 12 = ?', correct: '84', emoji: '🔥' },
+          { type: 'mcq', question: '___ × 7 = 49', options: ['6', '7', '8', '9'], correct: 1, emoji: '❓' },
+          { type: 'mcq', question: '7 × 11 = ?', options: ['70', '77', '84', '91'], correct: 1, emoji: '🔥' },
+          { type: 'fill', question: '___ × 7 = 14', correct: '2', emoji: '✖️' }
+        ]
+      }
+    };
+
+    function shuffle(array) {
+      return [...array].sort(() => Math.random() - 0.5);
     }
 
-    function getPlayerDocId() {
-      return `${sanitizeKey(gameState.playerName)}-table-${gameState.currentGrade}`;
+    function getClassKey(name, group) {
+      return `${name.trim().toLowerCase()}__${group.trim().toLowerCase()}`;
+    }
+
+    function getDailySeed() {
+      const today = new Date();
+      return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+    }
+
+    function pseudoRandom(seed) {
+      let hash = 0;
+      for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) % 2147483647;
+      return () => {
+        hash = (hash * 48271) % 2147483647;
+        return hash / 2147483647;
+      };
+    }
+
+    function buildDailyChallenge() {
+      const rand = pseudoRandom(getDailySeed());
+      const table = 2 + Math.floor(rand() * 11);
+      const level = 2 + Math.floor(rand() * 4);
+      return { table, level, timer: Math.max(4, LEVELS[level].timer || 6), questionCount: 7 };
+    }
+
+    function renderTableGrid() {
+      const grid = document.getElementById('table-grid');
+      if (!grid) return;
+      grid.innerHTML = Object.keys(TABLE_META).map(Number).map(table => {
+        const [name, hint, bg, titleColor, hintColor] = TABLE_META[table];
+        return `
+          <div onclick="selectGrade(${table})" class="bg-gradient-to-br ${bg} rounded-3xl p-5 text-center card-hover cursor-pointer border-4 border-transparent hover:border-violet-400">
+            <div class="text-4xl mb-2">×${table}</div>
+            <h3 class="text-xl font-bold ${titleColor}">${name}</h3>
+            <p class="${hintColor} text-sm mt-1">${hint}</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function generateLevelQuestions(grade, level, countOverride = null) {
+      const levelConfig = LEVELS[level] || LEVELS[1];
+      const count = countOverride || levelConfig.questionCount || 5;
+      const ranges = {
+        1: [2, 7],
+        2: [4, 11],
+        3: [5, 12],
+        4: [6, 12],
+        5: [2, 12]
+      };
+      const [min, max] = ranges[level] || [2, 12];
+      const nums = [];
+      for (let n = min; n <= max; n++) nums.push(n);
+      const picks = [];
+      while (picks.length < count) picks.push(nums[Math.floor(Math.random() * nums.length)]);
+
+      return picks.map((n, idx) => {
+        const answer = grade * n;
+        const mode = levelConfig.mode;
+        if (mode === 'boss' && idx % 3 === 0) {
+          return {
+            type: 'fill',
+            question: `${n} × ${grade} = ?`,
+            correct: String(answer),
+            emoji: '👑'
+          };
+        }
+        if ((mode === 'mixed' || mode === 'blitz' || mode === 'boss') && idx % 3 === 1) {
+          return {
+            type: 'fill',
+            question: `___ × ${grade} = ${answer}`,
+            correct: String(n),
+            emoji: mode === 'boss' ? '👑' : '🧠'
+          };
+        }
+
+        const wrongs = new Set();
+        const deltaMax = level >= 4 ? 8 : 5;
+        while (wrongs.size < 3) {
+          const delta = Math.floor(Math.random() * deltaMax) + 1;
+          const sign = Math.random() > 0.5 ? 1 : -1;
+          const wrong = Math.max(1, answer + delta * sign);
+          if (wrong !== answer) wrongs.add(String(wrong));
+        }
+        const options = shuffle([String(answer), ...wrongs]);
+        return {
+          type: 'mcq',
+          question: `${grade} × ${n} = ?`,
+          options,
+          correct: options.indexOf(String(answer)),
+          emoji: level >= 4 ? '🚀' : (level >= 2 ? '⚡' : '✖️')
+        };
+      });
+    }
+
+    function getQuizQuestions() {
+      const staticQuestions = quizQuestionsByGradeAndLevel[gameState.currentGrade]?.[gameState.currentLevel];
+      if (staticQuestions && staticQuestions.length && !gameState.dailyMode && gameState.currentLevel <= 3 && gameState.currentGrade <= 7) {
+        const expected = LEVELS[gameState.currentLevel].questionCount;
+        return staticQuestions.slice(0, expected);
+      }
+      return generateLevelQuestions(
+        gameState.currentGrade,
+        gameState.currentLevel,
+        gameState.dailyMode ? gameState.dailyChallenge.questionCount : null
+      );
     }
 
     function showScreen(screenId) {
@@ -345,297 +680,227 @@
       document.getElementById('coin-count').textContent = gameState.coins;
       document.getElementById('star-count-level').textContent = gameState.stars;
       document.getElementById('coin-count-level').textContent = gameState.coins;
+      document.getElementById('player-name-display').textContent = gameState.playerName;
+      document.getElementById('player-class-display').textContent = gameState.playerClass || 'No class';
     }
 
     function updateQuizStats() {
       document.getElementById('quiz-stars').textContent = gameState.quizScore;
-      document.getElementById('quiz-coins').textContent = gameState.quizScore * 10;
+      document.getElementById('quiz-coins').textContent = gameState.coins;
+      document.getElementById('quiz-streak').textContent = gameState.streak;
+      document.getElementById('quiz-timer').textContent = gameState.timerRemaining > 0 ? `${gameState.timerRemaining}s` : '∞';
     }
 
-    function renderTimer() {
-      const timerBox = document.getElementById('timer-box');
-      const timerValue = document.getElementById('timer-value');
-      if (!gameState.questionTimeLimit) {
-        timerValue.textContent = '∞';
-        timerBox.classList.remove('timer-warning');
-        return;
-      }
-      timerValue.textContent = `${gameState.timeRemaining}s`;
-      timerBox.classList.toggle('timer-warning', gameState.timeRemaining <= 3);
-    }
-
-    function getNumberPool(level) {
-      if (level === 1) return [2,3,4,5,6,7];
-      if (level === 2) return [4,5,6,7,8,9,10,11];
-      return [2,3,4,5,6,7,8,9,10,11,12];
-    }
-
-    function randomItem(arr) {
-      return arr[Math.floor(Math.random() * arr.length)];
-    }
-
-    function buildMcqQuestion(grade, n, emoji = '✖️', reverse = false) {
-      const answer = grade * n;
-      const correctText = reverse ? String(n) : String(answer);
-      const question = reverse ? `___ × ${grade} = ${answer}` : `${grade} × ${n} = ?`;
-      const wrongs = new Set();
-      while (wrongs.size < 3) {
-        const delta = Math.floor(Math.random() * 5) + 1;
-        const candidate = reverse ? Math.max(1, n + (Math.random() > 0.5 ? delta : -delta)) : Math.max(1, answer + (Math.random() > 0.5 ? delta : -delta) * grade);
-        if (String(candidate) !== correctText) wrongs.add(String(candidate));
-      }
-      const options = [correctText, ...wrongs].sort(() => Math.random() - 0.5);
-      return { type: 'mcq', question, options, correct: options.indexOf(correctText), emoji };
-    }
-
-    function buildFillQuestion(grade, n, emoji = '❓', reverse = false) {
-      const answer = grade * n;
-      return {
-        type: 'fill',
-        question: reverse ? `___ × ${grade} = ${answer}` : `${grade} × ${n} = ?`,
-        correct: String(reverse ? n : answer),
-        emoji
-      };
-    }
-
-    function generateQuestions() {
-      const levelConfig = LEVELS[gameState.currentLevel];
-      const pool = getNumberPool(gameState.currentLevel);
-      const questions = [];
-      for (let i = 0; i < levelConfig.count; i++) {
-        const n = randomItem(pool);
-        if (gameState.currentLevel === 1) {
-          questions.push(i < 3 ? buildMcqQuestion(gameState.currentGrade, n, '✖️') : buildFillQuestion(gameState.currentGrade, n, '❓'));
-        } else if (gameState.currentLevel === 2) {
-          questions.push(buildMcqQuestion(gameState.currentGrade, n, '⚡'));
-        } else if (gameState.currentLevel === 3) {
-          questions.push(i % 2 === 0 ? buildMcqQuestion(gameState.currentGrade, n, '🔥') : buildFillQuestion(gameState.currentGrade, n, '❓', i % 3 === 0));
-        } else if (gameState.currentLevel === 4) {
-          questions.push(i % 2 === 0 ? buildFillQuestion(gameState.currentGrade, n, '🧠', true) : buildMcqQuestion(gameState.currentGrade, n, '🚀', true));
-        } else {
-          questions.push(i % 3 === 0 ? buildFillQuestion(gameState.currentGrade, n, '👑', true) : buildMcqQuestion(gameState.currentGrade, n, '👑'));
-        }
-      }
-      return questions;
-    }
-
-    function getCurrentQuestion() {
-      return gameState.currentQuestions[gameState.currentQuestion];
-    }
-
-    async function loadPlayerProfile() {
-      const { doc, getDoc } = window.firebaseApi;
-      gameState.playerDocId = getPlayerDocId();
-      const snap = await getDoc(doc(window.firebaseApi.db, 'players', gameState.playerDocId));
-      if (snap.exists()) {
-        const data = snap.data();
-        gameState.stars = data.total_stars || 0;
-        gameState.coins = data.total_coins || 0;
-        gameState.unlockedLevels = data.unlocked_levels || 1;
-        gameState.bestScore = data.best_score || 0;
-        gameState.bestTime = data.best_time_seconds ?? null;
-      } else {
-        gameState.stars = 0;
-        gameState.coins = 0;
-        gameState.unlockedLevels = 1;
-        gameState.bestScore = 0;
-        gameState.bestTime = null;
-        await savePlayerProfile();
-      }
-      updateStats();
-    }
-
-    async function savePlayerProfile() {
-      const { doc, setDoc, serverTimestamp } = window.firebaseApi;
-      gameState.playerDocId = getPlayerDocId();
-      await setDoc(doc(window.firebaseApi.db, 'players', gameState.playerDocId), {
-        player_name: gameState.playerName,
-        times_table: gameState.currentGrade,
-        total_stars: gameState.stars,
-        total_coins: gameState.coins,
-        unlocked_levels: gameState.unlockedLevels,
-        best_score: gameState.bestScore,
-        best_time_seconds: gameState.bestTime,
-        updated_at: serverTimestamp()
-      }, { merge: true });
-    }
-
-    async function saveAttempt(result) {
-      const { collection, addDoc, serverTimestamp } = window.firebaseApi;
-      await addDoc(collection(window.firebaseApi.db, 'attempts'), {
-        player_name: gameState.playerName,
-        times_table: gameState.currentGrade,
-        level: gameState.currentLevel,
-        score_percent: result.percent,
-        correct_answers: result.correct,
-        total_questions: result.total,
-        stars_earned: result.bonusStars,
-        coins_earned: result.bonusCoins,
-        time_seconds: result.timeTaken,
-        passed: result.passed,
-        created_at: serverTimestamp()
-      });
-    }
-
-    async function fetchLeaderboard() {
-      const { collection, query, where, limit, getDocs } = window.firebaseApi;
-      const q = query(
-        collection(window.firebaseApi.db, 'players'),
-        where('times_table', '==', gameState.currentGrade),
-        limit(50)
-      );
-      const snap = await getDocs(q);
-      const rows = [];
-      snap.forEach(docSnap => rows.push(docSnap.data()));
-      rows.sort((a, b) => {
-        const scoreDiff = (b.best_score || 0) - (a.best_score || 0);
-        if (scoreDiff !== 0) return scoreDiff;
-        const timeA = a.best_time_seconds ?? Number.MAX_SAFE_INTEGER;
-        const timeB = b.best_time_seconds ?? Number.MAX_SAFE_INTEGER;
-        return timeA - timeB;
-      });
-      return rows.slice(0, 20);
-    }
-
-    async function openLeaderboard() {
-      document.getElementById('leaderboard-title').textContent = `Top players for Times Table ${gameState.currentGrade}`;
-      showScreen('leaderboard-screen');
-      await updateLeaderboard();
-    }
-
-    async function updateLeaderboard() {
-      const sorted = await fetchLeaderboard();
-      const listContainer = document.getElementById('leaderboard-list');
-      const podium = document.getElementById('podium');
-      const emojis = ['🧙', '🦄', '🐸', '🐬', '🦊', '🐻', '🦁', '🐯', '🦘', '🐰'];
-      const topThree = sorted.slice(0, 3);
-      const podiumOrder = [1, 0, 2];
-
-      podium.innerHTML = podiumOrder.map(orderIndex => {
-        const player = topThree[orderIndex];
-        if (!player) return '';
-        const actualRank = orderIndex + 1;
-        const score = player.best_score || 0;
-        const time = player.best_time_seconds == null ? '—' : `${player.best_time_seconds}s`;
-        const crown = actualRank === 1 ? '👑' : actualRank === 2 ? '🥈' : '🥉';
-        const sizeClass = actualRank === 1 ? 'w-24 h-24 text-4xl' : 'w-20 h-20 text-3xl';
-        const pillarClass = actualRank === 1 ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-white h-28' : actualRank === 2 ? 'bg-gray-200 text-gray-600 h-20' : 'bg-orange-200 text-orange-600 h-16';
-        return `
-          <div class="text-center slide-up">
-            <div class="${sizeClass} bg-gradient-to-br from-violet-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg mx-auto mb-2 ${actualRank === 1 ? 'pulse-glow' : ''}">${crown}</div>
-            <p class="font-bold text-gray-700">${player.player_name === gameState.playerName ? 'You' : player.player_name}</p>
-            <p class="text-sm text-gray-500">${score}% · ${time}</p>
-            <div class="rounded-t-2xl w-24 mt-2 flex items-center justify-center ${pillarClass}"><span class="text-2xl font-bold">${actualRank}</span></div>
-          </div>
-        `;
-      }).join('');
-
-      listContainer.innerHTML = sorted.map((player, idx) => {
-        const rank = idx + 1;
-        const isCurrentPlayer = player.player_name === gameState.playerName;
-        const bgColor = isCurrentPlayer ? 'bg-violet-50' : '';
-        const emoji = emojis[idx % emojis.length];
-        const score = player.best_score || 0;
-        const time = player.best_time_seconds == null ? '—' : `${player.best_time_seconds}s`;
-        return `
-          <div class="flex items-center gap-4 p-4 ${bgColor}">
-            <span class="w-8 text-center font-bold ${isCurrentPlayer ? 'text-violet-600' : 'text-gray-400'}">${rank}</span>
-            <div class="w-12 h-12 bg-gradient-to-br from-violet-400 to-purple-500 rounded-full flex items-center justify-center text-xl">${emoji}</div>
-            <div class="flex-1">
-              <p class="font-bold text-gray-800">${isCurrentPlayer ? 'You' : player.player_name}</p>
-              <p class="text-sm text-gray-500">Best time: ${time}</p>
-            </div>
-            <div class="text-right">
-              <p class="font-bold ${isCurrentPlayer ? 'text-violet-600' : 'text-gray-600'}">${score}%</p>
-              <p class="text-xs text-amber-500">${player.total_stars || 0} ⭐</p>
-            </div>
-          </div>
-        `;
-      }).join('') || '<div class="p-6 text-center text-gray-500">No scores yet. Be the first to play.</div>';
-    }
-
-    function renderLevelPath() {
-      const holder = document.getElementById('level-path');
-      holder.innerHTML = Object.entries(LEVELS).map(([levelKey, cfg]) => {
-        const level = Number(levelKey);
-        const unlocked = level <= gameState.unlockedLevels;
-        const completed = level < gameState.unlockedLevels;
-        const leftText = `<div class="flex-1 text-right"><span class="text-sm text-gray-500">${cfg.label}</span><p class="font-bold text-gray-700">${cfg.title}</p><p class="text-xs text-gray-400">${cfg.timer ? `${cfg.timer}s/question` : 'No timer'} · Pass ${cfg.passScore}%</p></div>`;
-        const rightStars = `<div class="flex-1"><div class="flex gap-1">${completed ? '<span class="text-amber-400">⭐</span><span class="text-amber-400">⭐</span><span class="text-amber-400">⭐</span>' : unlocked ? '<span class="text-amber-400">⭐</span><span class="text-gray-300">⭐</span><span class="text-gray-300">⭐</span>' : '<span class="text-gray-300">⭐</span><span class="text-gray-300">⭐</span><span class="text-gray-300">⭐</span>'}</div></div>`;
-        const circle = unlocked
-          ? `<div class="w-20 h-20 bg-gradient-to-br ${cfg.color} rounded-full flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform ${level === gameState.unlockedLevels ? 'pulse-glow' : ''}">${completed ? '✓' : cfg.icon}</div>`
-          : `<div class="w-20 h-20 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full flex items-center justify-center text-3xl shadow-lg">🔒</div>`;
-        const wrapperClass = unlocked ? 'flex items-center gap-4 cursor-pointer group' : 'flex items-center gap-4 opacity-50';
-        const action = unlocked ? `onclick="startLevel(${level})"` : '';
-        return `<div ${action} class="${wrapperClass}">${leftText}${circle}${rightStars}</div>`;
-      }).join('');
-    }
-
-    async function startAdventure() {
-      const nameInput = document.getElementById('student-name');
-      gameState.playerName = nameInput.value.trim() || 'Explorer';
-      document.getElementById('player-name-display').textContent = gameState.playerName;
-      await selectGrade(gameState.currentGrade, false);
-      showScreen('grade-screen');
-    }
-
-    async function selectGrade(grade, switchScreen = true) {
-      gameState.currentGrade = grade;
-      document.getElementById('grade-title').textContent = `Times Table ${grade} - Levels`;
-      document.getElementById('leaderboard-title').textContent = `Top players for Times Table ${grade}`;
-      await loadPlayerProfile();
-      renderLevelPath();
-      if (switchScreen) showScreen('level-screen');
+    function getSelectedQuestion() {
+      return gameState.questionSet[gameState.currentQuestion];
     }
 
     function clearTimer() {
-      if (gameState.timerInterval) {
-        clearInterval(gameState.timerInterval);
-        gameState.timerInterval = null;
+      if (gameState.timerId) {
+        clearInterval(gameState.timerId);
+        gameState.timerId = null;
       }
     }
 
-    function startQuestionTimer() {
+    function startTimer() {
       clearTimer();
-      gameState.questionTimeLimit = LEVELS[gameState.currentLevel].timer;
-      gameState.timeRemaining = gameState.questionTimeLimit;
-      renderTimer();
-      if (!gameState.questionTimeLimit) return;
-      gameState.timerInterval = setInterval(() => {
-        gameState.timeRemaining -= 1;
-        renderTimer();
-        if (gameState.timeRemaining <= 0) {
+      const levelConfig = LEVELS[gameState.currentLevel];
+      if (!levelConfig.timer) {
+        gameState.timerRemaining = 0;
+        updateQuizStats();
+        return;
+      }
+      gameState.timerRemaining = levelConfig.timer;
+      updateQuizStats();
+      gameState.timerId = setInterval(() => {
+        gameState.timerRemaining--;
+        updateQuizStats();
+        if (gameState.timerRemaining <= 0) {
           clearTimer();
-          showFeedback(false, '⏰ Time up!');
+          showFeedback(false, true);
         }
       }, 1000);
     }
 
-    function startLevel(level) {
-      if (level > gameState.unlockedLevels) {
-        alert(`Level ${level === 5 ? 'Boss' : level} is locked. Pass the earlier level first.`);
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: async (config) => {
+          document.getElementById('main-title').textContent = config.app_title || defaultConfig.app_title;
+          document.getElementById('welcome-text').textContent = config.welcome_message || defaultConfig.welcome_message;
+          const baseFont = config.font_family || 'Nunito';
+          document.body.style.fontFamily = `${baseFont}, sans-serif`;
+          if (config.font_size) document.body.style.fontSize = `${config.font_size}px`;
+          document.body.style.background = `linear-gradient(135deg, ${config.background_color || defaultConfig.background_color}, #FDE8E8, #E0F2FE)`;
+        },
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+            { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+            { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+            { get: () => config.primary_action || defaultConfig.primary_action, set: (v) => { config.primary_action = v; window.elementSdk.setConfig({ primary_action: v }); } },
+            { get: () => config.secondary_action || defaultConfig.secondary_action, set: (v) => { config.secondary_action = v; window.elementSdk.setConfig({ secondary_action: v }); } }
+          ],
+          borderables: [],
+          fontEditable: { get: () => config.font_family || 'Nunito', set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+          fontSizeable: { get: () => config.font_size || 16, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); } }
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['app_title', config.app_title || defaultConfig.app_title],
+          ['welcome_message', config.welcome_message || defaultConfig.welcome_message],
+          ['correct_message', config.correct_message || defaultConfig.correct_message],
+          ['incorrect_message', config.incorrect_message || defaultConfig.incorrect_message]
+        ])
+      });
+    }
+
+    const dataHandler = {
+      onDataChanged(data) {
+        allPlayerRecords = Array.isArray(data) ? data : [];
+        const refreshedPlayer = allPlayerRecords.find(p => getClassKey(p.player_name || '', p.player_class || '') === getClassKey(gameState.playerName, gameState.playerClass));
+        if (refreshedPlayer) gameState.playerRecord = refreshedPlayer;
+        updateLeaderboard();
+      }
+    };
+
+    async function initDataSdk() {
+      if (window.dataSdk) {
+        const result = await window.dataSdk.init(dataHandler);
+        if (!result.isOk) console.error('Failed to initialize data SDK');
+      }
+    }
+    initDataSdk();
+    window.addEventListener('DOMContentLoaded', () => {
+      renderTableGrid();
+      renderLevelPath();
+      gameState.dailyChallenge = buildDailyChallenge();
+      renderDailyScreen();
+    });
+
+    async function startAdventure() {
+      const nameInput = document.getElementById('student-name');
+      const classInput = document.getElementById('student-class');
+      gameState.playerName = nameInput.value.trim() || 'Explorer';
+      gameState.playerClass = classInput.value.trim() || 'No class';
+      gameState.dailyMode = false;
+
+      const existingPlayer = allPlayerRecords.find(
+        p => getClassKey(p.player_name || '', p.player_class || '') === getClassKey(gameState.playerName, gameState.playerClass)
+      );
+
+      if (existingPlayer) {
+        gameState.playerRecord = existingPlayer;
+        gameState.stars = parseInt(existingPlayer.total_stars) || 0;
+        gameState.coins = parseInt(existingPlayer.total_coins) || 0;
+        gameState.currentGrade = parseInt(existingPlayer.times_table) || 2;
+        gameState.unlockedLevels = parseInt(existingPlayer.unlocked_levels) || 1;
+      } else {
+        await saveNewPlayer();
+      }
+
+      updateStats();
+      updateLeaderboard();
+      renderDailyScreen();
+      showScreen('grade-screen');
+    }
+
+    async function saveNewPlayer() {
+      if (!window.dataSdk) return;
+      const newPlayer = {
+        player_name: gameState.playerName,
+        player_class: gameState.playerClass,
+        player_key: getClassKey(gameState.playerName, gameState.playerClass),
+        times_table: gameState.currentGrade,
+        total_stars: 0,
+        total_coins: 0,
+        levels_completed: 0,
+        unlocked_levels: 1,
+        best_daily_score: 0,
+        best_daily_date: '',
+        last_updated: new Date().toISOString()
+      };
+
+      const result = await window.dataSdk.create(newPlayer);
+      if (result.isOk) {
+        gameState.playerRecord = result.data || newPlayer;
+        gameState.unlockedLevels = parseInt(gameState.playerRecord.unlocked_levels) || 1;
+      }
+    }
+
+    async function updatePlayerProgress(extra = {}) {
+      if (!window.dataSdk) return;
+      if (!gameState.playerRecord) {
+        const existing = allPlayerRecords.find(
+          p => getClassKey(p.player_name || '', p.player_class || '') === getClassKey(gameState.playerName, gameState.playerClass)
+        );
+        if (existing) gameState.playerRecord = existing;
+      }
+      if (!gameState.playerRecord) await saveNewPlayer();
+
+      const updated = {
+        ...gameState.playerRecord,
+        player_name: gameState.playerName,
+        player_class: gameState.playerClass,
+        player_key: getClassKey(gameState.playerName, gameState.playerClass),
+        times_table: gameState.currentGrade,
+        total_stars: gameState.stars,
+        total_coins: gameState.coins,
+        levels_completed: Math.max(parseInt(gameState.playerRecord?.levels_completed) || 0, gameState.currentLevel),
+        unlocked_levels: gameState.unlockedLevels,
+        last_updated: new Date().toISOString(),
+        ...extra
+      };
+
+      const result = await window.dataSdk.update(updated);
+      if (result.isOk) gameState.playerRecord = result.data || updated;
+    }
+
+    function selectGrade(grade) {
+      gameState.dailyMode = false;
+      gameState.currentGrade = grade;
+      gameState.unlockedLevels = parseInt(gameState.playerRecord?.unlocked_levels) || gameState.unlockedLevels || 1;
+      const meta = TABLE_META[grade];
+      document.getElementById('grade-title').textContent = `Times Table ${grade} - Levels`;
+      document.getElementById('level-subtitle').textContent = meta ? `${meta[0]} · ${LEVELS[gameState.unlockedLevels].subtitle}` : 'Choose your challenge.';
+      if (gameState.playerRecord) updatePlayerProgress();
+      renderLevelPath();
+      updateLeaderboard();
+      showScreen('level-screen');
+    }
+
+    function startDailyChallenge() {
+      gameState.dailyMode = true;
+      gameState.dailyChallenge = buildDailyChallenge();
+      gameState.currentGrade = gameState.dailyChallenge.table;
+      gameState.currentLevel = gameState.dailyChallenge.level;
+      startLevel(gameState.currentLevel, true);
+    }
+
+    function startLevel(level, force = false) {
+      if (!force && !gameState.dailyMode && level > gameState.unlockedLevels) {
+        alert(`Level ${level === 5 ? 'Boss' : level} is still locked. Complete the earlier level with at least ${LEVELS[level - 1]?.passScore || 80}% to unlock it.`);
         return;
       }
       gameState.currentLevel = level;
       gameState.currentQuestion = 0;
       gameState.quizScore = 0;
       gameState.streak = 0;
-      gameState.currentQuestions = generateQuestions();
-      gameState.totalQuestions = gameState.currentQuestions.length;
-      gameState.sessionStartTime = Date.now();
+      currentDropItems = [];
+      gameState.questionSet = getQuizQuestions();
+      gameState.totalQuestions = gameState.questionSet.length || 5;
       updateQuizStats();
       showScreen('quiz-screen');
       loadQuestion();
     }
 
     function loadQuestion() {
-      const question = getCurrentQuestion();
+      clearTimer();
+      const question = getSelectedQuestion();
       const container = document.getElementById('quiz-container');
       const progress = ((gameState.currentQuestion + 1) / gameState.totalQuestions) * 100;
       document.getElementById('quiz-progress').style.width = `${progress}%`;
       document.getElementById('question-num').textContent = gameState.currentQuestion + 1;
       document.getElementById('total-questions').textContent = gameState.totalQuestions;
-      renderTimer();
 
       if (!question) {
         container.innerHTML = '<div class="bg-white rounded-3xl p-8 shadow-xl text-center">No questions found.</div>';
@@ -654,66 +919,128 @@
             </div>
           </div>
         `;
-      } else {
+      } else if (question.type === 'fill') {
         container.innerHTML = `
           <div class="bg-white rounded-3xl p-8 shadow-xl text-center slide-up">
             <div class="text-6xl mb-4">${question.emoji}</div>
             <h3 class="text-2xl font-bold text-gray-800 mb-6">${question.question}</h3>
-            <input type="number" id="fill-answer" class="w-28 h-24 text-4xl font-bold text-center border-4 border-violet-300 rounded-2xl focus:border-violet-500 focus:outline-none" placeholder="?">
+            <input type="number" id="fill-answer" class="w-24 h-24 text-4xl font-bold text-center border-4 border-violet-300 rounded-2xl focus:border-violet-500 focus:outline-none" placeholder="?">
             <br>
             <button onclick="checkFill('${question.correct}')" class="mt-6 bg-gradient-to-r from-violet-500 to-pink-500 text-white font-bold py-3 px-8 rounded-2xl shadow-lg btn-press">Check Answer ✓</button>
           </div>
         `;
       }
-      startQuestionTimer();
-      const input = document.getElementById('fill-answer');
-      if (input) {
-        input.focus();
-        input.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') checkFill(question.correct);
-        });
-      }
+      startTimer();
     }
 
     function checkMCQ(selected, correct) {
-      clearTimer();
       showFeedback(selected === correct);
     }
 
     function checkFill(correct) {
       const answer = document.getElementById('fill-answer').value.trim();
-      clearTimer();
+      if (answer === '') {
+        alert('Please enter your answer first.');
+        return;
+      }
       showFeedback(answer === correct);
     }
 
-    function showFeedback(isCorrect, overrideMessage = '') {
+    function dragStart(e) {
+      draggedValue = e.target.dataset.value;
+      e.target.style.opacity = '0.5';
+    }
+
+    function dragEnd(e) {
+      e.target.style.opacity = '1';
+    }
+
+    function dragOver(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('drag-over');
+    }
+
+    function dragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+
+    function renderDropZone() {
+      const dropZone = document.getElementById('drop-zone');
+      if (!dropZone) return;
+      if (currentDropItems.length === 0) {
+        dropZone.innerHTML = '<p class="text-gray-400 self-center">Drop numbers here in order</p>';
+        return;
+      }
+      dropZone.innerHTML = currentDropItems.map((value, index) => `
+        <div class="draggable bg-gradient-to-br from-emerald-100 to-green-100 text-gray-800 font-bold py-3 px-6 rounded-2xl text-2xl shadow-md cursor-pointer" onclick="removeDroppedItem(${index})" data-value="${value}">${value}</div>
+      `).join('');
+    }
+
+    function removeDroppedItem(index) {
+      const removed = currentDropItems[index];
+      currentDropItems.splice(index, 1);
+      const source = document.querySelector(`#drag-items .draggable[data-value="${removed}"]`);
+      if (source) source.style.display = 'block';
+      renderDropZone();
+      renderDragItems();
+    }
+
+    function renderDragItems() {
+      const dragItems = document.querySelectorAll('#drag-items .draggable');
+      dragItems.forEach(item => {
+        const value = item.dataset.value;
+        item.style.display = currentDropItems.includes(value) ? 'none' : 'block';
+      });
+    }
+
+    function drop(e) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      if (!draggedValue) return;
+      if (!currentDropItems.includes(draggedValue)) currentDropItems.push(draggedValue);
+      renderDropZone();
+      renderDragItems();
+      draggedValue = null;
+    }
+
+    function checkDragOrder() {
+      const correct = getSelectedQuestion().correct;
+      showFeedback(JSON.stringify(currentDropItems) === JSON.stringify(correct));
+    }
+
+    function showFeedback(isCorrect, timedOut = false) {
+      clearTimer();
       const overlay = document.getElementById('feedback-overlay');
       const content = document.getElementById('feedback-content');
+      const config = window.elementSdk?.config || defaultConfig;
       overlay.classList.remove('hidden');
 
       if (isCorrect) {
         gameState.quizScore++;
         gameState.streak++;
-        let earnedCoins = 10;
-        if (gameState.streak >= 3) earnedCoins += 5;
-        gameState.stars += 1;
-        gameState.coins += earnedCoins;
+        let bonus = 10;
+        if (gameState.currentLevel >= 3) bonus = 15;
+        if (gameState.currentLevel >= 5) bonus = 20;
+        if (gameState.streak > 0 && gameState.streak % 3 === 0) bonus += 10;
+        gameState.stars++;
+        gameState.coins += bonus;
         updateQuizStats();
         updateStats();
         content.innerHTML = `
           <div class="bounce-in">
             <div class="text-8xl mb-4">🎉</div>
-            <h2 class="text-3xl font-bold text-green-500">Brilliant!</h2>
-            <p class="text-xl text-gray-600 mt-2">+1 ⭐ +${earnedCoins} 🪙 ${gameState.streak >= 3 ? '🔥 Combo bonus!' : ''}</p>
+            <h2 class="text-3xl font-bold text-green-500">${config.correct_message || defaultConfig.correct_message}</h2>
+            <p class="text-xl text-gray-600 mt-2">+1 ⭐ +${bonus} 🪙</p>
+            ${gameState.streak % 3 === 0 ? '<p class="text-sm text-orange-500 font-bold mt-2">🔥 Combo bonus!</p>' : ''}
           </div>
         `;
       } else {
         gameState.streak = 0;
+        updateQuizStats();
         content.innerHTML = `
           <div class="shake">
-            <div class="text-8xl mb-4">😅</div>
-            <h2 class="text-3xl font-bold text-orange-500">${overrideMessage || 'Not quite!'}</h2>
-            <p class="text-xl text-gray-600 mt-2">Keep going!</p>
+            <div class="text-8xl mb-4">${timedOut ? '⏰' : '😅'}</div>
+            <h2 class="text-3xl font-bold text-orange-500">${timedOut ? 'Time\'s up!' : (config.incorrect_message || defaultConfig.incorrect_message)}</h2>
           </div>
         `;
       }
@@ -721,12 +1048,13 @@
       setTimeout(() => {
         overlay.classList.add('hidden');
         nextQuestion();
-      }, 1000);
+      }, 1100);
     }
 
     function nextQuestion() {
       gameState.currentQuestion++;
       if (gameState.currentQuestion < gameState.totalQuestions) {
+        currentDropItems = [];
         loadQuestion();
       } else {
         showCelebration();
@@ -735,81 +1063,66 @@
 
     async function showCelebration() {
       clearTimer();
-      const timeTaken = Math.max(1, Math.round((Date.now() - gameState.sessionStartTime) / 1000));
+      const bonusStars = 3;
+      const bonusCoins = gameState.currentLevel >= 4 ? 60 : 50;
       const percent = Math.round((gameState.quizScore / gameState.totalQuestions) * 100);
-      const levelConfig = LEVELS[gameState.currentLevel];
-      const passed = percent >= levelConfig.passScore;
-      const isPerfect = percent === 100;
-      const bonusStars = passed ? 3 : 1;
-      const bonusCoins = passed ? 50 : 20;
+      const isPerfect = gameState.quizScore === gameState.totalQuestions;
+      const passTarget = gameState.dailyMode ? 85 : LEVELS[gameState.currentLevel].passScore;
+      const passedLevel = percent >= passTarget;
+      const timeUsed = LEVELS[gameState.currentLevel].timer ? ((LEVELS[gameState.currentLevel].timer * gameState.totalQuestions) - Math.max(0, gameState.timerRemaining)) : 0;
 
       gameState.stars += bonusStars;
       gameState.coins += bonusCoins;
-      if (passed && gameState.currentLevel < 5) {
+      if (passedLevel && !gameState.dailyMode && gameState.currentLevel < 5) {
         gameState.unlockedLevels = Math.max(gameState.unlockedLevels, gameState.currentLevel + 1);
       }
-      gameState.bestScore = Math.max(gameState.bestScore, percent);
-      if (passed && (gameState.bestTime == null || timeTaken < gameState.bestTime)) {
-        gameState.bestTime = timeTaken;
+
+      const extra = {};
+      if (gameState.dailyMode && passedLevel) {
+        extra.best_daily_score = Math.max(parseInt(gameState.playerRecord?.best_daily_score) || 0, percent);
+        extra.best_daily_date = getDailySeed();
       }
 
-      const result = {
-        percent,
-        correct: gameState.quizScore,
-        total: gameState.totalQuestions,
-        timeTaken,
-        passed,
-        bonusStars,
-        bonusCoins
-      };
-      gameState.lastResult = result;
-
-      let saveError = '';
-      try {
-        await savePlayerProfile();
-        await saveAttempt(result);
-        await updateLeaderboard();
-      } catch (error) {
-        console.error('Celebration save error:', error);
-        saveError = ' Result saved locally only.';
-      }
-
-      renderLevelPath();
       updateStats();
+      await updatePlayerProgress(extra);
+      updateLeaderboard();
 
-      document.getElementById('celebration-message').textContent = passed
-        ? `Excellent, ${gameState.playerName}! ${gameState.currentLevel < 5 ? 'New level unlocked.' : 'You cleared the table.'}${saveError}`
-        : `Good try, ${gameState.playerName}. Reach ${levelConfig.passScore}% to unlock the next level.${saveError}`;
+      document.getElementById('celebration-message').textContent = passedLevel
+        ? `${gameState.dailyMode ? 'Daily challenge cleared' : 'Amazing job'}, ${gameState.playerName}! ${!gameState.dailyMode && gameState.currentLevel < 5 ? 'New level unlocked!' : 'Great work!'}`
+        : `Nice try, ${gameState.playerName}! Reach ${passTarget}% to ${gameState.dailyMode ? 'beat the daily challenge' : 'unlock the next level'}.`;
       document.getElementById('celebration-score').textContent = `${percent}%`;
-      document.getElementById('celebration-time').textContent = `${timeTaken}s`;
-      document.getElementById('celebration-stars-text').textContent = `+${bonusStars}`;
-      document.getElementById('celebration-coins-text').textContent = `+${bonusCoins}`;
+      document.getElementById('celebration-time-text').textContent = LEVELS[gameState.currentLevel].timer ? `${timeUsed}s` : 'No timer';
+      document.getElementById('celebration-coins-text').textContent = `+${bonusCoins} Coins`;
+      document.getElementById('celebration-stars-text').textContent = `${bonusStars} Stars`;
+      document.getElementById('celebration-stars-visual').innerHTML = Array.from({ length: bonusStars }).map((_, i) => `<span class="text-3xl star-spin" style="animation-delay: ${0.1 + i * 0.2}s">⭐</span>`).join('');
       document.getElementById('new-badge').classList.toggle('hidden', !isPerfect);
-      document.getElementById('result-note').textContent = passed
-        ? `Best score for this table: ${gameState.bestScore}%${gameState.bestTime != null ? ` · Best time: ${gameState.bestTime}s` : ''}`
-        : `Current best score for this table: ${gameState.bestScore}%`;
+      document.getElementById('celebration-note').textContent = gameState.dailyMode
+        ? `Daily challenge table ×${gameState.currentGrade} · Class: ${gameState.playerClass}`
+        : `${LEVELS[gameState.currentLevel].title} · Target ${passTarget}%`;
 
       const nextBtn = document.getElementById('next-level-btn');
-      if (passed && gameState.currentLevel < 5) {
-        nextBtn.innerHTML = `▶️ ${LEVELS[gameState.currentLevel + 1].label}`;
-        nextBtn.onclick = () => startLevel(gameState.currentLevel + 1);
-      } else if (passed && gameState.currentLevel === 5) {
+      if (gameState.dailyMode) {
         nextBtn.innerHTML = '🏆 View Leaderboard';
-        nextBtn.onclick = () => openLeaderboard();
+        nextBtn.onclick = () => { gameState.dailyMode = false; showScreen('leaderboard-screen'); updateLeaderboard(); };
+      } else if (passedLevel && gameState.currentLevel < 5) {
+        nextBtn.innerHTML = `▶️ Go to ${gameState.currentLevel + 1 === 5 ? 'Boss Level' : 'Level ' + (gameState.currentLevel + 1)}`;
+        nextBtn.onclick = () => startLevel(gameState.currentLevel + 1);
       } else {
         nextBtn.innerHTML = '🔁 Retry Level';
         nextBtn.onclick = () => startLevel(gameState.currentLevel);
       }
 
+      renderLevelPath();
       showScreen('celebration-screen');
       createConfetti();
+      gameState.dailyMode = false;
     }
 
     function createConfetti() {
       const container = document.getElementById('confetti-container');
       container.innerHTML = '';
       const colors = ['#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#3B82F6'];
-      for (let i = 0; i < 40; i++) {
+      for (let i = 0; i < 50; i++) {
         const confetti = document.createElement('div');
         confetti.className = 'confetti';
         confetti.style.left = Math.random() * 100 + '%';
@@ -822,17 +1135,216 @@
 
     function exitQuiz() {
       clearTimer();
+      gameState.dailyMode = false;
       showScreen('level-screen');
     }
 
-    window.startAdventure = startAdventure;
-    window.selectGrade = selectGrade;
-    window.startLevel = startLevel;
-    window.checkMCQ = checkMCQ;
-    window.checkFill = checkFill;
-    window.exitQuiz = exitQuiz;
-    window.showScreen = showScreen;
-    window.openLeaderboard = openLeaderboard;
+    function renderDailyScreen() {
+      gameState.dailyChallenge = buildDailyChallenge();
+      document.getElementById('daily-info').textContent = `Today's challenge seed: ${getDailySeed()}`;
+      document.getElementById('daily-table').textContent = `×${gameState.dailyChallenge.table}`;
+      document.getElementById('daily-timer').textContent = `${gameState.dailyChallenge.timer}s`;
+    }
+
+    function renderLevelPath() {
+      const holder = document.getElementById('level-path-holder');
+      if (!holder) return;
+      holder.innerHTML = Object.keys(LEVELS).map(Number).map(level => {
+        const cfg = LEVELS[level];
+        const unlocked = level <= gameState.unlockedLevels;
+        const completed = level < gameState.unlockedLevels;
+        const circle = unlocked
+          ? `<div class="w-20 h-20 bg-gradient-to-br ${cfg.color} rounded-full flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform ${level === gameState.unlockedLevels ? 'pulse-glow' : ''}">${completed ? '✓' : cfg.icon}</div>`
+          : `<div class="w-20 h-20 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full flex items-center justify-center text-3xl shadow-lg">🔒</div>`;
+        const stars = completed
+          ? '<span class="text-amber-400">⭐</span><span class="text-amber-400">⭐</span><span class="text-amber-400">⭐</span>'
+          : unlocked
+            ? '<span class="text-amber-400">⭐</span><span class="text-gray-300">⭐</span><span class="text-gray-300">⭐</span>'
+            : '<span class="text-gray-300">⭐</span><span class="text-gray-300">⭐</span><span class="text-gray-300">⭐</span>';
+        return `
+          <div ${unlocked ? `onclick="startLevel(${level})"` : ''} class="${unlocked ? 'flex items-center gap-4 cursor-pointer group' : 'flex items-center gap-4 opacity-50'}">
+            <div class="flex-1 text-right">
+              <span class="text-sm text-gray-500">${cfg.label}</span>
+              <p class="font-bold text-gray-700">${cfg.title}</p>
+              <p class="text-xs text-gray-500">${cfg.subtitle}</p>
+            </div>
+            ${circle}
+            <div class="flex-1"><div class="flex gap-1">${stars}</div><p class="text-xs text-gray-400 mt-1">Pass: ${cfg.passScore}%</p></div>
+          </div>
+        `;
+      }).join('');
+      const meta = TABLE_META[gameState.currentGrade];
+      document.getElementById('level-subtitle').textContent = meta ? `${meta[0]} · ${LEVELS[gameState.unlockedLevels].subtitle}` : 'Choose your challenge.';
+    }
+
+    function setLeaderboardMode(mode) {
+      gameState.leaderboardMode = mode;
+      document.getElementById('lb-overall').className = mode === 'overall' ? 'bg-violet-500 text-white rounded-2xl px-4 py-2 shadow-md' : 'bg-white text-gray-700 rounded-2xl px-4 py-2 shadow-md';
+      document.getElementById('lb-class').className = mode === 'class' ? 'bg-violet-500 text-white rounded-2xl px-4 py-2 shadow-md' : 'bg-white text-gray-700 rounded-2xl px-4 py-2 shadow-md';
+      updateLeaderboard();
+    }
+
+    function renderTeacherDashboard() {
+      const players = [...allPlayerRecords];
+      const totalPlayers = players.length;
+      const classMap = new Map();
+      const tableMap = new Map();
+
+      players.forEach(player => {
+        const className = player.player_class || 'No class';
+        const table = parseInt(player.times_table) || 2;
+        const stars = parseInt(player.total_stars) || 0;
+        const levels = parseInt(player.levels_completed) || 0;
+
+        if (!classMap.has(className)) classMap.set(className, { className, pupils: 0, stars: 0, levels: 0 });
+        const classRec = classMap.get(className);
+        classRec.pupils += 1;
+        classRec.stars += stars;
+        classRec.levels += levels;
+
+        if (!tableMap.has(table)) tableMap.set(table, { table, pupils: 0, stars: 0, levels: 0 });
+        const tableRec = tableMap.get(table);
+        tableRec.pupils += 1;
+        tableRec.stars += stars;
+        tableRec.levels += levels;
+      });
+
+      const classRows = [...classMap.values()].sort((a, b) => b.stars - a.stars || b.levels - a.levels);
+      const tableRows = [...tableMap.values()].map(row => ({
+        ...row,
+        avgStars: row.pupils ? row.stars / row.pupils : 0,
+        avgLevels: row.pupils ? row.levels / row.pupils : 0
+      })).sort((a, b) => b.avgStars - a.avgStars);
+      const topStudents = [...players].sort((a, b) => (parseInt(b.total_stars) || 0) - (parseInt(a.total_stars) || 0) || (parseInt(b.levels_completed) || 0) - (parseInt(a.levels_completed) || 0)).slice(0, 8);
+      const supportStudents = [...players].sort((a, b) => (parseInt(a.total_stars) || 0) - (parseInt(b.total_stars) || 0) || (parseInt(a.levels_completed) || 0) - (parseInt(b.levels_completed) || 0)).slice(0, 8);
+
+      document.getElementById('teacher-total-players').textContent = totalPlayers;
+      document.getElementById('teacher-total-classes').textContent = classRows.length;
+      document.getElementById('teacher-top-table').textContent = `×${tableRows[0]?.table || 0}`;
+      document.getElementById('teacher-weak-table').textContent = `×${tableRows[tableRows.length - 1]?.table || 0}`;
+
+      document.getElementById('teacher-class-list').innerHTML = classRows.length ? classRows.map((row, idx) => `
+        <div class="bg-violet-50 rounded-2xl p-4 flex items-center justify-between gap-4">
+          <div>
+            <p class="font-bold text-gray-800">${idx + 1}. ${row.className}</p>
+            <p class="text-sm text-gray-500">${row.pupils} pupils</p>
+          </div>
+          <div class="text-right">
+            <p class="font-bold text-violet-600">${row.stars} ⭐</p>
+            <p class="text-xs text-gray-500">${row.levels} levels cleared</p>
+          </div>
+        </div>
+      `).join('') : '<p class="text-gray-500">No class data yet.</p>';
+
+      document.getElementById('teacher-table-list').innerHTML = tableRows.length ? tableRows.map(row => `
+        <div class="bg-sky-50 rounded-2xl p-4 flex items-center justify-between gap-4">
+          <div>
+            <p class="font-bold text-gray-800">Times Table ×${row.table}</p>
+            <p class="text-sm text-gray-500">${row.pupils} pupils attempted</p>
+          </div>
+          <div class="text-right">
+            <p class="font-bold text-sky-600">${row.avgStars.toFixed(1)} avg ⭐</p>
+            <p class="text-xs text-gray-500">${row.avgLevels.toFixed(1)} avg levels</p>
+          </div>
+        </div>
+      `).join('') : '<p class="text-gray-500">No table data yet.</p>';
+
+      document.getElementById('teacher-student-list').innerHTML = topStudents.length ? topStudents.map((player, idx) => `
+        <div class="bg-emerald-50 rounded-2xl p-4 flex items-center justify-between gap-4">
+          <div>
+            <p class="font-bold text-gray-800">${idx + 1}. ${player.player_name}</p>
+            <p class="text-sm text-gray-500">${player.player_class || 'No class'} · ×${parseInt(player.times_table) || 2}</p>
+          </div>
+          <div class="text-right">
+            <p class="font-bold text-emerald-600">${parseInt(player.total_stars) || 0} ⭐</p>
+            <p class="text-xs text-gray-500">Level ${Math.max(1, parseInt(player.levels_completed) || 0)}</p>
+          </div>
+        </div>
+      `).join('') : '<p class="text-gray-500">No pupil data yet.</p>';
+
+      document.getElementById('teacher-support-list').innerHTML = supportStudents.length ? supportStudents.map(player => `
+        <div class="bg-rose-50 rounded-2xl p-4 flex items-center justify-between gap-4">
+          <div>
+            <p class="font-bold text-gray-800">${player.player_name}</p>
+            <p class="text-sm text-gray-500">${player.player_class || 'No class'} · ×${parseInt(player.times_table) || 2}</p>
+          </div>
+          <div class="text-right">
+            <p class="font-bold text-rose-600">${parseInt(player.total_stars) || 0} ⭐</p>
+            <p class="text-xs text-gray-500">Unlocked ${parseInt(player.unlocked_levels) || 1}</p>
+          </div>
+        </div>
+      `).join('') : '<p class="text-gray-500">No support list yet.</p>';
+    }
+
+    function updateLeaderboard() {
+      let filtered = [...allPlayerRecords].filter(p => (parseInt(p.times_table) || 2) === gameState.currentGrade);
+      if (gameState.leaderboardMode === 'class') {
+        filtered = filtered.filter(p => (p.player_class || 'No class') === gameState.playerClass);
+      }
+      const sorted = filtered.sort((a, b) => {
+        const starDiff = (parseInt(b.total_stars) || 0) - (parseInt(a.total_stars) || 0);
+        if (starDiff !== 0) return starDiff;
+        return (parseInt(b.levels_completed) || 0) - (parseInt(a.levels_completed) || 0);
+      });
+
+      const listContainer = document.getElementById('leaderboard-list');
+      const podium = document.getElementById('podium');
+      const title = document.getElementById('leaderboard-title');
+      if (!listContainer || !podium || !title) return;
+      title.textContent = gameState.leaderboardMode === 'class'
+        ? `Top players in ${gameState.playerClass} for ×${gameState.currentGrade}`
+        : `Top players overall for ×${gameState.currentGrade}`;
+
+      const emojis = ['🧙', '🦄', '🐸', '🐬', '🦊', '🐻', '🦁', '🐯', '🦘', '🐰'];
+      const topThree = sorted.slice(0, 3);
+      const podiumOrder = [1, 0, 2];
+      const medals = ['🥇', '🥈', '🥉'];
+
+      podium.innerHTML = podiumOrder.map(orderIndex => {
+        const player = topThree[orderIndex];
+        if (!player) return '';
+        const actualRank = orderIndex + 1;
+        const stars = parseInt(player.total_stars) || 0;
+        const crown = actualRank === 1 ? '👑' : medals[actualRank - 1];
+        const sizeClass = actualRank === 1 ? 'w-24 h-24 text-4xl' : 'w-20 h-20 text-3xl';
+        const pillarClass = actualRank === 1 ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-white h-28' : actualRank === 2 ? 'bg-gray-200 text-gray-600 h-20' : 'bg-orange-200 text-orange-600 h-16';
+        return `
+          <div class="text-center slide-up">
+            <div class="${sizeClass} bg-gradient-to-br from-violet-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg mx-auto mb-2 ${actualRank === 1 ? 'pulse-glow' : ''}">${crown}</div>
+            <p class="font-bold text-gray-700">${player.player_name === gameState.playerName && (player.player_class || 'No class') === gameState.playerClass ? 'You' : player.player_name}</p>
+            <p class="text-sm text-gray-500">${stars} pts</p>
+            <div class="rounded-t-2xl w-24 mt-2 flex items-center justify-center ${pillarClass}"><span class="text-2xl font-bold">${actualRank}</span></div>
+          </div>
+        `;
+      }).join('');
+
+      listContainer.innerHTML = sorted.length ? sorted.map((player, idx) => {
+        const rank = idx + 1;
+        const isCurrentPlayer = player.player_name === gameState.playerName && (player.player_class || 'No class') === gameState.playerClass;
+        const bgColor = isCurrentPlayer ? 'bg-violet-50' : '';
+        const emoji = emojis[idx % emojis.length];
+        const stars = parseInt(player.total_stars) || 0;
+        const timesTable = parseInt(player.times_table) || 2;
+        const levelsCompleted = parseInt(player.levels_completed) || 0;
+        return `
+          <div class="leaderboard-row flex items-center gap-4 p-4 ${bgColor}">
+            <span class="w-8 text-center font-bold ${isCurrentPlayer ? 'text-violet-600' : 'text-gray-400'}">${rank}</span>
+            <div class="w-12 h-12 bg-gradient-to-br from-violet-400 to-purple-500 rounded-full flex items-center justify-center text-xl">${emoji}</div>
+            <div class="flex-1">
+              <p class="font-bold text-gray-800">${isCurrentPlayer ? 'You' : player.player_name}</p>
+              <p class="text-sm text-gray-500">${player.player_class || 'No class'} · Times Table ${timesTable}</p>
+            </div>
+            <div class="text-right">
+              <p class="font-bold ${isCurrentPlayer ? 'text-violet-600' : 'text-gray-600'}">${stars} ⭐</p>
+              <p class="text-xs text-green-500">Level ${Math.max(1, levelsCompleted)}</p>
+            </div>
+          </div>
+        `;
+      }).join('') : '<div class="p-6 text-center text-gray-500">No scores yet for this view.</div>';
+
+      const currentPlayerIdx = sorted.findIndex(p => p.player_name === gameState.playerName && (p.player_class || 'No class') === gameState.playerClass);
+      if (currentPlayerIdx !== -1) gameState.playerRecord = sorted[currentPlayerIdx];
+    }
   </script>
 </body>
 </html>
