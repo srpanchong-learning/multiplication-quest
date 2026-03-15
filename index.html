@@ -478,12 +478,11 @@
     }
 
     async function fetchLeaderboard() {
-      const { collection, query, where, orderBy, limit, getDocs } = window.firebaseApi;
+      const { collection, query, where, limit, getDocs } = window.firebaseApi;
       const q = query(
         collection(window.firebaseApi.db, 'players'),
         where('times_table', '==', gameState.currentGrade),
-        orderBy('best_score', 'desc'),
-        limit(20)
+        limit(50)
       );
       const snap = await getDocs(q);
       const rows = [];
@@ -495,7 +494,7 @@
         const timeB = b.best_time_seconds ?? Number.MAX_SAFE_INTEGER;
         return timeA - timeB;
       });
-      return rows;
+      return rows.slice(0, 20);
     }
 
     async function openLeaderboard() {
@@ -765,15 +764,22 @@
       };
       gameState.lastResult = result;
 
-      await savePlayerProfile();
-      await saveAttempt(result);
-      await updateLeaderboard();
+      let saveError = '';
+      try {
+        await savePlayerProfile();
+        await saveAttempt(result);
+        await updateLeaderboard();
+      } catch (error) {
+        console.error('Celebration save error:', error);
+        saveError = ' Result saved locally only.';
+      }
+
       renderLevelPath();
       updateStats();
 
       document.getElementById('celebration-message').textContent = passed
-        ? `Excellent, ${gameState.playerName}! ${gameState.currentLevel < 5 ? 'New level unlocked.' : 'You cleared the table.'}`
-        : `Good try, ${gameState.playerName}. Reach ${levelConfig.passScore}% to unlock the next level.`;
+        ? `Excellent, ${gameState.playerName}! ${gameState.currentLevel < 5 ? 'New level unlocked.' : 'You cleared the table.'}${saveError}`
+        : `Good try, ${gameState.playerName}. Reach ${levelConfig.passScore}% to unlock the next level.${saveError}`;
       document.getElementById('celebration-score').textContent = `${percent}%`;
       document.getElementById('celebration-time').textContent = `${timeTaken}s`;
       document.getElementById('celebration-stars-text').textContent = `+${bonusStars}`;
