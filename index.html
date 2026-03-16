@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Multiplication Master Quest</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -241,6 +243,17 @@
   <script>
     const STORAGE_KEY = 'mmq_v2_records';
     const PLAYER_PREF_KEY = 'mmq_v2_player_pref';
+    const firebaseConfig = {
+      apiKey: "AIzaSyBQjpBHH-cYSll8bPYpLVfVXmgpHRXmpHA",
+      authDomain: "multiplication-quest.firebaseapp.com",
+      projectId: "multiplication-quest",
+      storageBucket: "multiplication-quest.firebasestorage.app",
+      messagingSenderId: "64140074912",
+      appId: "1:64140074912:web:23d7c3087dc12208454ec5"
+    };
+
+    let db = null;
+    let firebaseReady = false;
 
     const TABLE_META = {
       2: ['Twos', '2, 4, 6, 8...', 'from-rose-100 to-rose-200', 'text-rose-600', 'text-rose-500'],
@@ -307,12 +320,12 @@
     function normalize(v) { return String(v || '').trim().toLowerCase(); }
     function makeRecordId(name, cls, table) { return `${normalize(name)}__${normalize(cls)}__${table}`; }
 
-    function readStorage() {
+    function readCache() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
       catch { return []; }
     }
 
-    function writeStorage(records) {
+    function writeCache(records) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
       allRecords = records;
     }
@@ -329,6 +342,53 @@
           document.getElementById('student-class').value = pref.cls || '';
         }
       } catch {}
+    }
+
+    async function initFirebase() {
+      try {
+        if (!window.firebase) return false;
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        firebaseReady = true;
+        return true;
+      } catch (error) {
+        console.error('Firebase init error:', error);
+        firebaseReady = false;
+        return false;
+      }
+    }
+
+    async function loadAllRecords() {
+      if (!firebaseReady || !db) {
+        allRecords = readCache();
+        return allRecords;
+      }
+      try {
+        const snap = await db.collection('records').get();
+        const records = [];
+        snap.forEach(doc => records.push(doc.data()));
+        writeCache(records);
+        return records;
+      } catch (error) {
+        console.error('Load records error:', error);
+        allRecords = readCache();
+        return allRecords;
+      }
+    }
+
+    async function upsertRecord(updated) {
+      const records = [...allRecords];
+      const idx = records.findIndex(r => r.record_id === updated.record_id);
+      if (idx === -1) records.push(updated); else records[idx] = updated;
+      writeCache(records);
+      if (firebaseReady && db) {
+        try {
+          await db.collection('records').doc(updated.record_id).set(updated);
+        } catch (error) {
+          console.error('Save record error:', error);
+        }
+      }
+      return updated;
     }
 
     function getPlayerTableRecord(name, cls, table) {
@@ -351,14 +411,6 @@
         best_daily_date: '',
         last_updated: new Date().toISOString()
       };
-    }
-
-    function upsertRecord(updated) {
-      const records = [...allRecords];
-      const idx = records.findIndex(r => r.record_id === updated.record_id);
-      if (idx === -1) records.push(updated); else records[idx] = updated;
-      writeStorage(records);
-      return updated;
     }
 
     function aggregatePlayerTotals(name, cls) {
@@ -506,10 +558,11 @@
       }
     }
 
-    function startAdventure() {
+    async function startAdventure() {
       gameState.playerName = document.getElementById('student-name').value.trim() || 'Explorer';
       gameState.playerClass = document.getElementById('student-class').value.trim() || 'No class';
       savePlayerPref();
+      await loadAllRecords();
       updateStats();
       renderTableGrid();
       renderDailyScreen();
@@ -649,7 +702,7 @@
       else showCelebration();
     }
 
-    function showCelebration() {
+    async function showCelebration() {
       clearTimer();
       const levelCfg = LEVELS[gameState.currentLevel];
       const percent = Math.round((gameState.quizScore / gameState.totalQuestions) * 100);
@@ -676,7 +729,8 @@
         record.best_daily_date = getDailySeed();
       }
       record.last_updated = new Date().toISOString();
-      gameState.currentRecord = upsertRecord(record);
+      gameState.currentRecord = await upsertRecord(record);
+      await loadAllRecords();
 
       updateStats();
       renderTableGrid();
@@ -771,57 +825,11 @@
       }).join('') : '<div class="p-6 text-center text-gray-500">No records yet for this view.</div>';
     }
 
-    function getPlayerBadges(recordsForPlayer) {
-      const totalTables = recordsForPlayer.length;
-      const perfectRuns = recordsForPlayer.filter(r => (parseInt(r.best_score) || 0) === 100).length;
-      const fastBoss = recordsForPlayer.some(r => (parseInt(r.unlocked_levels) || 1) >= 5 && r.best_time_seconds != null && Number(r.best_time_seconds) <= 20);
-      const badges = [];
-      if (perfectRuns >= 1) badges.push('🎯 Perfect Run');
-      if (perfectRuns >= 3) badges.push('🌟 Triple Perfect');
-      if (fastBoss) badges.push('⚡ Speed Demon');
-      if (recordsForPlayer.some(r => (parseInt(r.times_table) || 0) === 12 && (parseInt(r.unlocked_levels) || 1) >= 5)) badges.push('👑 ×12 Master');
-      if (totalTables >= 5) badges.push('🧠 Table Explorer');
-      return badges;
-    }
-
-    function renderChampionsBoard() {
-      const grouped = new Map();
-      allRecords.forEach(r => {
-        const key = `${normalize(r.player_name)}__${normalize(r.player_class)}`;
-        if (!grouped.has(key)) grouped.set(key, { player_name: r.player_name, player_class: r.player_class, stars: 0, score: 0, tables: 0, unlocked: 0, rows: [] });
-        const item = grouped.get(key);
-        item.stars += parseInt(r.total_stars) || 0;
-        item.score += parseInt(r.best_score) || 0;
-        item.tables += 1;
-        item.unlocked = Math.max(item.unlocked, parseInt(r.unlocked_levels) || 1);
-        item.rows.push(r);
-      });
-      const sorted = [...grouped.values()].sort((a, b) => b.stars - a.stars || b.score - a.score);
-      document.getElementById('champions-list').innerHTML = sorted.length ? sorted.slice(0, 20).map((p, idx) => {
-        const isYou = normalize(p.player_name) === normalize(gameState.playerName) && normalize(p.player_class) === normalize(gameState.playerClass);
-        const badges = getPlayerBadges(p.rows).slice(0, 2).join(' · ');
-        return `<div class="flex items-center gap-4 p-4 ${isYou ? 'bg-violet-50' : ''}"><span class="w-8 text-center font-bold ${isYou ? 'text-violet-600' : 'text-gray-400'}">${idx + 1}</span><div class="w-12 h-12 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full flex items-center justify-center text-xl">${idx === 0 ? '👑' : '⭐'}</div><div class="flex-1"><p class="font-bold text-gray-800">${isYou ? 'You' : p.player_name}</p><p class="text-sm text-gray-500">${p.player_class} · ${p.tables} tables played${badges ? ` · ${badges}` : ''}</p></div><div class="text-right"><p class="font-bold ${isYou ? 'text-violet-600' : 'text-gray-700'}">${p.stars} ⭐</p><p class="text-xs text-gray-500">Unlocked ${p.unlocked}</p></div></div>`;
-      }).join('') : '<div class="p-6 text-center text-gray-500">No champions yet.</div>';
-
-      const classTotals = new Map();
-      allRecords.forEach(r => {
-        const cls = r.player_class || 'No class';
-        if (!classTotals.has(cls)) classTotals.set(cls, { className: cls, stars: 0, records: 0, score: 0 });
-        const c = classTotals.get(cls);
-        c.stars += parseInt(r.total_stars) || 0;
-        c.records += 1;
-        c.score += parseInt(r.best_score) || 0;
-      });
-      const classSorted = [...classTotals.values()].sort((a, b) => b.stars - a.stars || b.score - a.score);
-      document.getElementById('class-vs-class-list').innerHTML = classSorted.length ? classSorted.map((c, idx) => `<div class="flex items-center justify-between gap-4 p-4"><div><p class="font-bold text-gray-800">${idx + 1}. ${c.className}</p><p class="text-sm text-gray-500">${c.records} table records</p></div><div class="text-right"><p class="font-bold text-sky-600">${c.stars} ⭐</p><p class="text-xs text-gray-500">${(c.score / Math.max(c.records, 1)).toFixed(1)} avg %</p></div></div>`).join('') : '<div class="p-6 text-center text-gray-500">No class totals yet.</div>';
-    }
-
     function renderTeacherDashboard() {
       const players = [...allRecords];
       const totalPlayers = new Set(players.map(p => `${normalize(p.player_name)}__${normalize(p.player_class)}`)).size;
       const classMap = new Map();
       const tableMap = new Map();
-      const playerGroups = new Map();
       players.forEach(p => {
         const className = p.player_class || 'No class';
         const table = parseInt(p.times_table) || 2;
@@ -831,15 +839,11 @@
         const c = classMap.get(className); c.records++; c.stars += stars; c.levels += levels;
         if (!tableMap.has(table)) tableMap.set(table, { table, records: 0, stars: 0, levels: 0 });
         const t = tableMap.get(table); t.records++; t.stars += stars; t.levels += levels;
-        const key = `${normalize(p.player_name)}__${normalize(p.player_class)}`;
-        if (!playerGroups.has(key)) playerGroups.set(key, []);
-        playerGroups.get(key).push(p);
       });
       const classRows = [...classMap.values()].sort((a, b) => b.stars - a.stars || b.levels - a.levels);
       const tableRows = [...tableMap.values()].map(r => ({ ...r, avgStars: r.records ? r.stars / r.records : 0, avgLevels: r.records ? r.levels / r.records : 0 })).sort((a, b) => b.avgStars - a.avgStars);
       const topStudents = [...players].sort((a, b) => (parseInt(b.best_score) || 0) - (parseInt(a.best_score) || 0) || (parseInt(b.total_stars) || 0) - (parseInt(a.total_stars) || 0)).slice(0, 8);
       const support = [...players].sort((a, b) => (parseInt(a.best_score) || 0) - (parseInt(b.best_score) || 0) || (parseInt(a.unlocked_levels) || 1) - (parseInt(b.unlocked_levels) || 1)).slice(0, 8);
-      const badgeWatch = [...playerGroups.entries()].map(([_, rows]) => ({ player_name: rows[0].player_name, player_class: rows[0].player_class, badges: getPlayerBadges(rows) })).filter(x => x.badges.length).slice(0, 10);
       document.getElementById('teacher-total-players').textContent = totalPlayers;
       document.getElementById('teacher-total-classes').textContent = classRows.length;
       document.getElementById('teacher-top-table').textContent = `×${tableRows[0]?.table || 0}`;
@@ -848,7 +852,6 @@
       document.getElementById('teacher-table-list').innerHTML = tableRows.length ? tableRows.map(r => `<div class="bg-sky-50 rounded-2xl p-4 flex items-center justify-between gap-4"><div><p class="font-bold text-gray-800">Times Table ×${r.table}</p><p class="text-sm text-gray-500">${r.records} records</p></div><div class="text-right"><p class="font-bold text-sky-600">${r.avgStars.toFixed(1)} avg ⭐</p><p class="text-xs text-gray-500">${r.avgLevels.toFixed(1)} avg levels</p></div></div>`).join('') : '<p class="text-gray-500">No table data yet.</p>';
       document.getElementById('teacher-student-list').innerHTML = topStudents.length ? topStudents.map((p, i) => `<div class="bg-emerald-50 rounded-2xl p-4 flex items-center justify-between gap-4"><div><p class="font-bold text-gray-800">${i + 1}. ${p.player_name}</p><p class="text-sm text-gray-500">${p.player_class} · ×${p.times_table}</p></div><div class="text-right"><p class="font-bold text-emerald-600">${parseInt(p.best_score) || 0}%</p><p class="text-xs text-gray-500">${parseInt(p.total_stars) || 0} ⭐</p></div></div>`).join('') : '<p class="text-gray-500">No pupil data yet.</p>';
       document.getElementById('teacher-support-list').innerHTML = support.length ? support.map(p => `<div class="bg-rose-50 rounded-2xl p-4 flex items-center justify-between gap-4"><div><p class="font-bold text-gray-800">${p.player_name}</p><p class="text-sm text-gray-500">${p.player_class} · ×${p.times_table}</p></div><div class="text-right"><p class="font-bold text-rose-600">${parseInt(p.best_score) || 0}%</p><p class="text-xs text-gray-500">Unlocked ${parseInt(p.unlocked_levels) || 1}</p></div></div>`).join('') : '<p class="text-gray-500">No support list yet.</p>';
-      document.getElementById('teacher-badge-list').innerHTML = badgeWatch.length ? badgeWatch.map(p => `<div class="bg-amber-50 rounded-2xl p-4 flex items-center justify-between gap-4"><div><p class="font-bold text-gray-800">${p.player_name}</p><p class="text-sm text-gray-500">${p.player_class}</p></div><div class="text-right"><p class="font-bold text-amber-700">${p.badges.join(' · ')}</p></div></div>`).join('') : '<p class="text-gray-500">No badges earned yet.</p>';
     }
 
     function exitQuiz() {
@@ -857,9 +860,10 @@
       showScreen('level-screen');
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      allRecords = readStorage();
+    window.addEventListener('DOMContentLoaded', async () => {
       loadPlayerPref();
+      await initFirebase();
+      await loadAllRecords();
       renderTableGrid();
       renderDailyScreen();
       renderTeacherDashboard();
