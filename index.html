@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Multiplication Master Quest</title>
+  <title>Multiplication Master Quest V2</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -94,6 +94,17 @@
         <div class="bg-white rounded-3xl p-5 shadow-md text-center"><div class="text-3xl mb-2">⚡</div><p class="font-bold text-gray-700">Speed Levels</p><p class="text-sm text-gray-500">Higher levels get faster and harder.</p></div>
         <div class="bg-white rounded-3xl p-5 shadow-md text-center"><div class="text-3xl mb-2">🏫</div><p class="font-bold text-gray-700">Class Competition</p><p class="text-sm text-gray-500">Leaderboards work by class and overall.</p></div>
         <div class="bg-white rounded-3xl p-5 shadow-md text-center"><div class="text-3xl mb-2">🔐</div><p class="font-bold text-gray-700">Per-Table Progress</p><p class="text-sm text-gray-500">Unlock ×2 separately from ×12.</p></div>
+      </div>
+
+      <div class="mt-6 max-w-5xl mx-auto bg-white rounded-3xl p-5 shadow-md flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <p class="font-bold text-gray-800">📅 My Practice This Week</p>
+          <p class="text-sm text-gray-500">Minimum target: 3 sessions per week</p>
+        </div>
+        <div class="text-right">
+          <p id="my-week-sessions" class="text-2xl font-extrabold text-violet-600">0/3</p>
+          <p id="my-last-practice" class="text-xs text-gray-500">Last practice: -</p>
+        </div>
       </div>
     </div>
 
@@ -220,9 +231,16 @@
       <div class="max-w-6xl mx-auto space-y-6">
         <div class="grid md:grid-cols-4 gap-4">
           <div class="bg-white rounded-3xl p-5 shadow-md text-center"><p class="text-sm text-gray-500">Total Players</p><p id="teacher-total-players" class="text-3xl font-extrabold text-violet-600">0</p></div>
+          <div class="bg-white rounded-3xl p-5 shadow-md text-center"><p class="text-sm text-gray-500">Active This Week</p><p id="teacher-active-week" class="text-3xl font-extrabold text-emerald-600">0</p></div>
+          <div class="bg-white rounded-3xl p-5 shadow-md text-center"><p class="text-sm text-gray-500">Met Weekly Target</p><p id="teacher-met-target" class="text-3xl font-extrabold text-amber-600">0</p></div>
           <div class="bg-white rounded-3xl p-5 shadow-md text-center"><p class="text-sm text-gray-500">Active Classes</p><p id="teacher-total-classes" class="text-3xl font-extrabold text-sky-600">0</p></div>
           <div class="bg-white rounded-3xl p-5 shadow-md text-center"><p class="text-sm text-gray-500">Top Table</p><p id="teacher-top-table" class="text-3xl font-extrabold text-emerald-600">×0</p></div>
           <div class="bg-white rounded-3xl p-5 shadow-md text-center"><p class="text-sm text-gray-500">Weakest Table</p><p id="teacher-weak-table" class="text-3xl font-extrabold text-rose-600">×0</p></div>
+          <div class="bg-white rounded-3xl p-5 shadow-md text-center md:col-span-2"><p class="text-sm text-gray-500">Weekly Target</p><p class="text-3xl font-extrabold text-violet-600">3 sessions</p><p class="text-xs text-gray-500">More than 3 is still recorded</p></div>
+        </div>
+        <div class="bg-white rounded-3xl p-6 shadow-xl">
+          <h3 class="text-xl font-bold text-gray-800 mb-4">📅 Weekly Practice Frequency</h3>
+          <div id="teacher-frequency-list" class="space-y-3"></div>
         </div>
         <div class="grid lg:grid-cols-2 gap-6">
           <div class="bg-white rounded-3xl p-6 shadow-xl"><h3 class="text-xl font-bold text-gray-800 mb-4">🏫 Class Rankings</h3><div id="teacher-class-list" class="space-y-3"></div></div>
@@ -243,6 +261,7 @@
   <script>
     const STORAGE_KEY = 'mmq_v2_records';
     const PLAYER_PREF_KEY = 'mmq_v2_player_pref';
+    const WEEKLY_TARGET = 3;
     const firebaseConfig = {
       apiKey: "AIzaSyBQjpBHH-cYSll8bPYpLVfVXmgpHRXmpHA",
       authDomain: "multiplication-quest.firebaseapp.com",
@@ -320,6 +339,21 @@
     function normalize(v) { return String(v || '').trim().toLowerCase(); }
     function safeIdPart(v) { return encodeURIComponent(normalize(v)).replace(/%/g, '_'); }
     function makeRecordId(name, cls, table) { return `${safeIdPart(name)}__${safeIdPart(cls)}__${table}`; }
+    function pad2(n) { return String(n).padStart(2, '0'); }
+    function getDateKey(date = new Date()) { return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`; }
+    function getWeekKey(date = new Date()) {
+      const d = new Date(date);
+      const day = (d.getDay() + 6) % 7; // Monday = 0
+      d.setDate(d.getDate() - day);
+      return getDateKey(d);
+    }
+    function formatDateKey(value) {
+      if (!value) return '-';
+      const raw = String(value);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+      const d = new Date(raw);
+      return isNaN(d.getTime()) ? raw : getDateKey(d);
+    }
 
     function readCache() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
@@ -410,6 +444,10 @@
         best_time_seconds: null,
         best_daily_score: 0,
         best_daily_date: '',
+        total_sessions: 0,
+        weekly_sessions: 0,
+        week_key: getWeekKey(),
+        last_practiced_date: '',
         last_updated: new Date().toISOString()
       };
     }
@@ -513,6 +551,21 @@
       document.getElementById(id).classList.remove('hidden');
     }
 
+    function aggregatePracticeForPlayer(name, cls) {
+      const currentWeek = getWeekKey();
+      const mine = allRecords.filter(r => normalize(r.player_name) === normalize(name) && normalize(r.player_class) === normalize(cls));
+      let last = '';
+      mine.forEach(r => {
+        const value = r.last_practiced_date || r.last_updated || '';
+        if (value && (!last || new Date(value) > new Date(last))) last = value;
+      });
+      return {
+        totalSessions: mine.reduce((s, r) => s + (parseInt(r.total_sessions) || 0), 0),
+        weeklySessions: mine.reduce((s, r) => s + (r.week_key === currentWeek ? (parseInt(r.weekly_sessions) || 0) : 0), 0),
+        lastPractice: last
+      };
+    }
+
     function updateStats() {
       const totals = aggregatePlayerTotals(gameState.playerName, gameState.playerClass);
       gameState.stars = totals.stars;
@@ -523,6 +576,11 @@
       document.getElementById('coin-count-level').textContent = gameState.coins;
       document.getElementById('player-name-display').textContent = gameState.playerName;
       document.getElementById('player-class-display').textContent = gameState.playerClass;
+      const practice = aggregatePracticeForPlayer(gameState.playerName, gameState.playerClass);
+      const myWeek = document.getElementById('my-week-sessions');
+      const myLast = document.getElementById('my-last-practice');
+      if (myWeek) myWeek.textContent = `${practice.weeklySessions}/${WEEKLY_TARGET}`;
+      if (myLast) myLast.textContent = `Last practice: ${formatDateKey(practice.lastPractice)}`;
     }
 
     function updateQuizStats() {
@@ -729,7 +787,16 @@
         record.best_daily_score = Math.max(parseInt(record.best_daily_score) || 0, percent);
         record.best_daily_date = getDailySeed();
       }
-      record.last_updated = new Date().toISOString();
+      const now = new Date();
+      const currentWeekKey = getWeekKey(now);
+      if (record.week_key !== currentWeekKey) {
+        record.week_key = currentWeekKey;
+        record.weekly_sessions = 0;
+      }
+      record.total_sessions = (parseInt(record.total_sessions) || 0) + 1;
+      record.weekly_sessions = (parseInt(record.weekly_sessions) || 0) + 1;
+      record.last_practiced_date = now.toISOString();
+      record.last_updated = now.toISOString();
       gameState.currentRecord = await upsertRecord(record);
       await loadAllRecords();
 
@@ -745,8 +812,9 @@
       document.getElementById('celebration-coins-text').textContent = `+${bonusCoins} Coins`;
       document.getElementById('celebration-stars-text').textContent = `${bonusStars} Stars`;
       document.getElementById('celebration-stars-visual').innerHTML = Array.from({ length: bonusStars }).map((_, i) => `<span class="text-3xl star-spin" style="animation-delay:${0.1 + i * 0.2}s">⭐</span>`).join('');
+      const practiceAfter = aggregatePracticeForPlayer(gameState.playerName, gameState.playerClass);
       document.getElementById('new-badge').classList.toggle('hidden', !perfect);
-      document.getElementById('celebration-note').textContent = gameState.dailyMode ? `Daily challenge ×${gameState.currentGrade} · ${gameState.playerClass}` : `${levelCfg.title} · Target ${passTarget}%`;
+      document.getElementById('celebration-note').textContent = gameState.dailyMode ? `Daily challenge ×${gameState.currentGrade} · ${gameState.playerClass} · Practice recorded (${practiceAfter.weeklySessions}/${WEEKLY_TARGET} this week)` : `${levelCfg.title} · Target ${passTarget}% · Practice recorded (${practiceAfter.weeklySessions}/${WEEKLY_TARGET} this week)`;
 
       const nextBtn = document.getElementById('next-level-btn');
       if (gameState.dailyMode) {
@@ -828,7 +896,37 @@
 
     function renderTeacherDashboard() {
       const players = [...allRecords];
-      const totalPlayers = new Set(players.map(p => `${normalize(p.player_name)}__${normalize(p.player_class)}`)).size;
+      const currentWeek = getWeekKey();
+      const playerMap = new Map();
+      players.forEach(p => {
+        const key = `${normalize(p.player_name)}__${normalize(p.player_class)}`;
+        if (!playerMap.has(key)) {
+          playerMap.set(key, {
+            name: p.player_name || 'Unknown',
+            cls: p.player_class || 'No class',
+            weekly: 0,
+            total: 0,
+            last: '',
+            best: 0,
+            stars: 0,
+            records: 0
+          });
+        }
+        const row = playerMap.get(key);
+        row.records++;
+        row.weekly += p.week_key === currentWeek ? (parseInt(p.weekly_sessions) || 0) : 0;
+        row.total += parseInt(p.total_sessions) || 0;
+        row.best = Math.max(row.best, parseInt(p.best_score) || 0);
+        row.stars += parseInt(p.total_stars) || 0;
+        const lastValue = p.last_practiced_date || p.last_updated || '';
+        if (lastValue && (!row.last || new Date(lastValue) > new Date(row.last))) row.last = lastValue;
+      });
+
+      const playerRows = [...playerMap.values()].sort((a, b) => b.weekly - a.weekly || b.best - a.best || a.name.localeCompare(b.name));
+      const totalPlayers = playerRows.length;
+      const activeThisWeek = playerRows.filter(p => p.weekly > 0).length;
+      const metTarget = playerRows.filter(p => p.weekly >= WEEKLY_TARGET).length;
+
       const classMap = new Map();
       const tableMap = new Map();
       players.forEach(p => {
@@ -836,23 +934,41 @@
         const table = parseInt(p.times_table) || 2;
         const stars = parseInt(p.total_stars) || 0;
         const levels = parseInt(p.levels_completed) || 0;
-        if (!classMap.has(className)) classMap.set(className, { className, records: 0, stars: 0, levels: 0 });
-        const c = classMap.get(className); c.records++; c.stars += stars; c.levels += levels;
+        const sessions = p.week_key === currentWeek ? (parseInt(p.weekly_sessions) || 0) : 0;
+        if (!classMap.has(className)) classMap.set(className, { className, records: 0, stars: 0, levels: 0, weekly: 0 });
+        const c = classMap.get(className); c.records++; c.stars += stars; c.levels += levels; c.weekly += sessions;
         if (!tableMap.has(table)) tableMap.set(table, { table, records: 0, stars: 0, levels: 0 });
         const t = tableMap.get(table); t.records++; t.stars += stars; t.levels += levels;
       });
-      const classRows = [...classMap.values()].sort((a, b) => b.stars - a.stars || b.levels - a.levels);
+
+      const classRows = [...classMap.values()].sort((a, b) => b.weekly - a.weekly || b.stars - a.stars || b.levels - a.levels);
       const tableRows = [...tableMap.values()].map(r => ({ ...r, avgStars: r.records ? r.stars / r.records : 0, avgLevels: r.records ? r.levels / r.records : 0 })).sort((a, b) => b.avgStars - a.avgStars);
       const topStudents = [...players].sort((a, b) => (parseInt(b.best_score) || 0) - (parseInt(a.best_score) || 0) || (parseInt(b.total_stars) || 0) - (parseInt(a.total_stars) || 0)).slice(0, 8);
-      const support = [...players].sort((a, b) => (parseInt(a.best_score) || 0) - (parseInt(b.best_score) || 0) || (parseInt(a.unlocked_levels) || 1) - (parseInt(b.unlocked_levels) || 1)).slice(0, 8);
+      const support = [...playerRows].sort((a, b) => a.weekly - b.weekly || a.best - b.best).slice(0, 8);
+
       document.getElementById('teacher-total-players').textContent = totalPlayers;
+      document.getElementById('teacher-active-week').textContent = activeThisWeek;
+      document.getElementById('teacher-met-target').textContent = metTarget;
       document.getElementById('teacher-total-classes').textContent = classRows.length;
       document.getElementById('teacher-top-table').textContent = `×${tableRows[0]?.table || 0}`;
       document.getElementById('teacher-weak-table').textContent = `×${tableRows[tableRows.length - 1]?.table || 0}`;
-      document.getElementById('teacher-class-list').innerHTML = classRows.length ? classRows.map((r, i) => `<div class="bg-violet-50 rounded-2xl p-4 flex items-center justify-between gap-4"><div><p class="font-bold text-gray-800">${i + 1}. ${r.className}</p><p class="text-sm text-gray-500">${r.records} table records</p></div><div class="text-right"><p class="font-bold text-violet-600">${r.stars} ⭐</p><p class="text-xs text-gray-500">${r.levels} levels cleared</p></div></div>`).join('') : '<p class="text-gray-500">No class data yet.</p>';
+
+      document.getElementById('teacher-frequency-list').innerHTML = playerRows.length ? playerRows.map(p => {
+        const status = p.weekly >= WEEKLY_TARGET ? 'Target met ✅' : p.weekly > 0 ? 'Below target ⚠️' : 'Not active yet 🚩';
+        const bg = p.weekly >= WEEKLY_TARGET ? 'bg-emerald-50' : p.weekly > 0 ? 'bg-amber-50' : 'bg-rose-50';
+        return `<div class="${bg} rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap"><div><p class="font-bold text-gray-800">${p.name}</p><p class="text-sm text-gray-500">${p.cls} · Last practice: ${formatDateKey(p.last)}</p></div><div class="text-right"><p class="font-bold text-violet-600">${p.weekly}/${WEEKLY_TARGET} this week</p><p class="text-xs text-gray-500">Total: ${p.total} sessions · ${status}</p></div></div>`;
+      }).join('') : '<p class="text-gray-500">No practice frequency data yet.</p>';
+
+      document.getElementById('teacher-class-list').innerHTML = classRows.length ? classRows.map((r, i) => `<div class="bg-violet-50 rounded-2xl p-4 flex items-center justify-between gap-4"><div><p class="font-bold text-gray-800">${i + 1}. ${r.className}</p><p class="text-sm text-gray-500">${r.records} table records</p></div><div class="text-right"><p class="font-bold text-violet-600">${r.weekly} sessions this week</p><p class="text-xs text-gray-500">${r.stars} ⭐ · ${r.levels} levels cleared</p></div></div>`).join('') : '<p class="text-gray-500">No class data yet.</p>';
       document.getElementById('teacher-table-list').innerHTML = tableRows.length ? tableRows.map(r => `<div class="bg-sky-50 rounded-2xl p-4 flex items-center justify-between gap-4"><div><p class="font-bold text-gray-800">Times Table ×${r.table}</p><p class="text-sm text-gray-500">${r.records} records</p></div><div class="text-right"><p class="font-bold text-sky-600">${r.avgStars.toFixed(1)} avg ⭐</p><p class="text-xs text-gray-500">${r.avgLevels.toFixed(1)} avg levels</p></div></div>`).join('') : '<p class="text-gray-500">No table data yet.</p>';
       document.getElementById('teacher-student-list').innerHTML = topStudents.length ? topStudents.map((p, i) => `<div class="bg-emerald-50 rounded-2xl p-4 flex items-center justify-between gap-4"><div><p class="font-bold text-gray-800">${i + 1}. ${p.player_name}</p><p class="text-sm text-gray-500">${p.player_class} · ×${p.times_table}</p></div><div class="text-right"><p class="font-bold text-emerald-600">${parseInt(p.best_score) || 0}%</p><p class="text-xs text-gray-500">${parseInt(p.total_stars) || 0} ⭐</p></div></div>`).join('') : '<p class="text-gray-500">No pupil data yet.</p>';
-      document.getElementById('teacher-support-list').innerHTML = support.length ? support.map(p => `<div class="bg-rose-50 rounded-2xl p-4 flex items-center justify-between gap-4"><div><p class="font-bold text-gray-800">${p.player_name}</p><p class="text-sm text-gray-500">${p.player_class} · ×${p.times_table}</p></div><div class="text-right"><p class="font-bold text-rose-600">${parseInt(p.best_score) || 0}%</p><p class="text-xs text-gray-500">Unlocked ${parseInt(p.unlocked_levels) || 1}</p></div></div>`).join('') : '<p class="text-gray-500">No support list yet.</p>';
+      document.getElementById('teacher-support-list').innerHTML = support.length ? support.map(p => `<div class="bg-rose-50 rounded-2xl p-4 flex items-center justify-between gap-4"><div><p class="font-bold text-gray-800">${p.name}</p><p class="text-sm text-gray-500">${p.cls} · Last practice: ${formatDateKey(p.last)}</p></div><div class="text-right"><p class="font-bold text-rose-600">${p.weekly}/${WEEKLY_TARGET} sessions</p><p class="text-xs text-gray-500">Best score ${p.best}%</p></div></div>`).join('') : '<p class="text-gray-500">No support list yet.</p>';
+
+      const badgeList = document.getElementById('teacher-badge-list');
+      if (badgeList) {
+        const exceeded = playerRows.filter(p => p.weekly > WEEKLY_TARGET).slice(0, 8);
+        badgeList.innerHTML = exceeded.length ? exceeded.map(p => `<div class="bg-amber-50 rounded-2xl p-4 flex items-center justify-between gap-4"><div><p class="font-bold text-gray-800">⭐ ${p.name}</p><p class="text-sm text-gray-500">${p.cls}</p></div><div class="text-right"><p class="font-bold text-amber-600">${p.weekly}/${WEEKLY_TARGET}</p><p class="text-xs text-gray-500">Target exceeded</p></div></div>`).join('') : '<p class="text-gray-500">No pupils exceeded the weekly target yet.</p>';
+      }
     }
 
     function exitQuiz() {
