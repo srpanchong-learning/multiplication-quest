@@ -318,7 +318,8 @@
 
     function shuffle(array) { return [...array].sort(() => Math.random() - 0.5); }
     function normalize(v) { return String(v || '').trim().toLowerCase(); }
-    function makeRecordId(name, cls, table) { return `${normalize(name)}__${normalize(cls)}__${table}`; }
+    function safeIdPart(v) { return encodeURIComponent(normalize(v)).replace(/%/g, '_'); }
+    function makeRecordId(name, cls, table) { return `${safeIdPart(name)}__${safeIdPart(cls)}__${table}`; }
 
     function readCache() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
@@ -864,22 +865,6 @@
       loadPlayerPref();
       await initFirebase();
       await loadAllRecords();
-      renderTableGrid();
-      renderDailyScreen();
-      renderTeacherDashboard();
-      updateStats();
-    });
-  </script>
-</body>
-</html>() {
-      clearTimer();
-      gameState.dailyMode = false;
-      showScreen('level-screen');
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      allRecords = readStorage();
-      loadPlayerPref();
       renderTableGrid();
       renderDailyScreen();
       renderTeacherDashboard();
