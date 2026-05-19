@@ -195,21 +195,7 @@
       <header class="flex items-center gap-4 mb-6 flex-wrap">
         <button onclick="showScreen('grade-screen')" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
         <h2 class="text-3xl font-extrabold text-gray-800">🏆 Leaderboard</h2>
-        <div class="ml-auto flex gap-2 flex-wrap items-center">
-          <label for="lb-table-select" class="text-sm font-bold text-gray-600">Table</label>
-          <select id="lb-table-select" onchange="setLeaderboardTable(this.value)" class="bg-white text-gray-700 rounded-2xl px-4 py-2 shadow-md border border-violet-100 focus:outline-none focus:ring-2 focus:ring-violet-300">
-            <option value="2">×2</option>
-            <option value="3">×3</option>
-            <option value="4">×4</option>
-            <option value="5">×5</option>
-            <option value="6">×6</option>
-            <option value="7">×7</option>
-            <option value="8">×8</option>
-            <option value="9">×9</option>
-            <option value="10">×10</option>
-            <option value="11">×11</option>
-            <option value="12">×12</option>
-          </select>
+        <div class="ml-auto flex gap-2 flex-wrap">
           <button onclick="setLeaderboardMode('overall')" id="lb-overall" class="bg-violet-500 text-white rounded-2xl px-4 py-2 shadow-md">Overall</button>
           <button onclick="setLeaderboardMode('class')" id="lb-class" class="bg-white text-gray-700 rounded-2xl px-4 py-2 shadow-md">My Class</button>
         </div>
@@ -364,7 +350,6 @@
       timerId: null,
       questionSet: [],
       leaderboardMode: 'overall',
-      leaderboardTable: 2,
       dailyChallenge: null,
       dailyMode: false,
       currentRecord: null
@@ -1014,28 +999,13 @@
       updateLeaderboard();
     }
 
-    function setLeaderboardTable(value) {
-      const table = parseInt(value) || 2;
-      gameState.leaderboardTable = table;
-      updateLeaderboard();
-    }
-
-    function syncLeaderboardTableSelect() {
-      const select = document.getElementById('lb-table-select');
-      if (select) select.value = String(gameState.leaderboardTable || 2);
-    }
-
     function openLeaderboard(show = true) {
-      gameState.leaderboardTable = gameState.currentGrade || gameState.leaderboardTable || 2;
-      syncLeaderboardTableSelect();
       updateLeaderboard();
       if (show) showScreen('leaderboard-screen');
     }
 
     function updateLeaderboard() {
-      const leaderboardTable = gameState.leaderboardTable || gameState.currentGrade || 2;
-      syncLeaderboardTableSelect();
-      let filtered = allRecords.filter(r => (parseInt(r.times_table) || 2) === leaderboardTable);
+      let filtered = allRecords.filter(r => (parseInt(r.times_table) || 2) === gameState.currentGrade);
       if (gameState.leaderboardMode === 'class') filtered = filtered.filter(r => normalize(r.player_class) === normalize(gameState.playerClass));
       const sorted = [...filtered].sort((a, b) => {
         const scoreDiff = (parseInt(b.best_score) || 0) - (parseInt(a.best_score) || 0);
@@ -1047,7 +1017,7 @@
         return timeA - timeB;
       });
 
-      document.getElementById('leaderboard-title').textContent = gameState.leaderboardMode === 'class' ? `Top players in ${gameState.playerClass} for ×${leaderboardTable}` : `Top players overall for ×${leaderboardTable}`;
+      document.getElementById('leaderboard-title').textContent = gameState.leaderboardMode === 'class' ? `Top players in ${gameState.playerClass} for ×${gameState.currentGrade}` : `Top players overall for ×${gameState.currentGrade}`;
       const podium = document.getElementById('podium');
       const list = document.getElementById('leaderboard-list');
       const podiumOrder = [1,0,2];
@@ -1082,23 +1052,43 @@
     }
 
     function getAnalyticsSessions() {
-      if (allSessions && allSessions.length) return allSessions;
-      // Backward compatibility for records created before session history was added.
-      return allRecords.map(r => ({
-        session_id: r.record_id,
-        player_name: r.player_name,
-        player_class: r.player_class,
-        times_table: r.times_table,
-        score_percent: r.latest_score || r.best_score || 0,
-        correct: r.latest_correct || '',
-        total: r.latest_total || '',
-        week_key: r.week_key,
-        date_key: formatDateKey(r.last_practiced_date || r.last_updated),
-        timestamp_iso: r.last_practiced_date || r.last_updated,
-        practice_source: r.latest_source || 'Legacy record',
-        _legacy_sessions: parseInt(r.weekly_sessions) || 0
-      }));
+      // Combine new full session-history data with older aggregate records.
+      // Important: once one new session exists, we must NOT hide older records that
+      // do not yet have session-history entries.
+      const sessionRows = Array.isArray(allSessions) ? [...allSessions] : [];
+      const sessionRecordKeys = new Set(sessionRows.map(s => makeRecordId(
+        s.player_name || 'Unknown',
+        canonicalizeClass(s.player_class || 'Year 1'),
+        parseInt(s.times_table) || 0
+      )));
+
+      const legacyRows = (Array.isArray(allRecords) ? allRecords : [])
+        .filter(r => {
+          const key = makeRecordId(
+            r.player_name || 'Unknown',
+            canonicalizeClass(r.player_class || 'Year 1'),
+            parseInt(r.times_table) || 0
+          );
+          return !sessionRecordKeys.has(key);
+        })
+        .map(r => ({
+          session_id: r.record_id,
+          player_name: r.player_name,
+          player_class: canonicalizeClass(r.player_class || 'Year 1'),
+          times_table: r.times_table,
+          score_percent: r.latest_score || r.best_score || 0,
+          correct: r.latest_correct || '',
+          total: r.latest_total || '',
+          week_key: r.week_key,
+          date_key: formatDateKey(r.last_practiced_date || r.last_updated),
+          timestamp_iso: r.last_practiced_date || r.last_updated,
+          practice_source: r.latest_source || 'Legacy record',
+          _legacy_sessions: parseInt(r.weekly_sessions) || 0
+        }));
+
+      return [...sessionRows, ...legacyRows];
     }
+
 
     function buildTeacherAnalytics(classFilter = '__all__') {
       const currentWeek = getWeekKey();
