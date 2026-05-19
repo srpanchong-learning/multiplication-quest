@@ -195,7 +195,21 @@
       <header class="flex items-center gap-4 mb-6 flex-wrap">
         <button onclick="showScreen('grade-screen')" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
         <h2 class="text-3xl font-extrabold text-gray-800">🏆 Leaderboard</h2>
-        <div class="ml-auto flex gap-2 flex-wrap">
+        <div class="ml-auto flex gap-2 flex-wrap items-center">
+          <label for="lb-table-select" class="text-sm font-bold text-gray-600">Table</label>
+          <select id="lb-table-select" onchange="setLeaderboardTable(this.value)" class="bg-white text-gray-700 rounded-2xl px-4 py-2 shadow-md border border-violet-100 focus:outline-none focus:ring-2 focus:ring-violet-300">
+            <option value="2">×2</option>
+            <option value="3">×3</option>
+            <option value="4">×4</option>
+            <option value="5">×5</option>
+            <option value="6">×6</option>
+            <option value="7">×7</option>
+            <option value="8">×8</option>
+            <option value="9">×9</option>
+            <option value="10">×10</option>
+            <option value="11">×11</option>
+            <option value="12">×12</option>
+          </select>
           <button onclick="setLeaderboardMode('overall')" id="lb-overall" class="bg-violet-500 text-white rounded-2xl px-4 py-2 shadow-md">Overall</button>
           <button onclick="setLeaderboardMode('class')" id="lb-class" class="bg-white text-gray-700 rounded-2xl px-4 py-2 shadow-md">My Class</button>
         </div>
@@ -350,6 +364,7 @@
       timerId: null,
       questionSet: [],
       leaderboardMode: 'overall',
+      leaderboardTable: 2,
       dailyChallenge: null,
       dailyMode: false,
       currentRecord: null
@@ -999,13 +1014,28 @@
       updateLeaderboard();
     }
 
+    function setLeaderboardTable(value) {
+      const table = parseInt(value) || 2;
+      gameState.leaderboardTable = table;
+      updateLeaderboard();
+    }
+
+    function syncLeaderboardTableSelect() {
+      const select = document.getElementById('lb-table-select');
+      if (select) select.value = String(gameState.leaderboardTable || 2);
+    }
+
     function openLeaderboard(show = true) {
+      gameState.leaderboardTable = gameState.currentGrade || gameState.leaderboardTable || 2;
+      syncLeaderboardTableSelect();
       updateLeaderboard();
       if (show) showScreen('leaderboard-screen');
     }
 
     function updateLeaderboard() {
-      let filtered = allRecords.filter(r => (parseInt(r.times_table) || 2) === gameState.currentGrade);
+      const leaderboardTable = gameState.leaderboardTable || gameState.currentGrade || 2;
+      syncLeaderboardTableSelect();
+      let filtered = allRecords.filter(r => (parseInt(r.times_table) || 2) === leaderboardTable);
       if (gameState.leaderboardMode === 'class') filtered = filtered.filter(r => normalize(r.player_class) === normalize(gameState.playerClass));
       const sorted = [...filtered].sort((a, b) => {
         const scoreDiff = (parseInt(b.best_score) || 0) - (parseInt(a.best_score) || 0);
@@ -1017,7 +1047,7 @@
         return timeA - timeB;
       });
 
-      document.getElementById('leaderboard-title').textContent = gameState.leaderboardMode === 'class' ? `Top players in ${gameState.playerClass} for ×${gameState.currentGrade}` : `Top players overall for ×${gameState.currentGrade}`;
+      document.getElementById('leaderboard-title').textContent = gameState.leaderboardMode === 'class' ? `Top players in ${gameState.playerClass} for ×${leaderboardTable}` : `Top players overall for ×${leaderboardTable}`;
       const podium = document.getElementById('podium');
       const list = document.getElementById('leaderboard-list');
       const podiumOrder = [1,0,2];
