@@ -111,7 +111,7 @@
       <div class="mt-6 max-w-5xl mx-auto bg-white rounded-3xl p-5 shadow-md flex items-center justify-between gap-4 flex-wrap">
         <div>
           <p class="font-bold text-gray-800">📅 My Practice This Week</p>
-          <p class="text-sm text-gray-500">Minimum target: 3 sessions per week</p>
+          <p class="text-sm text-gray-500">Weekly target: 10 sessions per week</p>
         </div>
         <div class="text-right">
           <p id="my-week-sessions" class="text-2xl font-extrabold text-violet-600">0/3</p>
@@ -195,7 +195,21 @@
       <header class="flex items-center gap-4 mb-6 flex-wrap">
         <button onclick="showScreen('grade-screen')" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
         <h2 class="text-3xl font-extrabold text-gray-800">🏆 Leaderboard</h2>
-        <div class="ml-auto flex gap-2 flex-wrap">
+        <div class="ml-auto flex gap-2 flex-wrap items-center">
+          <label for="leaderboard-table-select" class="text-sm font-bold text-gray-600">Table</label>
+          <select id="leaderboard-table-select" onchange="setLeaderboardTable(this.value)" class="bg-white text-gray-700 rounded-2xl px-4 py-2 shadow-md border border-gray-100 font-bold focus:outline-none focus:ring-2 focus:ring-violet-300">
+            <option value="2">×2</option>
+            <option value="3">×3</option>
+            <option value="4">×4</option>
+            <option value="5">×5</option>
+            <option value="6">×6</option>
+            <option value="7">×7</option>
+            <option value="8">×8</option>
+            <option value="9">×9</option>
+            <option value="10">×10</option>
+            <option value="11">×11</option>
+            <option value="12">×12</option>
+          </select>
           <button onclick="setLeaderboardMode('overall')" id="lb-overall" class="bg-violet-500 text-white rounded-2xl px-4 py-2 shadow-md">Overall</button>
           <button onclick="setLeaderboardMode('class')" id="lb-class" class="bg-white text-gray-700 rounded-2xl px-4 py-2 shadow-md">My Class</button>
         </div>
@@ -269,7 +283,7 @@
           <div class="bg-white rounded-3xl p-5 shadow-md text-center"><p class="text-sm text-gray-500">Active Classes</p><p id="teacher-total-classes" class="text-3xl font-extrabold text-sky-600">0</p></div>
           <div class="bg-white rounded-3xl p-5 shadow-md text-center"><p class="text-sm text-gray-500">Top Table</p><p id="teacher-top-table" class="text-3xl font-extrabold text-emerald-600">×0</p></div>
           <div class="bg-white rounded-3xl p-5 shadow-md text-center"><p class="text-sm text-gray-500">Weakest Table</p><p id="teacher-weak-table" class="text-3xl font-extrabold text-rose-600">×0</p></div>
-          <div class="bg-white rounded-3xl p-5 shadow-md text-center md:col-span-2"><p class="text-sm text-gray-500">Weekly Target</p><p class="text-3xl font-extrabold text-violet-600">3 sessions</p><p class="text-xs text-gray-500">More than 3 is still recorded</p></div>
+          <div class="bg-white rounded-3xl p-5 shadow-md text-center md:col-span-2"><p class="text-sm text-gray-500">Weekly Target</p><p class="text-3xl font-extrabold text-violet-600">10 sessions</p><p class="text-xs text-gray-500">Programme milestone: 5 attempts per table ×2–×12</p></div>
         </div>
         <div class="bg-white rounded-3xl p-6 shadow-xl">
           <h3 class="text-xl font-bold text-gray-800 mb-4">📅 Weekly Practice Frequency</h3>
@@ -299,7 +313,7 @@
     const STORAGE_KEY = 'mmq_v2_records';
     const SESSION_STORAGE_KEY = 'mmq_v2_sessions';
     const PLAYER_PREF_KEY = 'mmq_v2_player_pref';
-    const WEEKLY_TARGET = 3;
+    const WEEKLY_TARGET = 10;
     const firebaseConfig = {
       apiKey: "AIzaSyBQjpBHH-cYSll8bPYpLVfVXmgpHRXmpHA",
       authDomain: "multiplication-quest.firebaseapp.com",
@@ -350,6 +364,7 @@
       timerId: null,
       questionSet: [],
       leaderboardMode: 'overall',
+      leaderboardTable: 2,
       dailyChallenge: null,
       dailyMode: false,
       currentRecord: null
@@ -749,6 +764,7 @@
     function selectGrade(grade) {
       gameState.dailyMode = false;
       gameState.currentGrade = grade;
+      gameState.leaderboardTable = grade;
       gameState.currentRecord = getPlayerTableRecord(gameState.playerName, gameState.playerClass, grade) || createBlankRecord(grade);
       document.getElementById('grade-title').textContent = `Times Table ${grade} - Levels`;
       document.getElementById('level-subtitle').textContent = `${TABLE_META[grade][0]} · Unlocks are saved for this table only.`;
@@ -963,7 +979,7 @@
       const nextBtn = document.getElementById('next-level-btn');
       if (gameState.dailyMode) {
         nextBtn.textContent = '🏆 View Leaderboard';
-        nextBtn.onclick = () => { gameState.dailyMode = false; openLeaderboard(); };
+        nextBtn.onclick = () => { gameState.dailyMode = false; gameState.leaderboardTable = gameState.currentGrade; openLeaderboard(); };
       } else if (passed && gameState.currentLevel < 5) {
         nextBtn.textContent = `▶️ Go to ${gameState.currentLevel + 1 === 5 ? 'Boss Level' : 'Level ' + (gameState.currentLevel + 1)}`;
         nextBtn.onclick = () => startLevel(gameState.currentLevel + 1);
@@ -999,13 +1015,29 @@
       updateLeaderboard();
     }
 
+    function setLeaderboardTable(value) {
+      const table = parseInt(value) || 2;
+      gameState.leaderboardTable = table;
+      updateLeaderboard();
+    }
+
+    function syncLeaderboardTableSelect() {
+      const select = document.getElementById('leaderboard-table-select');
+      if (select) select.value = String(gameState.leaderboardTable || gameState.currentGrade || 2);
+    }
+
     function openLeaderboard(show = true) {
+      // Keep the leaderboard independent from the Teacher Dashboard.
+      // Opening from a selected table uses that table as the default, but changing the dropdown does not change currentGrade.
+      if (!gameState.leaderboardTable) gameState.leaderboardTable = gameState.currentGrade || 2;
+      syncLeaderboardTableSelect();
       updateLeaderboard();
       if (show) showScreen('leaderboard-screen');
     }
 
     function updateLeaderboard() {
-      let filtered = allRecords.filter(r => (parseInt(r.times_table) || 2) === gameState.currentGrade);
+      const selectedTable = gameState.leaderboardTable || gameState.currentGrade || 2;
+      let filtered = allRecords.filter(r => (parseInt(r.times_table) || 2) === selectedTable);
       if (gameState.leaderboardMode === 'class') filtered = filtered.filter(r => normalize(r.player_class) === normalize(gameState.playerClass));
       const sorted = [...filtered].sort((a, b) => {
         const scoreDiff = (parseInt(b.best_score) || 0) - (parseInt(a.best_score) || 0);
@@ -1017,7 +1049,7 @@
         return timeA - timeB;
       });
 
-      document.getElementById('leaderboard-title').textContent = gameState.leaderboardMode === 'class' ? `Top players in ${gameState.playerClass} for ×${gameState.currentGrade}` : `Top players overall for ×${gameState.currentGrade}`;
+      document.getElementById('leaderboard-title').textContent = gameState.leaderboardMode === 'class' ? `Top players in ${gameState.playerClass} for ×${selectedTable}` : `Top players overall for ×${selectedTable}`;
       const podium = document.getElementById('podium');
       const list = document.getElementById('leaderboard-list');
       const podiumOrder = [1,0,2];
