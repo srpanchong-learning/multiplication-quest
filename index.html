@@ -47,10 +47,9 @@
         <div class="flex justify-center mb-6">
           <div class="w-24 h-24 bg-gradient-to-br from-violet-400 to-pink-400 rounded-full flex items-center justify-center text-5xl shadow-lg">🧙‍♂️</div>
         </div>
-        <label class="block text-gray-700 font-bold mb-2 text-center">Player Name</label>
-        <input id="student-name" type="text" placeholder="Enter your name..." class="w-full px-5 py-4 rounded-2xl border-2 border-violet-200 focus:border-violet-400 focus:outline-none text-center text-xl font-semibold text-gray-700 transition-all mb-4">
         <label class="block text-gray-700 font-bold mb-2 text-center">Class / Year</label>
-        <select id="student-class" class="w-full px-5 py-4 rounded-2xl border-2 border-sky-200 focus:border-sky-400 focus:outline-none text-center text-lg font-semibold text-gray-700 transition-all mb-4 bg-white">
+        <select id="student-class" onchange="populateNameDropdown()" class="w-full px-5 py-4 rounded-2xl border-2 border-sky-200 focus:border-sky-400 focus:outline-none text-center text-lg font-semibold text-gray-700 transition-all mb-4 bg-white">
+          <option value="">— Choose your class —</option>
           <option value="Year 1">Year 1</option>
           <option value="Year 2">Year 2</option>
           <option value="Year 3">Year 3</option>
@@ -58,6 +57,11 @@
           <option value="Year 5">Year 5</option>
           <option value="Year 6">Year 6</option>
         </select>
+        <label class="block text-gray-700 font-bold mb-2 text-center">Your Name</label>
+        <select id="student-name" class="w-full px-5 py-4 rounded-2xl border-2 border-violet-200 focus:border-violet-400 focus:outline-none text-center text-lg font-semibold text-gray-700 transition-all mb-1 bg-white">
+          <option value="">— Choose your class first —</option>
+        </select>
+        <p class="text-xs text-gray-400 text-center mb-4">Can't find your name? Ask your teacher.</p>
         <label class="block text-gray-700 font-bold mb-2 text-center">Practice Location</label>
         <select id="practice-source" class="w-full px-5 py-4 rounded-2xl border-2 border-emerald-200 focus:border-emerald-400 focus:outline-none text-center text-lg font-semibold text-gray-700 transition-all mb-6 bg-white">
           <option value="Home Practice">Home Practice</option>
@@ -76,7 +80,7 @@
     <div id="grade-screen" class="min-h-full p-6 hidden">
       <header class="flex justify-between items-center mb-8 gap-4 flex-wrap">
         <div class="flex items-center gap-3">
-          <button onclick="showScreen('welcome-screen')" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press">
+          <button onclick="showScreen('welcome-screen')" aria-label="Back to start" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press">
             <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
           </button>
           <div>
@@ -89,9 +93,10 @@
           <div class="bg-white rounded-2xl px-4 py-2 flex items-center gap-2 shadow-md"><span class="text-xl">⭐</span><span id="star-count" class="font-bold text-amber-500">0</span></div>
           <div class="bg-white rounded-2xl px-4 py-2 flex items-center gap-2 shadow-md"><span class="text-xl">🪙</span><span id="coin-count" class="font-bold text-yellow-500">0</span></div>
           <button onclick="showScreen('daily-screen'); renderDailyScreen();" class="bg-white rounded-2xl px-4 py-2 shadow-md hover:shadow-lg transition-all btn-press">⚔️ Daily</button>
-          <button onclick="openLeaderboard()" class="bg-white rounded-2xl px-4 py-2 shadow-md hover:shadow-lg transition-all btn-press">🏆</button>
-          <button onclick="showScreen('champions-screen'); renderChampionsBoard();" class="bg-white rounded-2xl px-4 py-2 shadow-md hover:shadow-lg transition-all btn-press">👑</button>
+          <button onclick="openLeaderboard()" aria-label="Leaderboard" class="bg-white rounded-2xl px-4 py-2 shadow-md hover:shadow-lg transition-all btn-press">🏆</button>
+          <button onclick="showScreen('champions-screen'); renderChampionsBoard();" aria-label="School champions" class="bg-white rounded-2xl px-4 py-2 shadow-md hover:shadow-lg transition-all btn-press">👑</button>
           <button onclick="showScreen('teacher-screen'); renderTeacherDashboard();" class="bg-white rounded-2xl px-4 py-2 shadow-md hover:shadow-lg transition-all btn-press">📊 Teacher</button>
+          <div id="sync-status" title="Data sync status" class="bg-white rounded-2xl px-3 py-2 flex items-center gap-2 shadow-md text-sm font-bold"><span id="sync-dot" class="inline-block w-2.5 h-2.5 rounded-full bg-gray-300"></span><span id="sync-text" class="text-gray-500">Checking…</span></div>
         </div>
       </header>
 
@@ -114,7 +119,7 @@
           <p class="text-sm text-gray-500">Weekly target: 10 sessions per week</p>
         </div>
         <div class="text-right">
-          <p id="my-week-sessions" class="text-2xl font-extrabold text-violet-600">0/3</p>
+          <p id="my-week-sessions" class="text-2xl font-extrabold text-violet-600">0/10</p>
           <p id="my-last-practice" class="text-xs text-gray-500">Last practice: -</p>
         </div>
       </div>
@@ -122,7 +127,7 @@
 
     <div id="level-screen" class="min-h-full p-6 hidden">
       <header class="flex justify-between items-center mb-8 gap-4 flex-wrap">
-        <button onclick="showScreen('grade-screen')" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press">
+        <button onclick="showScreen('grade-screen')" aria-label="Back" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press">
           <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
         </button>
         <div class="text-center">
@@ -147,7 +152,7 @@
 
     <div id="quiz-screen" class="min-h-full p-6 hidden">
       <header class="flex justify-between items-center mb-6 gap-4 flex-wrap">
-        <button onclick="exitQuiz()" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press">
+        <button onclick="exitQuiz()" aria-label="Exit quiz" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press">
           <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
         <div class="flex-1 mx-4 min-w-[220px]">
@@ -193,7 +198,7 @@
 
     <div id="leaderboard-screen" class="min-h-full p-6 hidden">
       <header class="flex items-center gap-4 mb-6 flex-wrap">
-        <button onclick="showScreen('grade-screen')" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
+        <button onclick="showScreen('grade-screen')" aria-label="Back" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
         <h2 class="text-3xl font-extrabold text-gray-800">🏆 Leaderboard</h2>
         <div class="ml-auto flex gap-2 flex-wrap items-center">
           <label for="leaderboard-table-select" class="text-sm font-bold text-gray-600">Table</label>
@@ -223,7 +228,7 @@
 
     <div id="daily-screen" class="min-h-full p-6 hidden">
       <header class="flex items-center gap-4 mb-8 flex-wrap">
-        <button onclick="showScreen('grade-screen')" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
+        <button onclick="showScreen('grade-screen')" aria-label="Back" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
         <h2 class="text-3xl font-extrabold text-gray-800">⚔️ Daily Challenge</h2>
       </header>
       <div class="max-w-xl mx-auto bg-white rounded-3xl p-8 shadow-xl text-center">
@@ -240,7 +245,7 @@
 
     <div id="champions-screen" class="min-h-full p-6 hidden">
       <header class="flex items-center gap-4 mb-8 flex-wrap">
-        <button onclick="showScreen('grade-screen')" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
+        <button onclick="showScreen('grade-screen')" aria-label="Back" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
         <h2 class="text-3xl font-extrabold text-gray-800">👑 School Champions</h2>
       </header>
       <div class="max-w-3xl mx-auto space-y-6">
@@ -251,7 +256,7 @@
 
     <div id="teacher-screen" class="min-h-full p-6 hidden">
       <header class="flex items-center gap-4 mb-8 flex-wrap">
-        <button onclick="showScreen('grade-screen')" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
+        <button onclick="showScreen('grade-screen')" aria-label="Back" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
         <h2 class="text-3xl font-extrabold text-gray-800">📊 Teacher Dashboard</h2>
         <button onclick="downloadSessionsCSV()" class="ml-auto bg-white rounded-2xl px-4 py-2 shadow-md hover:shadow-lg transition-all btn-press">⬇️ Export CSV</button>
       </header>
@@ -294,6 +299,11 @@
           <div class="bg-white rounded-3xl p-6 shadow-xl"><h3 class="text-xl font-bold text-gray-800 mb-4">🧠 Table Mastery Overview</h3><div id="teacher-table-list" class="space-y-3"></div></div>
         </div>
         <div class="bg-white rounded-3xl p-6 shadow-xl">
+          <h3 class="text-xl font-bold text-gray-800 mb-1">🎯 Tricky Facts (Most Missed)</h3>
+          <p class="text-sm text-gray-500 mb-4">Specific multiplication facts pupils get wrong most often. Use these to target intervention.</p>
+          <div id="teacher-tricky-list" class="flex gap-2 flex-wrap"></div>
+        </div>
+        <div class="bg-white rounded-3xl p-6 shadow-xl">
           <h3 class="text-xl font-bold text-gray-800 mb-4">🧾 Individual Times Table Mastery Snapshot</h3>
           <div id="teacher-mastery-list" class="space-y-3"></div>
         </div>
@@ -314,6 +324,52 @@
     const SESSION_STORAGE_KEY = 'mmq_v2_sessions';
     const PLAYER_PREF_KEY = 'mmq_v2_player_pref';
     const WEEKLY_TARGET = 10;
+
+    // Official SIP pupil roster. Names with duplicates carry a (distinguisher) so
+    // each pupil maps to a unique record. Edit this list to add/remove pupils.
+    const CLASS_ROSTER = {
+      'Year 1': [
+        'Muhammad Eddie Edzwan', 'Muhammad Nabil Fikri', 'Muhammad Shahirul Iman Faiq',
+        'Kong Xian Li', 'Adriell Raymond', 'Muhammad Firas Nufael',
+        'Muhammad Afiq Zayyan', 'Mohammad Nor Edie Darwish', 'Mohammad Hazirul Abbasy',
+        'Mohammad Khairul Zaqwan', 'Romessa', 'Nur Alesha Zahra'
+      ],
+      'Year 2': [
+        'Arfan', 'Muhammad Eddie Izyan', 'Mohammad Faris Adam',
+        'Mohammad Nor Adie Azuwan', 'Nur Asyafia', 'Nurul Faresya Aurora'
+      ],
+      'Year 3': [
+        'Alvin Calin', 'Muhammad Khair As-Soleh', 'Ariesya Az-Zahra',
+        'Nur Arisha', 'Nur Falisha Dania', 'Nurul Rizawanizah', 'Nurul Syahirah'
+      ],
+      'Year 4': [
+        'Aryan Anak Asmaddey', 'Muhammad Afiq Ahnaf', 'Muhammad Aniq Izzuddin',
+        'Muhammad Danish Al-Shafie', 'Nur Alisha Az-Zahara', 'Nurul Miasarah',
+        'Nur Amirah Qarirah', 'Noreaddyratul Rafyikah', 'Shareena Shaqirah',
+        "Muhammad Nur'raiyyan Ehsan", 'Nurhaziqah'
+      ],
+      'Year 5': [
+        'Aryan Ardy', 'Mohammad Norandika Fardy', 'Shan Erineo',
+        'Aisyah Az-Zahra', 'Nurul Rizawanina', 'Roshamizzah', "Siti Nur'Haisyah"
+      ],
+      'Year 6': [
+        'Azirul', 'Mohammad Nur Safwan Haziq', 'Mohammad Khairul Aminuddin',
+        'Muhammad Nirza Erwan Shah', 'Muhammad Eddy Ridzrul', 'Norazriezah',
+        'Muhammad Khairul Wafiq', 'Alysha', 'Dang Aryana Ariessa', 'Norasyuranie'
+      ]
+    };
+
+    function populateNameDropdown() {
+      const cls = document.getElementById('student-class').value;
+      const nameSelect = document.getElementById('student-name');
+      if (!cls || !CLASS_ROSTER[cls]) {
+        nameSelect.innerHTML = '<option value="">— Choose your class first —</option>';
+        return;
+      }
+      const names = [...CLASS_ROSTER[cls]].sort((a, b) => a.localeCompare(b));
+      nameSelect.innerHTML = '<option value="">— Choose your name —</option>' +
+        names.map(n => `<option value="${n.replace(/"/g, '&quot;')}">${n}</option>`).join('');
+    }
     const firebaseConfig = {
       apiKey: "AIzaSyBQjpBHH-cYSll8bPYpLVfVXmgpHRXmpHA",
       authDomain: "multiplication-quest.firebaseapp.com",
@@ -363,6 +419,8 @@
       timerRemaining: 0,
       timerId: null,
       questionSet: [],
+      missedFacts: [],
+      activeMCQ: null,
       leaderboardMode: 'overall',
       leaderboardTable: 2,
       dailyChallenge: null,
@@ -461,8 +519,14 @@
       try {
         const pref = JSON.parse(localStorage.getItem(PLAYER_PREF_KEY) || 'null');
         if (pref) {
-          document.getElementById('student-name').value = pref.name || '';
-          document.getElementById('student-class').value = canonicalizeClass(pref.cls || 'Year 1');
+          const classEl = document.getElementById('student-class');
+          if (pref.cls) classEl.value = canonicalizeClass(pref.cls);
+          populateNameDropdown();
+          const nameEl = document.getElementById('student-name');
+          // Only restore the name if it exists in the chosen class roster
+          if (pref.name && [...nameEl.options].some(o => o.value === pref.name)) {
+            nameEl.value = pref.name;
+          }
           const sourceEl = document.getElementById('practice-source');
           if (sourceEl && pref.source) sourceEl.value = pref.source;
         }
@@ -653,20 +717,32 @@
       return picks.map((n, idx) => {
         const answer = grade * n;
         if ((levelConfig.mode === 'mixed' || levelConfig.mode === 'blitz' || levelConfig.mode === 'boss') && idx % 3 === 1) {
-          return { type: 'fill', question: `___ × ${grade} = ${answer}`, correct: String(n), emoji: level >= 4 ? '🧠' : '❓' };
+          return { type: 'fill', question: `___ × ${grade} = ${answer}`, correct: String(n), emoji: level >= 4 ? '🧠' : '❓', fact: `${grade}×${n}` };
         }
         if (levelConfig.mode === 'boss' && idx % 3 === 2) {
-          return { type: 'fill', question: `${n} × ${grade} = ?`, correct: String(answer), emoji: '👑' };
+          return { type: 'fill', question: `${n} × ${grade} = ?`, correct: String(answer), emoji: '👑', fact: `${grade}×${n}` };
         }
         const wrongs = new Set();
-        const deltaMax = level >= 4 ? 8 : 5;
+        // Plausible near-misses: adjacent multiples and small offsets, always positive
+        const candidates = [
+          answer + grade, answer - grade,        // off-by-one multiple
+          answer + 1, answer - 1,                // counting slip
+          answer + 2, answer - 2,
+          grade * (n + 1), grade * (n - 1)
+        ];
+        for (const c of shuffle(candidates)) {
+          if (wrongs.size >= 3) break;
+          if (c > 0 && c !== answer) wrongs.add(String(c));
+        }
+        // Top up if still short (very small answers)
+        let pad = 1;
         while (wrongs.size < 3) {
-          const delta = Math.floor(Math.random() * deltaMax) + 1;
-          const wrong = Math.max(1, answer + delta * (Math.random() > 0.5 ? 1 : -1));
-          if (wrong !== answer) wrongs.add(String(wrong));
+          const c = answer + pad;
+          if (c > 0 && c !== answer) wrongs.add(String(c));
+          pad++;
         }
         const options = shuffle([String(answer), ...wrongs]);
-        return { type: 'mcq', question: `${grade} × ${n} = ?`, options, correct: options.indexOf(String(answer)), emoji: level >= 4 ? '🚀' : (level >= 2 ? '⚡' : '✖️') };
+        return { type: 'mcq', question: `${grade} × ${n} = ?`, options, correct: options.indexOf(String(answer)), emoji: level >= 4 ? '🚀' : (level >= 2 ? '⚡' : '✖️'), fact: `${grade}×${n}` };
       });
     }
 
@@ -679,6 +755,21 @@
     function showScreen(id) {
       document.querySelectorAll('#app > div').forEach(div => div.classList.add('hidden'));
       document.getElementById(id).classList.remove('hidden');
+    }
+
+    function updateSyncStatus() {
+      const dot = document.getElementById('sync-dot');
+      const text = document.getElementById('sync-text');
+      if (!dot || !text) return;
+      if (firebaseReady && db) {
+        dot.className = 'inline-block w-2.5 h-2.5 rounded-full bg-emerald-500';
+        text.className = 'text-emerald-600';
+        text.textContent = 'Synced';
+      } else {
+        dot.className = 'inline-block w-2.5 h-2.5 rounded-full bg-amber-500';
+        text.className = 'text-amber-600';
+        text.textContent = 'Offline (this device only)';
+      }
     }
 
     function aggregatePracticeForPlayer(name, cls) {
@@ -748,8 +839,12 @@
     }
 
     async function startAdventure() {
-      gameState.playerName = document.getElementById('student-name').value.trim() || 'Explorer';
-      gameState.playerClass = canonicalizeClass(document.getElementById('student-class').value || 'Year 1');
+      const classVal = document.getElementById('student-class').value;
+      const nameVal = document.getElementById('student-name').value;
+      if (!classVal) { alert('Please choose your class first.'); return; }
+      if (!nameVal) { alert('Please choose your name from the list.'); return; }
+      gameState.playerName = nameVal;
+      gameState.playerClass = canonicalizeClass(classVal);
       const sourceEl = document.getElementById('practice-source');
       gameState.practiceSource = sourceEl ? sourceEl.value : 'Home Practice';
       savePlayerPref();
@@ -804,6 +899,7 @@
       gameState.currentQuestion = 0;
       gameState.quizScore = 0;
       gameState.streak = 0;
+      gameState.missedFacts = [];
       gameState.questionSet = getQuizQuestions();
       gameState.totalQuestions = gameState.questionSet.length;
       updateQuizStats();
@@ -835,33 +931,39 @@
         return;
       }
       if (q.type === 'mcq') {
+        gameState.activeMCQ = { correct: q.correct, count: q.options.length };
         container.innerHTML = `
           <div class="bg-white rounded-3xl p-8 shadow-xl text-center slide-up">
             <div class="text-6xl mb-4">${q.emoji}</div>
             <h3 class="text-2xl font-bold text-gray-800 mb-6">${q.question}</h3>
+            <p class="text-xs text-gray-400 mb-3">Tip: tap an answer, or press 1–4 on a keyboard.</p>
             <div class="grid grid-cols-2 gap-4">
-              ${q.options.map((opt, i) => `<button onclick="checkMCQ(${i}, ${q.correct})" class="bg-gradient-to-br from-violet-100 to-pink-100 hover:from-violet-200 hover:to-pink-200 text-gray-800 font-bold py-4 px-6 rounded-2xl text-xl transition-all btn-press card-hover">${opt}</button>`).join('')}
+              ${q.options.map((opt, i) => `<button onclick="checkMCQ(${i}, ${q.correct})" class="bg-gradient-to-br from-violet-100 to-pink-100 hover:from-violet-200 hover:to-pink-200 text-gray-800 font-bold py-4 px-6 rounded-2xl text-xl transition-all btn-press card-hover"><span class="text-sm text-violet-400 mr-1">${i+1}.</span>${opt}</button>`).join('')}
             </div>
           </div>`;
       } else {
+        gameState.activeMCQ = null;
         container.innerHTML = `
           <div class="bg-white rounded-3xl p-8 shadow-xl text-center slide-up">
             <div class="text-6xl mb-4">${q.emoji}</div>
             <h3 class="text-2xl font-bold text-gray-800 mb-6">${q.question}</h3>
-            <input id="fill-answer" type="number" class="w-24 h-24 text-4xl font-bold text-center border-4 border-violet-300 rounded-2xl focus:border-violet-500 focus:outline-none" placeholder="?">
+            <input id="fill-answer" type="number" inputmode="numeric" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();checkFill('${q.correct}');}" class="w-24 h-24 text-4xl font-bold text-center border-4 border-violet-300 rounded-2xl focus:border-violet-500 focus:outline-none" placeholder="?">
             <br>
             <button onclick="checkFill('${q.correct}')" class="mt-6 bg-gradient-to-r from-violet-500 to-pink-500 text-white font-bold py-3 px-8 rounded-2xl shadow-lg btn-press">Check Answer ✓</button>
           </div>`;
       }
       startTimer();
+      const fillInput = document.getElementById('fill-answer');
+      if (fillInput) setTimeout(() => fillInput.focus(), 50);
     }
 
-    function checkMCQ(selected, correct) { showFeedback(selected === correct); }
+    function checkMCQ(selected, correct) { gameState.activeMCQ = null; showFeedback(selected === correct); }
 
     function checkFill(correct) {
       const answer = document.getElementById('fill-answer').value.trim();
-      if (!answer) { alert('Please enter your answer first.'); return; }
-      showFeedback(answer === correct);
+      if (answer === '') { alert('Please enter your answer first.'); return; }
+      const isRight = Number(answer) === Number(correct);
+      showFeedback(isRight);
     }
 
     function showFeedback(isCorrect, timedOut = false) {
@@ -880,6 +982,8 @@
         content.innerHTML = `<div class="bounce-in"><div class="text-8xl mb-4">🎉</div><h2 class="text-3xl font-bold text-green-500">Brilliant! You've got it!</h2><p class="text-xl text-gray-600 mt-2">+${bonus} 🪙</p>${gameState.streak % 3 === 0 ? '<p class="text-sm text-orange-500 font-bold mt-2">🔥 Combo bonus!</p>' : ''}</div>`;
       } else {
         gameState.streak = 0;
+        const missedQ = getSelectedQuestion();
+        if (missedQ && missedQ.fact) gameState.missedFacts.push(missedQ.fact);
         content.innerHTML = `<div class="shake"><div class="text-8xl mb-4">${timedOut ? '⏰' : '😅'}</div><h2 class="text-3xl font-bold text-orange-500">${timedOut ? "Time's up!" : 'Not quite! Try again!'}</h2></div>`;
       }
       updateQuizStats();
@@ -936,6 +1040,7 @@
         total: gameState.totalQuestions,
         score_percent: percent,
         passed: passed,
+        missed_facts: gameState.missedFacts.join(' '),
         date_key: getDateKey(now),
         week_key: currentWeekKey,
         timestamp_iso: nowIso,
@@ -1129,6 +1234,7 @@
       const playerMap = new Map();
       const classMap = new Map();
       const tableMap = new Map();
+      const trickyMap = new Map();
 
       sessions.forEach(s => {
         const name = s.player_name || 'Unknown';
@@ -1173,6 +1279,12 @@
         c.pupils.add(key);
         c.totalScore += score;
         c.attempts += sessionCount;
+
+        if (s.missed_facts) {
+          String(s.missed_facts).split(/\s+/).filter(Boolean).forEach(fact => {
+            trickyMap.set(fact, (trickyMap.get(fact) || 0) + 1);
+          });
+        }
       });
 
       const playerRows = [...playerMap.values()].map(p => {
@@ -1190,7 +1302,8 @@
 
       const classRows = [...classMap.values()].map(c => ({ ...c, pupilCount: c.pupils.size, avgScore: c.attempts ? c.totalScore / c.attempts : 0 })).sort((a,b) => b.weekly - a.weekly || b.avgScore - a.avgScore);
       const tableRows = [...tableMap.values()].map(t => ({ ...t, avgScore: t.attempts ? t.totalScore / t.attempts : 0 })).sort((a,b) => b.avgScore - a.avgScore);
-      return { currentWeek, sessions, playerRows, classRows, tableRows };
+      const trickyFacts = [...trickyMap.entries()].map(([fact, count]) => ({ fact, count })).sort((a,b) => b.count - a.count);
+      return { currentWeek, sessions, playerRows, classRows, tableRows, trickyFacts };
     }
 
     function masteryChip(t) {
@@ -1219,7 +1332,7 @@
 
     function downloadSessionsCSV() {
       const sessions = teacherClassFilter === '__all__' ? getAnalyticsSessions() : getAnalyticsSessions().filter(s => sameClass(s.player_class || 'Year 1', teacherClassFilter));
-      const headers = ['session_id','date_key','timestamp_iso','player_name','player_class','practice_source','times_table','level','mode','correct','total','score_percent','passed','week_key'];
+      const headers = ['session_id','date_key','timestamp_iso','player_name','player_class','practice_source','times_table','level','mode','correct','total','score_percent','passed','missed_facts','week_key'];
       const rows = [headers.join(',')];
       sessions.forEach(s => {
         rows.push(headers.map(h => `"${String(s[h] ?? '').replace(/"/g, '""')}"`).join(','));
@@ -1239,7 +1352,7 @@
     function renderTeacherDashboard() {
       renderTeacherClassFilterOptions();
       const overallAnalytics = buildTeacherAnalytics('__all__');
-      const { sessions, playerRows, classRows, tableRows } = buildTeacherAnalytics(teacherClassFilter);
+      const { sessions, playerRows, classRows, tableRows, trickyFacts } = buildTeacherAnalytics(teacherClassFilter);
       const filterNote = document.getElementById('teacher-filter-note');
       if (filterNote) filterNote.textContent = teacherClassFilter === '__all__' ? 'Showing: Overall - All Classes' : `Showing: ${teacherClassFilter}`;
       const totalPlayers = playerRows.length;
@@ -1273,6 +1386,19 @@
         return `<div class="bg-rose-50 rounded-2xl p-4 flex items-center justify-between gap-4"><div><p class="font-bold text-gray-800">${p.name}</p><p class="text-sm text-gray-500">${p.cls} · ${issue} · Weak: ${p.weakTables.join(', ') || '-'}</p></div><div class="text-right"><p class="font-bold text-rose-600">${p.weekly}/${WEEKLY_TARGET} sessions</p><p class="text-xs text-gray-500">Latest ${p.latest}% · Best ${p.best}%</p></div></div>`;
       }).join('') : '<p class="text-gray-500">No priority support pupils yet.</p>';
 
+      const trickyEl = document.getElementById('teacher-tricky-list');
+      if (trickyEl) {
+        const top = trickyFacts.slice(0, 15);
+        const maxCount = top.length ? top[0].count : 1;
+        trickyEl.innerHTML = top.length ? top.map(t => {
+          const intensity = t.count / maxCount;
+          const cls = intensity > 0.66 ? 'bg-rose-100 text-rose-700 border-rose-300'
+                    : intensity > 0.33 ? 'bg-amber-100 text-amber-700 border-amber-300'
+                    : 'bg-sky-100 text-sky-700 border-sky-300';
+          return `<span class="${cls} border rounded-xl px-3 py-2 text-sm font-bold">${t.fact} <span class="opacity-70">(${t.count})</span></span>`;
+        }).join('') : '<p class="text-gray-500 text-sm">No missed-fact data yet. This builds up as pupils play the new version.</p>';
+      }
+
       const masteryList = document.getElementById('teacher-mastery-list');
       if (masteryList) {
         masteryList.innerHTML = playerRows.length ? playerRows.map(p => {
@@ -1300,10 +1426,23 @@
       await initFirebase();
       await loadAllRecords();
       await loadAllSessions();
+      updateSyncStatus();
       renderTableGrid();
       renderDailyScreen();
       renderTeacherDashboard();
       updateStats();
+
+      document.addEventListener('keydown', (e) => {
+        const quizVisible = !document.getElementById('quiz-screen').classList.contains('hidden');
+        if (!quizVisible || !gameState.activeMCQ) return;
+        const n = parseInt(e.key);
+        if (n >= 1 && n <= gameState.activeMCQ.count) {
+          const idx = n - 1;
+          const correct = gameState.activeMCQ.correct;
+          gameState.activeMCQ = null;
+          checkMCQ(idx, correct);
+        }
+      });
     });
   </script>
 </body>
