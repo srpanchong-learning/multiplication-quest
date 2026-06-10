@@ -1,1736 +1,1310 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" class="h-full">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Multiplication Master Worlds</title>
-<style>
-:root{
-  --bg:#f4f8ff; --card:#ffffff; --blue:#2563eb; --blue-dark:#1d4ed8; --yellow:#fbbf24;
-  --green:#10b981; --red:#ef4444; --purple:#8b5cf6; --text:#1f2937; --muted:#6b7280;
-  --line:#dbe4f0; --shadow:0 12px 30px rgba(37,99,235,.10); --radius:22px;
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);
-  background:
-    radial-gradient(circle at top left, #dbeafe 0%, transparent 28%),
-    radial-gradient(circle at top right, #fde68a 0%, transparent 22%),
-    linear-gradient(180deg, #f7fbff 0%, #eef6ff 100%);
-}
-.app{max-width:1260px;margin:0 auto;padding:18px}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
-.brand{display:flex;align-items:center;gap:12px}
-.logo{width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,var(--blue),var(--purple));display:grid;place-items:center;color:#fff;font-size:28px;font-weight:700;box-shadow:var(--shadow)}
-.brand h1{margin:0;font-size:28px}
-.brand p{margin:4px 0 0;color:var(--muted);font-size:14px}
-.nav{display:flex;gap:10px;flex-wrap:wrap}
-.btn{border:none;border-radius:16px;padding:12px 16px;font-weight:700;cursor:pointer;font-size:14px}
-.btn:hover{transform:translateY(-1px)}
-.btn-primary{background:var(--blue);color:#fff}
-.btn-secondary{background:#fff;color:var(--blue);border:2px solid #bfd4ff}
-.btn-green{background:var(--green);color:#fff}
-.btn-gold{background:var(--yellow);color:#7c4a00}
-.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
-.grid{display:grid;gap:18px}
-.grid-hero{grid-template-columns:1.05fr .95fr}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
-.hero{background:linear-gradient(135deg,#eff6ff,#fff);border:1px solid #dbeafe;border-radius:24px;padding:22px}
-.hero h2{margin:0 0 8px;font-size:32px}
-.hero p{margin:0;color:var(--muted);line-height:1.5}
-.profile{display:flex;gap:12px;align-items:center;background:#f8fbff;border:1px solid var(--line);border-radius:18px;padding:14px;margin-top:14px}
-.avatar{width:68px;height:68px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;background:#fff;border:3px solid #dbeafe;flex-shrink:0}
-.avatar.frame-bronze{box-shadow:0 0 0 5px #cd7f32 inset}
-.avatar.frame-rainbow{box-shadow:0 0 0 5px #8b5cf6 inset}
-.avatar.frame-champion{box-shadow:0 0 0 5px #f59e0b inset}
-.avatar.avatar-blue{background:#dbeafe}
-.avatar.avatar-robot{background:#e5e7eb}
-.avatar.avatar-ninja{background:#ede9fe}
-.meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
-.stat{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;text-align:center}
-.stat .n{font-size:24px;font-weight:800;color:var(--blue)}
-label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:700}
-input,select{width:100%;padding:12px 14px;border-radius:14px;border:2px solid #dbe7fb;outline:none;font-size:15px;background:#fff;margin-bottom:12px}
-.section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-.section-title h3{margin:0;font-size:24px}
-.section-title p{margin:5px 0 0;color:var(--muted);font-size:14px}
-.small{font-size:12px;color:var(--muted)}
-.hidden{display:none !important}
-.success{color:#047857;font-weight:800}
-.danger{color:#b91c1c;font-weight:800}
-.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#fef3c7;color:#92400e;font-weight:800;font-size:12px}
-.world-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
-.world-card{border-radius:20px;padding:16px;border:2px solid #dbeafe;background:linear-gradient(180deg,#fff,#f8fbff);cursor:pointer;position:relative}
-.world-card.locked{opacity:.55;border-color:#e5e7eb;background:linear-gradient(180deg,#fafafa,#f3f4f6)}
-.world-card.done{border-color:#bbf7d0;background:#f0fdf4}
-.world-icon{font-size:34px}
-.world-table{font-size:28px;font-weight:900;color:var(--blue);margin-top:8px}
-.progress{width:100%;height:10px;background:#e5edfb;border-radius:999px;overflow:hidden;margin:10px 0 6px}
-.progress > span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:999px}
-.methods{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
-.method-card{border:2px solid #dbeafe;background:#fff;border-radius:20px;padding:16px;cursor:pointer}
-.method-card.done{border-color:#bbf7d0;background:#f0fdf4}
-.method-head{display:flex;justify-content:space-between;align-items:center}
-.method-order{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#eff6ff;color:var(--blue);font-weight:900}
-.method-card.done .method-order{background:#10b981;color:#fff}
-.quiz-wrap{display:grid;grid-template-columns:1fr .9fr;gap:18px}
-.question-box{min-height:260px;display:flex;flex-direction:column;justify-content:center;gap:18px;background:linear-gradient(135deg,#fff,#eff6ff)}
-.question{font-size:34px;font-weight:900;line-height:1.25;text-align:center}
-.question-small{color:var(--muted);text-align:center;font-size:15px}
-.answers{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.answer-btn{width:100%;padding:15px;border-radius:16px;border:2px solid #dbeafe;background:#fff;font-size:18px;font-weight:800;cursor:pointer}
-.answer-btn:hover{border-color:#93c5fd}
-.mini{background:#f8fbff;border:1px solid var(--line);border-radius:18px;padding:12px 14px;margin-bottom:12px}
-.visual-board{background:#fff;border:2px solid #e6eefb;border-radius:24px;padding:24px;min-height:250px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px}
-.array-wrap{display:grid;gap:14px;justify-content:center}
-.array-row{display:flex;gap:12px;justify-content:center}
-.array-dot{width:30px;height:30px;border-radius:50%;background:#6366f1;transform:scale(.2);opacity:0;animation:popIn .35s ease forwards}
-@keyframes popIn{to{transform:scale(1);opacity:1}}
-.numberline-wrap{width:100%;max-width:720px;padding:20px 10px 10px}
-.numberline-svg{width:100%;height:auto;display:block}
-.jump-path{fill:none;stroke:#fb7185;stroke-width:4;stroke-linecap:round;stroke-dasharray:160;stroke-dashoffset:160;animation:drawJump .7s ease forwards}
-@keyframes drawJump{to{stroke-dashoffset:0}}
-.line-base{stroke:#6366f1;stroke-width:5;stroke-linecap:round}
-.tick{stroke:#6366f1;stroke-width:3}
-.tick-label{font-size:14px;fill:#334155;font-weight:700}
-.dragdrop-wrap{display:flex;flex-direction:column;align-items:center;gap:20px}
-.drag-equation{font-size:34px;font-weight:900;text-align:center}
-.drop-zone{min-width:140px;min-height:72px;border:3px dashed #bfd4ff;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#94a3b8;background:#f8fbff}
-.drop-zone.over{border-color:#6366f1;background:#eef2ff}
-.drag-options{display:flex;flex-wrap:wrap;justify-content:center;gap:14px}
-.drag-chip{padding:14px 18px;border:3px dashed #6366f1;border-radius:16px;background:#fff;font-size:24px;font-weight:800;cursor:grab}
-.drag-chip.used{opacity:.35;pointer-events:none}
-.shop-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
-.shop-item{border:2px solid #dbeafe;border-radius:20px;padding:16px;background:#fff}
-.shop-item.owned{border-color:#bbf7d0;background:#f0fdf4}
-.item-preview{height:84px;border-radius:18px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:28px;font-weight:900;border:2px dashed #dbeafe;background:#f8fbff}
-.item-preview.bg-sky{background:linear-gradient(180deg,#dbeafe,#eff6ff)}
-.item-preview.bg-jungle{background:linear-gradient(180deg,#dcfce7,#bbf7d0)}
-.item-preview.bg-galaxy{background:linear-gradient(180deg,#1e1b4b,#4c1d95);color:#fff}
-.item-preview.frame-bronze{box-shadow:inset 0 0 0 6px #cd7f32}
-.item-preview.frame-rainbow{box-shadow:inset 0 0 0 6px #8b5cf6}
-.item-preview.frame-champion{box-shadow:inset 0 0 0 6px #f59e0b}
-.item-preview.avatar-blue{background:#dbeafe}
-.item-preview.avatar-robot{background:#e5e7eb}
-.item-preview.avatar-ninja{background:#ede9fe}
-.owned-badge{display:inline-block;background:#dcfce7;color:#166534;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800;margin-left:6px}
-.lb-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 10px;border-bottom:1px solid #e5edf8}
-.lb-left{display:flex;align-items:center;gap:12px}
-.lb-avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#fff;border:2px solid #dbeafe;font-size:20px}
-.lb-avatar.frame-bronze{box-shadow:0 0 0 3px #cd7f32 inset}
-.lb-avatar.frame-rainbow{box-shadow:0 0 0 3px #8b5cf6 inset}
-.lb-avatar.frame-champion{box-shadow:0 0 0 3px #f59e0b inset}
-.lb-rank{font-weight:900;color:var(--blue);width:28px}
-.sticker{display:inline-block;padding:5px 8px;border-radius:999px;background:#eef2ff;color:#4338ca;font-size:12px;font-weight:800}
-.highlight-name{font-weight:900}
-.around-me{background:#f8fbff;border:1px solid var(--line);border-radius:18px;padding:12px}
-.heatmap-grid{display:grid;grid-template-columns:160px repeat(11, 1fr);gap:6px;font-size:12px;align-items:center}
-.heatmap-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
-.pin-overlay{position:fixed;inset:0;background:rgba(15,23,42,.7);display:none;align-items:center;justify-content:center;z-index:19999;padding:20px}
-.pin-overlay.show{display:flex}
-.pin-box{background:#fff;border-radius:28px;padding:32px 28px;width:min(360px,100%);text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.3)}
-.pin-box h3{margin:0 0 8px;font-size:26px}
-.pin-box p{margin:0 0 18px;color:var(--muted);font-size:14px}
-.pin-dots{display:flex;justify-content:center;gap:14px;margin-bottom:18px}
-.pin-dot{width:18px;height:18px;border-radius:50%;border:2px solid #bfd4ff;background:#fff;transition:background .15s}
-.pin-dot.filled{background:var(--blue);border-color:var(--blue)}
-.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:240px;margin:0 auto 14px}
-.pin-key{padding:16px;border-radius:16px;border:2px solid #dbe7fb;background:#fff;font-size:22px;font-weight:800;cursor:pointer;color:var(--text)}
-.pin-key:hover{background:#eff6ff;border-color:#93c5fd}
-.pin-key.del{background:#fef2f2;border-color:#fecaca;color:var(--red)}
-.pin-error{color:var(--red);font-size:13px;font-weight:700;min-height:20px}
-.heatcell{padding:8px 6px;border-radius:10px;text-align:center;font-weight:800}
-.green{background:#dcfce7;color:#166534}
-.yellow{background:#fef3c7;color:#92400e}
-.red{background:#fee2e2;color:#991b1b}
-.neutral{background:#e5e7eb;color:#374151}
-.boss-box{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff7ed;border:1px solid #fdba74;border-radius:18px;padding:14px}
-.boss-bar{flex:1;height:16px;background:#fed7aa;border-radius:999px;overflow:hidden}
-.boss-bar span{display:block;height:100%;background:linear-gradient(90deg,#f97316,#ef4444)}
-.chest-box{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f5f3ff;border:1px solid #c4b5fd;border-radius:18px;padding:14px}
-
-.medal-strip{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px}
-.medal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:8px;margin-top:10px}
-.medal-card{background:#f8fbff;border:1px solid var(--line);border-radius:14px;padding:8px;text-align:center}
-.medal-icon{font-size:22px}
-
-.overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px}
-.overlay.show{display:flex}
-.modal{width:min(560px,100%);background:#fff;border-radius:28px;padding:28px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.25);position:relative;overflow:hidden}
-.modal h2{margin:0 0 10px;font-size:34px}
-.modal p{margin:6px 0;color:var(--muted)}
-.confetti-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.confetti{position:absolute;width:10px;height:18px;opacity:.9;animation:fall 2.2s linear forwards;border-radius:3px}
-@keyframes fall{from{transform:translateY(-30px) rotate(0deg)}to{transform:translateY(420px) rotate(540deg);opacity:0}}
-.bg-sky-theme{background:linear-gradient(180deg,#dbeafe,#eff6ff)}
-.bg-jungle-theme{background:linear-gradient(180deg,#dcfce7,#f0fdf4)}
-.bg-galaxy-theme{background:linear-gradient(180deg,#1e1b4b,#312e81);color:#fff}
-.bg-galaxy-theme .muted,.bg-galaxy-theme .small,.bg-galaxy-theme .section-title p,.bg-galaxy-theme label{color:#dbeafe}
-@media (max-width: 900px){
-  .grid-hero,.quiz-wrap{grid-template-columns:1fr}
-  .meta-grid{grid-template-columns:repeat(2,1fr)}
-  .answers{grid-template-columns:1fr}
-  .question{font-size:28px}
-  .drag-equation{font-size:28px}
-  .heatmap-grid{grid-template-columns:90px repeat(11, minmax(36px,1fr));font-size:10px}
-  .heatcell{padding:5px 2px;font-size:10px}
-  .brand h1{font-size:20px}
-  .nav .btn{padding:9px 10px;font-size:12px}
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multiplication Master Quest V2.1 SIP Tracker</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Nunito', sans-serif; }
+    body { box-sizing: border-box; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    @keyframes pulse-glow { 0%,100%{box-shadow:0 0 20px rgba(255,183,77,.4)} 50%{box-shadow:0 0 40px rgba(255,183,77,.8)} }
+    @keyframes star-spin { 0%{transform:rotate(0) scale(0);opacity:0} 50%{transform:rotate(180deg) scale(1.2);opacity:1} 100%{transform:rotate(360deg) scale(1);opacity:1} }
+    @keyframes bounce-in { 0%{transform:scale(0)} 50%{transform:scale(1.2)} 100%{transform:scale(1)} }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+    @keyframes confetti-fall { 0%{transform:translateY(-100%) rotate(0);opacity:1} 100%{transform:translateY(100%) rotate(720deg);opacity:0} }
+    @keyframes slide-up { 0%{transform:translateY(30px);opacity:0} 100%{transform:translateY(0);opacity:1} }
+    .float-animation { animation: float 3s ease-in-out infinite; }
+    .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+    .star-spin { animation: star-spin .6s ease-out forwards; }
+    .bounce-in { animation: bounce-in .5s ease-out forwards; }
+    .shake { animation: shake .5s ease-in-out; }
+    .slide-up { animation: slide-up .4s ease-out forwards; }
+    .confetti { position:absolute; width:10px; height:10px; animation:confetti-fall 3s ease-in-out forwards; }
+    .card-hover { transition: all .3s ease; }
+    .card-hover:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,.1); }
+    .btn-press { transition: all .15s ease; }
+    .btn-press:active { transform: scale(.95); }
+    .progress-fill { transition: width .35s ease-out; }
+  </style>
 </head>
-<body>
-<div class="app">
-  <div class="topbar">
-    <div class="brand">
-      <div class="logo">×</div>
-      <div>
-        <h1>Multiplication Master Worlds</h1>
-        <p>Learning map • medals • daily challenge • bosses • treasure chests • teacher analytics</p>
+<body class="h-full bg-gradient-to-br from-amber-50 via-rose-50 to-sky-50 overflow-auto">
+  <div id="app" class="w-full min-h-full">
+    <div id="welcome-screen" class="min-h-full flex flex-col items-center justify-center p-6">
+      <div class="text-center mb-8 slide-up">
+        <div class="text-6xl mb-4 float-animation">🚀</div>
+        <h1 class="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-violet-600 via-pink-500 to-orange-400 bg-clip-text text-transparent mb-2">Multiplication Master Quest</h1>
+        <p class="text-lg text-gray-600">Train each times table separately. Beat your class. Unlock every challenge.</p>
+      </div>
+
+      <div class="bg-white rounded-3xl p-8 shadow-xl max-w-md w-full slide-up" style="animation-delay:.2s;">
+        <div class="flex justify-center mb-6">
+          <div class="w-24 h-24 bg-gradient-to-br from-violet-400 to-pink-400 rounded-full flex items-center justify-center text-5xl shadow-lg">🧙‍♂️</div>
+        </div>
+        <label class="block text-gray-700 font-bold mb-2 text-center">Player Name</label>
+        <input id="student-name" type="text" placeholder="Enter your name..." class="w-full px-5 py-4 rounded-2xl border-2 border-violet-200 focus:border-violet-400 focus:outline-none text-center text-xl font-semibold text-gray-700 transition-all mb-4">
+        <label class="block text-gray-700 font-bold mb-2 text-center">Class / Year</label>
+        <select id="student-class" class="w-full px-5 py-4 rounded-2xl border-2 border-sky-200 focus:border-sky-400 focus:outline-none text-center text-lg font-semibold text-gray-700 transition-all mb-4 bg-white">
+          <option value="Year 1">Year 1</option>
+          <option value="Year 2">Year 2</option>
+          <option value="Year 3">Year 3</option>
+          <option value="Year 4">Year 4</option>
+          <option value="Year 5">Year 5</option>
+          <option value="Year 6">Year 6</option>
+        </select>
+        <label class="block text-gray-700 font-bold mb-2 text-center">Practice Location</label>
+        <select id="practice-source" class="w-full px-5 py-4 rounded-2xl border-2 border-emerald-200 focus:border-emerald-400 focus:outline-none text-center text-lg font-semibold text-gray-700 transition-all mb-6 bg-white">
+          <option value="Home Practice">Home Practice</option>
+          <option value="Class Practice">Class Practice</option>
+        </select>
+        <button onclick="startAdventure()" class="w-full bg-gradient-to-r from-violet-500 to-pink-500 text-white font-bold py-4 px-8 rounded-2xl text-xl shadow-lg hover:shadow-xl transition-all btn-press pulse-glow">🎮 Start Adventure!</button>
+      </div>
+
+      <div class="flex gap-4 mt-8 slide-up flex-wrap justify-center" style="animation-delay:.4s;">
+        <div class="bg-white/80 rounded-2xl px-4 py-2 flex items-center gap-2"><span class="text-2xl">⭐</span><span class="font-bold text-gray-700">Earn Stars</span></div>
+        <div class="bg-white/80 rounded-2xl px-4 py-2 flex items-center gap-2"><span class="text-2xl">🪙</span><span class="font-bold text-gray-700">Collect Coins</span></div>
+        <div class="bg-white/80 rounded-2xl px-4 py-2 flex items-center gap-2"><span class="text-2xl">🏆</span><span class="font-bold text-gray-700">Beat Your Class</span></div>
       </div>
     </div>
-    <div class="nav">
-      <button class="btn btn-secondary" onclick="showSection('worldsSection')">Worlds</button>
-      <button class="btn btn-secondary" onclick="showSection('shopSection')">Coin Shop</button>
-      <button class="btn btn-secondary" onclick="showSection('leaderboardSection')">Leaderboard</button>
-      <button class="btn btn-secondary" onclick="showSection('teacherSection')">Teacher Dashboard</button>
-    </div>
-  </div>
 
-  <div id="heroCard" class="grid grid-hero">
-    <div class="hero">
-      <h2>Explore the multiplication worlds</h2>
-      <p>Start at Forest ×2, master all 10 methods, defeat the boss, open treasure chests, and unlock the next world.</p>
+    <div id="grade-screen" class="min-h-full p-6 hidden">
+      <header class="flex justify-between items-center mb-8 gap-4 flex-wrap">
+        <div class="flex items-center gap-3">
+          <button onclick="showScreen('welcome-screen')" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press">
+            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+          </button>
+          <div>
+            <p class="text-gray-500 text-sm">Welcome back,</p>
+            <p id="player-name-display" class="font-bold text-xl text-gray-800">Explorer</p>
+            <p id="player-class-display" class="text-sm text-sky-600 font-semibold">No class</p>
+          </div>
+        </div>
+        <div class="flex gap-3 flex-wrap">
+          <div class="bg-white rounded-2xl px-4 py-2 flex items-center gap-2 shadow-md"><span class="text-xl">⭐</span><span id="star-count" class="font-bold text-amber-500">0</span></div>
+          <div class="bg-white rounded-2xl px-4 py-2 flex items-center gap-2 shadow-md"><span class="text-xl">🪙</span><span id="coin-count" class="font-bold text-yellow-500">0</span></div>
+          <button onclick="showScreen('daily-screen'); renderDailyScreen();" class="bg-white rounded-2xl px-4 py-2 shadow-md hover:shadow-lg transition-all btn-press">⚔️ Daily</button>
+          <button onclick="openLeaderboard()" class="bg-white rounded-2xl px-4 py-2 shadow-md hover:shadow-lg transition-all btn-press">🏆</button>
+          <button onclick="showScreen('champions-screen'); renderChampionsBoard();" class="bg-white rounded-2xl px-4 py-2 shadow-md hover:shadow-lg transition-all btn-press">👑</button>
+          <button onclick="showScreen('teacher-screen'); renderTeacherDashboard();" class="bg-white rounded-2xl px-4 py-2 shadow-md hover:shadow-lg transition-all btn-press">📊 Teacher</button>
+        </div>
+      </header>
 
-      <div id="profileBox" class="profile hidden">
-        <div id="profileAvatar" class="avatar">🙂</div>
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-extrabold text-gray-800 mb-2">Choose Your Times Table</h2>
+        <p class="text-gray-600">Each table has its own unlock path and leaderboard.</p>
+      </div>
+
+      <div id="table-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-5 max-w-6xl mx-auto"></div>
+
+      <div class="mt-10 max-w-5xl mx-auto grid md:grid-cols-3 gap-4">
+        <div class="bg-white rounded-3xl p-5 shadow-md text-center"><div class="text-3xl mb-2">⚡</div><p class="font-bold text-gray-700">Speed Levels</p><p class="text-sm text-gray-500">Higher levels get faster and harder.</p></div>
+        <div class="bg-white rounded-3xl p-5 shadow-md text-center"><div class="text-3xl mb-2">🏫</div><p class="font-bold text-gray-700">Class Competition</p><p class="text-sm text-gray-500">Leaderboards work by class and overall.</p></div>
+        <div class="bg-white rounded-3xl p-5 shadow-md text-center"><div class="text-3xl mb-2">🔐</div><p class="font-bold text-gray-700">Per-Table Progress</p><p class="text-sm text-gray-500">Unlock ×2 separately from ×12.</p></div>
+      </div>
+
+      <div class="mt-6 max-w-5xl mx-auto bg-white rounded-3xl p-5 shadow-md flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <div id="profileName" style="font-size:20px;font-weight:900;">Student</div>
-          <div id="profileTitle" class="muted">No title equipped</div>
-          <div id="profileSticker" class="small">No sticker equipped</div>
-          <div id="profileMeta" class="small">⭐ 0 • 🪙 0</div>
+          <p class="font-bold text-gray-800">📅 My Practice This Week</p>
+          <p class="text-sm text-gray-500">Weekly target: 10 sessions per week</p>
+        </div>
+        <div class="text-right">
+          <p id="my-week-sessions" class="text-2xl font-extrabold text-violet-600">0/3</p>
+          <p id="my-last-practice" class="text-xs text-gray-500">Last practice: -</p>
         </div>
       </div>
-
-      <div class="meta-grid">
-        <div class="stat"><div class="n">11</div><div>Worlds</div></div>
-        <div class="stat"><div class="n">10</div><div>Methods / World</div></div>
-        <div class="stat"><div class="n">⭐</div><div>Stars</div></div>
-        <div class="stat"><div class="n">🪙</div><div>Coins</div></div>
-      </div>
-
-      <div id="streakBox" class="pill hidden" style="margin-top:14px;"></div>
-      <div id="challengeBox" class="pill hidden" style="margin-top:10px;background:#dbeafe;color:#1d4ed8;"></div>
-      <div id="sipScorePanel" class="card hidden" style="margin-top:12px;padding:14px;"></div>
-      <div id="medalSection" class="medal-strip hidden">
-        <div style="font-weight:900;">🏅 Medal Cabinet</div>
-        <div class="small">Gold = perfect, Silver = excellent, Bronze = good</div>
-        <div id="medalGrid" class="medal-grid"></div>
-      </div>
     </div>
 
-    <div class="card">
-      <div class="section-title">
-        <div>
-          <h3>Student Login</h3>
-          <p>Select your year and name to begin.</p>
+    <div id="level-screen" class="min-h-full p-6 hidden">
+      <header class="flex justify-between items-center mb-8 gap-4 flex-wrap">
+        <button onclick="showScreen('grade-screen')" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press">
+          <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+        </button>
+        <div class="text-center">
+          <h2 id="grade-title" class="text-2xl font-bold text-gray-800">Times Table 2 - Levels</h2>
+          <p id="level-subtitle" class="text-sm text-gray-500">Choose your challenge.</p>
+        </div>
+        <div class="flex gap-3">
+          <div class="bg-white rounded-2xl px-4 py-2 flex items-center gap-2 shadow-md"><span class="text-xl">⭐</span><span id="star-count-level" class="font-bold text-amber-500">0</span></div>
+          <div class="bg-white rounded-2xl px-4 py-2 flex items-center gap-2 shadow-md"><span class="text-xl">🪙</span><span id="coin-count-level" class="font-bold text-yellow-500">0</span></div>
+        </div>
+      </header>
+
+      <div class="max-w-3xl mx-auto">
+        <div class="relative">
+          <svg class="absolute top-0 left-1/2 transform -translate-x-1/2 w-4 h-full z-0" style="height: calc(100% - 50px);">
+            <line x1="8" y1="0" x2="8" y2="100%" stroke="#E5E7EB" stroke-width="4" stroke-dasharray="10,10" />
+          </svg>
+          <div id="level-path-holder" class="relative z-10 space-y-6"></div>
         </div>
       </div>
-      <label for="studentClass">Year Level</label>
-      <select id="studentClass" onchange="populateNameDropdown()">
-        <option value="">— Select Year —</option>
-        <option>Year 1</option><option>Year 2</option><option>Year 3</option>
-        <option>Year 4</option><option>Year 5</option><option>Year 6</option>
-      </select>
-      <label for="studentNameSelect">Student Name</label>
-      <select id="studentNameSelect" disabled>
-        <option value="">— Select Year first —</option>
-      </select>
-      <div id="notInListBox" style="display:none;margin-bottom:12px;">
-        <label for="studentName">Type your name</label>
-        <input id="studentName" type="text" placeholder="Enter full name" />
-      </div>
-      <button class="btn btn-primary" style="width:100%" onclick="loginStudent()">Start Learning</button>
-      <div id="loginStatus" class="small" style="margin-top:10px;"></div>
     </div>
-  </div>
 
-  <div id="worldsSection" class="card" style="margin-top:18px;">
-    <div class="section-title">
-      <div>
-        <h3>Math Worlds / Learning Map</h3>
-        <p>Unlock the path one world at a time.</p>
-      </div>
-      <div id="currentStudentBox" class="pill">No student yet</div>
-    </div>
-    <div id="worldMap" class="world-map"></div>
-  </div>
-
-  <div id="methodsSection" class="card hidden" style="margin-top:18px;">
-    <div class="section-title">
-      <div>
-        <h3 id="methodsTitle">Training Methods</h3>
-        <p>Concrete → visual → abstract → application.</p>
-      </div>
-      <button class="btn btn-secondary" onclick="showSection('worldsSection')">Back to Worlds</button>
-    </div>
-    <div id="methodsGrid" class="methods"></div>
-
-    <div id="bossSection" class="hidden" style="margin-top:16px;">
-      <div class="boss-box">
-        <div>
-          <div style="font-weight:900">⚔ Boss Battle</div>
-          <div id="bossName" class="small">Boss</div>
+    <div id="quiz-screen" class="min-h-full p-6 hidden">
+      <header class="flex justify-between items-center mb-6 gap-4 flex-wrap">
+        <button onclick="exitQuiz()" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press">
+          <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+        <div class="flex-1 mx-4 min-w-[220px]">
+          <div class="bg-gray-200 rounded-full h-4 overflow-hidden"><div id="quiz-progress" class="bg-gradient-to-r from-violet-500 to-pink-500 h-full progress-fill" style="width:20%"></div></div>
+          <p class="text-center text-sm text-gray-600 mt-1">Question <span id="question-num">1</span> of <span id="total-questions">5</span></p>
         </div>
-        <div class="boss-bar"><span id="bossBar" style="width:100%"></span></div>
-        <button id="bossBtn" class="btn btn-gold" onclick="startBossBattle()">Start Boss</button>
-      </div>
-    </div>
-
-    <div id="chestSection" class="hidden" style="margin-top:14px;">
-      <div class="chest-box">
-        <div>
-          <div style="font-weight:900">🎁 Treasure Chest Ready</div>
-          <div class="small">Open your reward chest for this world.</div>
+        <div class="flex gap-2 flex-wrap">
+          <div class="bg-white rounded-xl px-3 py-1 flex items-center gap-1 shadow-md"><span>⭐</span><span id="quiz-stars" class="font-bold text-amber-500">0</span></div>
+          <div class="bg-white rounded-xl px-3 py-1 flex items-center gap-1 shadow-md"><span>🪙</span><span id="quiz-coins" class="font-bold text-yellow-500">0</span></div>
+          <div class="bg-white rounded-xl px-3 py-1 flex items-center gap-1 shadow-md"><span>⏱️</span><span id="quiz-timer" class="font-bold text-rose-500">--</span></div>
+          <div class="bg-white rounded-xl px-3 py-1 flex items-center gap-1 shadow-md"><span>🔥</span><span id="quiz-streak" class="font-bold text-orange-500">0</span></div>
         </div>
-        <button class="btn btn-primary" onclick="openTreasureChest()">Open Chest</button>
-      </div>
+      </header>
+      <div id="quiz-container" class="max-w-2xl mx-auto"></div>
+      <div id="feedback-overlay" class="fixed inset-0 flex items-center justify-center z-50 hidden pointer-events-none"><div id="feedback-content" class="text-center"></div></div>
     </div>
-  </div>
 
-  <div id="quizSection" class="card hidden" style="margin-top:18px;">
-    <div class="section-title">
-      <div>
-        <h3 id="quizTitle">Quiz</h3>
-        <p>Answer correctly to earn stars and coins.</p>
+    <div id="celebration-screen" class="min-h-full flex flex-col items-center justify-center p-6 hidden relative overflow-hidden">
+      <div id="confetti-container" class="absolute inset-0 pointer-events-none"></div>
+      <div class="text-center z-10 slide-up">
+        <div class="text-8xl mb-6 bounce-in">🎉</div>
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-2">Level Complete!</h1>
+        <p id="celebration-message" class="text-xl text-gray-600 mb-8">Amazing job!</p>
+        <div class="bg-white rounded-3xl p-8 shadow-xl max-w-md w-full mb-6">
+          <h3 class="text-lg font-bold text-gray-700 mb-4">Your Rewards</h3>
+          <div class="grid grid-cols-3 gap-4 mb-6 text-center">
+            <div><div id="celebration-stars-visual" class="flex justify-center gap-1 mb-2"></div><p id="celebration-stars-text" class="text-gray-600 font-semibold">0 Stars</p></div>
+            <div><div class="text-3xl mb-2 bounce-in">🪙</div><p id="celebration-coins-text" class="text-gray-600 font-semibold">+0 Coins</p></div>
+            <div><div class="text-3xl mb-2 bounce-in">⏱️</div><p id="celebration-time-text" class="text-gray-600 font-semibold">0s</p></div>
+          </div>
+          <div id="new-badge" class="bg-gradient-to-r from-amber-100 to-orange-100 rounded-2xl p-4 mb-4 hidden bounce-in"><p class="text-sm text-amber-600 font-semibold mb-2">🏅 New Badge Unlocked!</p><div class="flex items-center justify-center gap-3"><span class="text-4xl">🎯</span><span class="font-bold text-amber-700">Perfect Score!</span></div></div>
+          <div class="text-center space-y-1">
+            <p class="text-gray-500 text-sm">Score: <span id="celebration-score" class="font-bold text-violet-600">0%</span></p>
+            <p id="celebration-note" class="text-xs text-gray-500"></p>
+          </div>
+        </div>
+        <div class="flex gap-4 justify-center flex-wrap">
+          <button onclick="showScreen('level-screen'); renderLevelPath();" class="bg-white text-gray-700 font-bold py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transition-all btn-press">📚 Back to Levels</button>
+          <button id="next-level-btn" class="bg-gradient-to-r from-violet-500 to-pink-500 text-white font-bold py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transition-all btn-press">▶️ Next Level</button>
+        </div>
       </div>
-      <button class="btn btn-secondary" onclick="backToMethods()">Back to Methods</button>
     </div>
-    <div class="quiz-wrap">
-      <div class="card question-box">
-        <div id="questionMeta" class="question-small"></div>
-        <div id="questionText" class="question">Ready?</div>
-        <div id="answersArea"></div>
-      </div>
-      <div>
-        <div class="mini"><b>Student:</b> <span id="quizStudent">-</span></div>
-        <div class="mini"><b>World:</b> <span id="quizWorld">-</span></div>
-        <div class="mini"><b>Mode:</b> <span id="quizMode">-</span></div>
-        <div class="mini"><b>Question:</b> <span id="quizProgress">1 / 10</span></div>
-        <div class="mini"><b>Score:</b> <span id="quizScore">0</span></div>
-        <div class="mini"><b>Stars:</b> <span id="quizStars">0</span></div>
-        <div class="mini"><b>Coins:</b> <span id="quizCoins">0</span></div>
-        <div class="mini"><b>Result:</b> <span id="quizFeedback">Answer to begin</span></div>
-      </div>
-    </div>
-  </div>
 
-  <div id="shopSection" class="card" style="margin-top:18px;">
-    <div class="section-title">
-      <div>
-        <h3>Coin Shop</h3>
-        <p>Buy and equip avatar, title, sticker, frame, and background.</p>
-      </div>
-      <div id="shopCoins" class="pill">🪙 0 coins</div>
-    </div>
-    <div id="inventorySummary" class="small" style="margin-bottom:14px;">Login to view inventory.</div>
-    <div id="shopGrid" class="shop-grid"></div>
-  </div>
-
-  <div id="leaderboardSection" class="card" style="margin-top:18px;">
-    <div class="section-title">
-      <div>
-        <h3>Leaderboard</h3>
-        <p>Top champions and your nearby rank.</p>
-      </div>
-      <button class="btn btn-secondary" onclick="loadLeaderboard()">Refresh</button>
-    </div>
-    <div id="topLeaderboard"></div>
-    <div id="aroundMe" class="around-me" style="margin-top:16px;"></div>
-  </div>
-
-  <div id="teacherSection" class="card" style="margin-top:18px;">
-    <div class="section-title">
-      <div>
-        <h3>Teacher Dashboard</h3>
-        <p>Class leaderboard, heatmap, and progress insights.</p>
-      </div>
-      <button class="btn btn-secondary" onclick="loadTeacherDashboard()">Refresh</button>
-    </div>
-    <div id="teacherLocked" style="text-align:center;padding:40px 20px;">
-      <div style="font-size:48px;margin-bottom:12px;">🔒</div>
-      <div style="font-size:20px;font-weight:900;margin-bottom:8px;">Teacher Access Only</div>
-      <p style="color:var(--muted);margin-bottom:18px;">Enter the teacher PIN to view the dashboard.</p>
-      <button class="btn btn-primary" onclick="showPinOverlay()">Enter PIN</button>
-    </div>
-    <div id="teacherContent" class="hidden">
-      <div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:12px;align-items:end;margin-bottom:14px;">
-        <div>
-          <label for="filterClass">Filter by Class</label>
-          <select id="filterClass" onchange="loadTeacherDashboard()">
-            <option value="All">All Classes</option>
-            <option>Year 1</option><option>Year 2</option><option>Year 3</option>
-            <option>Year 4</option><option>Year 5</option><option>Year 6</option>
+    <div id="leaderboard-screen" class="min-h-full p-6 hidden">
+      <header class="flex items-center gap-4 mb-6 flex-wrap">
+        <button onclick="showScreen('grade-screen')" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
+        <h2 class="text-3xl font-extrabold text-gray-800">🏆 Leaderboard</h2>
+        <div class="ml-auto flex gap-2 flex-wrap items-center">
+          <label for="leaderboard-table-select" class="text-sm font-bold text-gray-600">Table</label>
+          <select id="leaderboard-table-select" onchange="setLeaderboardTable(this.value)" class="bg-white text-gray-700 rounded-2xl px-4 py-2 shadow-md border border-gray-100 font-bold focus:outline-none focus:ring-2 focus:ring-violet-300">
+            <option value="2">×2</option>
+            <option value="3">×3</option>
+            <option value="4">×4</option>
+            <option value="5">×5</option>
+            <option value="6">×6</option>
+            <option value="7">×7</option>
+            <option value="8">×8</option>
+            <option value="9">×9</option>
+            <option value="10">×10</option>
+            <option value="11">×11</option>
+            <option value="12">×12</option>
           </select>
+          <button onclick="setLeaderboardMode('overall')" id="lb-overall" class="bg-violet-500 text-white rounded-2xl px-4 py-2 shadow-md">Overall</button>
+          <button onclick="setLeaderboardMode('class')" id="lb-class" class="bg-white text-gray-700 rounded-2xl px-4 py-2 shadow-md">My Class</button>
         </div>
-        <div>
-          <label for="teacherSearch">Search Student</label>
-          <input id="teacherSearch" type="text" placeholder="Type name..." oninput="loadTeacherDashboard()" />
-        </div>
-        <div>
-          <label for="weeklyTarget">Weekly Target (days)</label>
-          <select id="weeklyTarget" onchange="loadTeacherDashboard()">
-            <option value="1">1 day</option>
-            <option value="2" selected>2 days</option>
-            <option value="3">3 days</option>
-            <option value="4">4 days</option>
-            <option value="5">5 days</option>
-          </select>
-        </div>
-        <button class="btn btn-secondary" onclick="lockTeacher()">🔒 Lock</button>
+      </header>
+      <div class="max-w-3xl mx-auto">
+        <p id="leaderboard-title" class="text-center text-gray-600 mb-4">Top players for the selected table.</p>
+        <div id="podium" class="flex justify-center items-end gap-4 mb-8 flex-wrap"></div>
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden"><div id="leaderboard-list" class="divide-y divide-gray-100"></div></div>
       </div>
-      <div id="teacherLeaderboard"></div>
-      <div style="margin-top:18px;">
-        <div style="font-weight:900;margin-bottom:10px;">Learning Heatmap <span class="small">(scroll sideways on mobile)</span></div>
-        <div class="heatmap-scroll"><div id="heatmap"></div></div>
+    </div>
+
+    <div id="daily-screen" class="min-h-full p-6 hidden">
+      <header class="flex items-center gap-4 mb-8 flex-wrap">
+        <button onclick="showScreen('grade-screen')" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
+        <h2 class="text-3xl font-extrabold text-gray-800">⚔️ Daily Challenge</h2>
+      </header>
+      <div class="max-w-xl mx-auto bg-white rounded-3xl p-8 shadow-xl text-center">
+        <div class="text-6xl mb-4">🎯</div>
+        <h3 class="text-2xl font-bold text-gray-800 mb-2">Beat today’s random challenge</h3>
+        <p id="daily-info" class="text-gray-600 mb-6">A fresh challenge appears each day.</p>
+        <div class="grid grid-cols-2 gap-4 mb-6 text-left">
+          <div class="bg-violet-50 rounded-2xl p-4"><p class="text-sm text-gray-500">Table</p><p id="daily-table" class="font-bold text-violet-700 text-xl">×6</p></div>
+          <div class="bg-rose-50 rounded-2xl p-4"><p class="text-sm text-gray-500">Timer</p><p id="daily-timer" class="font-bold text-rose-700 text-xl">6s</p></div>
+        </div>
+        <button onclick="startDailyChallenge()" class="bg-gradient-to-r from-violet-500 to-pink-500 text-white font-bold py-4 px-8 rounded-2xl text-xl shadow-lg hover:shadow-xl transition-all btn-press">▶️ Start Daily Challenge</button>
+      </div>
+    </div>
+
+    <div id="champions-screen" class="min-h-full p-6 hidden">
+      <header class="flex items-center gap-4 mb-8 flex-wrap">
+        <button onclick="showScreen('grade-screen')" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
+        <h2 class="text-3xl font-extrabold text-gray-800">👑 School Champions</h2>
+      </header>
+      <div class="max-w-3xl mx-auto space-y-6">
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden"><div id="champions-list" class="divide-y divide-gray-100"></div></div>
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden"><div class="p-5 border-b border-gray-100"><h3 class="text-xl font-bold text-gray-800">🏫 Class vs Class</h3><p class="text-sm text-gray-500">Total stars across all tables.</p></div><div id="class-vs-class-list" class="divide-y divide-gray-100"></div></div>
+      </div>
+    </div>
+
+    <div id="teacher-screen" class="min-h-full p-6 hidden">
+      <header class="flex items-center gap-4 mb-8 flex-wrap">
+        <button onclick="showScreen('grade-screen')" class="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all btn-press"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
+        <h2 class="text-3xl font-extrabold text-gray-800">📊 Teacher Dashboard</h2>
+        <button onclick="downloadSessionsCSV()" class="ml-auto bg-white rounded-2xl px-4 py-2 shadow-md hover:shadow-lg transition-all btn-press">⬇️ Export CSV</button>
+      </header>
+      <div class="max-w-6xl mx-auto space-y-6">
+        <div class="bg-white rounded-3xl p-5 shadow-md border-l-4 border-violet-400">
+          <p class="font-bold text-gray-800">SIP Tracking View</p>
+          <p class="text-sm text-gray-500">Use Weekly Practice Frequency as the main home-practice tracker. Use Individual Times Table Mastery to identify weak tables. Older records are shown as legacy snapshots until pupils create new session history.</p>
+        </div>
+        <div class="bg-white rounded-3xl p-5 shadow-md">
+          <div class="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <p class="font-bold text-gray-800">🔎 Filter View</p>
+              <p class="text-sm text-gray-500">Choose Overall or focus on one class/year for easier weekly tracking.</p>
+            </div>
+            <div class="flex items-center gap-3 flex-wrap">
+              <label for="teacher-class-filter" class="text-sm font-bold text-gray-600">Class / Year</label>
+              <select id="teacher-class-filter" onchange="setTeacherClassFilter(this.value)" class="bg-white border-2 border-violet-200 rounded-2xl px-4 py-3 font-bold text-gray-700 focus:border-violet-400 focus:outline-none min-w-[220px]">
+                <option value="__all__">Overall - All Classes</option>
+              </select>
+              <button onclick="setTeacherClassFilter('__all__')" class="bg-violet-50 text-violet-700 rounded-2xl px-4 py-3 font-bold shadow-sm hover:shadow-md transition-all btn-press">Reset</button>
+            </div>
+          </div>
+          <p id="teacher-filter-note" class="text-xs text-gray-500 mt-3">Showing: Overall - All Classes</p>
+        </div>
+        <div class="grid md:grid-cols-4 gap-4">
+          <div class="bg-white rounded-3xl p-5 shadow-md text-center"><p class="text-sm text-gray-500">Total Players</p><p id="teacher-total-players" class="text-3xl font-extrabold text-violet-600">0</p></div>
+          <div class="bg-white rounded-3xl p-5 shadow-md text-center"><p class="text-sm text-gray-500">Active This Week</p><p id="teacher-active-week" class="text-3xl font-extrabold text-emerald-600">0</p></div>
+          <div class="bg-white rounded-3xl p-5 shadow-md text-center"><p class="text-sm text-gray-500">Met Weekly Target</p><p id="teacher-met-target" class="text-3xl font-extrabold text-amber-600">0</p></div>
+          <div class="bg-white rounded-3xl p-5 shadow-md text-center"><p class="text-sm text-gray-500">Active Classes</p><p id="teacher-total-classes" class="text-3xl font-extrabold text-sky-600">0</p></div>
+          <div class="bg-white rounded-3xl p-5 shadow-md text-center"><p class="text-sm text-gray-500">Top Table</p><p id="teacher-top-table" class="text-3xl font-extrabold text-emerald-600">×0</p></div>
+          <div class="bg-white rounded-3xl p-5 shadow-md text-center"><p class="text-sm text-gray-500">Weakest Table</p><p id="teacher-weak-table" class="text-3xl font-extrabold text-rose-600">×0</p></div>
+          <div class="bg-white rounded-3xl p-5 shadow-md text-center md:col-span-2"><p class="text-sm text-gray-500">Weekly Target</p><p class="text-3xl font-extrabold text-violet-600">10 sessions</p><p class="text-xs text-gray-500">Programme milestone: 5 attempts per table ×2–×12</p></div>
+        </div>
+        <div class="bg-white rounded-3xl p-6 shadow-xl">
+          <h3 class="text-xl font-bold text-gray-800 mb-4">📅 Weekly Practice Frequency</h3>
+          <div id="teacher-frequency-list" class="space-y-3"></div>
+        </div>
+        <div class="grid lg:grid-cols-2 gap-6">
+          <div class="bg-white rounded-3xl p-6 shadow-xl"><h3 class="text-xl font-bold text-gray-800 mb-4">🏫 Class Rankings</h3><div id="teacher-class-list" class="space-y-3"></div></div>
+          <div class="bg-white rounded-3xl p-6 shadow-xl"><h3 class="text-xl font-bold text-gray-800 mb-4">🧠 Table Mastery Overview</h3><div id="teacher-table-list" class="space-y-3"></div></div>
+        </div>
+        <div class="bg-white rounded-3xl p-6 shadow-xl">
+          <h3 class="text-xl font-bold text-gray-800 mb-4">🧾 Individual Times Table Mastery Snapshot</h3>
+          <div id="teacher-mastery-list" class="space-y-3"></div>
+        </div>
+        <div class="grid lg:grid-cols-2 gap-6">
+          <div class="bg-white rounded-3xl p-6 shadow-xl"><h3 class="text-xl font-bold text-gray-800 mb-4">⭐ Top Pupils</h3><div id="teacher-student-list" class="space-y-3"></div></div>
+          <div class="bg-white rounded-3xl p-6 shadow-xl"><h3 class="text-xl font-bold text-gray-800 mb-4">🚩 Priority Support</h3><div id="teacher-support-list" class="space-y-3"></div></div>
+        </div>
+        <div class="bg-white rounded-3xl p-6 shadow-xl">
+          <h3 class="text-xl font-bold text-gray-800 mb-4">🏅 Badge Watch</h3>
+          <div id="teacher-badge-list" class="space-y-3"></div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<div id="pinOverlay" class="pin-overlay">
-  <div class="pin-box">
-    <div style="font-size:40px;margin-bottom:8px;">🔐</div>
-    <h3>Teacher PIN</h3>
-    <p>Enter the 4-digit PIN to access the Teacher Dashboard.</p>
-    <div class="pin-dots">
-      <div class="pin-dot" id="pd0"></div>
-      <div class="pin-dot" id="pd1"></div>
-      <div class="pin-dot" id="pd2"></div>
-      <div class="pin-dot" id="pd3"></div>
-    </div>
-    <div class="pin-keypad">
-      <button class="pin-key" onclick="pinPress('1')">1</button>
-      <button class="pin-key" onclick="pinPress('2')">2</button>
-      <button class="pin-key" onclick="pinPress('3')">3</button>
-      <button class="pin-key" onclick="pinPress('4')">4</button>
-      <button class="pin-key" onclick="pinPress('5')">5</button>
-      <button class="pin-key" onclick="pinPress('6')">6</button>
-      <button class="pin-key" onclick="pinPress('7')">7</button>
-      <button class="pin-key" onclick="pinPress('8')">8</button>
-      <button class="pin-key" onclick="pinPress('9')">9</button>
-      <button class="pin-key del" onclick="pinPress('del')" style="grid-column:1">⌫</button>
-      <button class="pin-key" onclick="pinPress('0')">0</button>
-      <button class="pin-key" onclick="pinPress('cancel')" style="background:#f3f4f6;font-size:14px;">✕</button>
-    </div>
-    <div class="pin-error" id="pinError"></div>
-  </div>
-</div>
+  <script>
+    const STORAGE_KEY = 'mmq_v2_records';
+    const SESSION_STORAGE_KEY = 'mmq_v2_sessions';
+    const PLAYER_PREF_KEY = 'mmq_v2_player_pref';
+    const WEEKLY_TARGET = 10;
+    const firebaseConfig = {
+      apiKey: "AIzaSyBQjpBHH-cYSll8bPYpLVfVXmgpHRXmpHA",
+      authDomain: "multiplication-quest.firebaseapp.com",
+      projectId: "multiplication-quest",
+      storageBucket: "multiplication-quest.firebasestorage.app",
+      messagingSenderId: "64140074912",
+      appId: "1:64140074912:web:23d7c3087dc12208454ec5"
+    };
 
+    let db = null;
+    let firebaseReady = false;
 
-  <div class="modal">
-    <div id="confettiWrap" class="confetti-wrap"></div>
-    <div id="modalIcon" style="font-size:34px;margin-bottom:10px;">🎉</div>
-    <h2 id="modalTitle">Unlocked!</h2>
-    <p id="modalText">Great work.</p>
-    <button class="btn btn-primary" onclick="closeModal()">Awesome!</button>
-  </div>
-</div>
+    const TABLE_META = {
+      2: ['Twos', '2, 4, 6, 8...', 'from-rose-100 to-rose-200', 'text-rose-600', 'text-rose-500'],
+      3: ['Threes', '3, 6, 9, 12...', 'from-orange-100 to-orange-200', 'text-orange-600', 'text-orange-500'],
+      4: ['Fours', '4, 8, 12, 16...', 'from-amber-100 to-amber-200', 'text-amber-600', 'text-amber-500'],
+      5: ['Fives', '5, 10, 15, 20...', 'from-emerald-100 to-emerald-200', 'text-emerald-600', 'text-emerald-500'],
+      6: ['Sixes', '6, 12, 18, 24...', 'from-sky-100 to-sky-200', 'text-sky-600', 'text-sky-500'],
+      7: ['Sevens', '7, 14, 21, 28...', 'from-violet-100 to-violet-200', 'text-violet-600', 'text-violet-500'],
+      8: ['Eights', '8, 16, 24, 32...', 'from-fuchsia-100 to-fuchsia-200', 'text-fuchsia-600', 'text-fuchsia-500'],
+      9: ['Nines', '9, 18, 27, 36...', 'from-cyan-100 to-cyan-200', 'text-cyan-600', 'text-cyan-500'],
+      10: ['Tens', '10, 20, 30, 40...', 'from-lime-100 to-lime-200', 'text-lime-700', 'text-lime-600'],
+      11: ['Elevens', '11, 22, 33, 44...', 'from-blue-100 to-blue-200', 'text-blue-700', 'text-blue-500'],
+      12: ['Twelves', '12, 24, 36, 48...', 'from-pink-100 to-pink-200', 'text-pink-600', 'text-pink-500']
+    };
 
-<script>
-// ── Pupil data + dropdown (regular script, runs immediately, no dependencies) ──
-window.PUPIL_LISTS = {
-  "Year 1": [
-    "ADRIELL RAYMOND BIN SAPEIE",
-    "KONG XIAN LI",
-    "MOHAMMAD HAZIRUL ABBASY BIN ABDULLAH",
-    "MOHAMMAD KHAIRUL ZAQWAN BIN MOHAMMAD IBRAHEM",
-    "MOHAMMAD NOR EDIE DARWISH BIN MOHAMMAD NORIKHWAN",
-    "MUHAMMAD AFIQ ZAYYAN BIN MUHAMMAD SAIFUL SYAZWAN",
-    "MUHAMMAD EDDIE EDZWAN BIN MUHAMMAD EDDIE SUFIYAN",
-    "MUHAMMAD FIRAS NUFAEL BIN AZIZOL FAIZAN",
-    "MUHAMMAD NABIL FIKRI BIN MUHAMMAD NOH RIZAL",
-    "MUHAMMAD SHAHIRUL IMAN FAIQ BIN SUHAINI",
-    "NUR ALESHA ZAHRA BINTI MUHAMMAD FAIZUREN",
-    "ROMESSA BINTI MERIO"
-  ],
-  "Year 2": [
-    "ARFAN ANAK ASMADDEY*",
-    "MOHAMMAD FARIS ADAM BIN AZIZOL FAIZAN*",
-    "MOHAMMAD NOR ADIE AZUWAN BIN MOHAMMAD NORIKHWAN*",
-    "MUHAMMAD EDDIE IZYAN BIN MUHAMMAD EDDIE SUFIYAN*",
-    "NUR ASYAFIA BINTI MUHAMMAD SAIFUL SYAZWAN*",
-    "NURUL FARESYA AURORA BINTI MOHAMMAD FAUZILAH*"
-  ],
-  "Year 3": [
-    "ALVIN CALIN BIN NOORASLISHAH*",
-    "ARIESYA AZ-ZAHRA BINTI MUSLIM*",
-    "MOHD SHAFIRUL MALIK BIN MOHD HILMI*",
-    "MUHAMMAD KHAIR AS-SOLEH BIN ABDULLAH*",
-    "NUR ARISHA BINTI MUHAMMAD FITRI ZUL HILMI*",
-    "NUR FALISHA DANIA BINTI MUHAMMAD FAIZUREN*",
-    "NURUL RIZAWANIZAH BINTI MUHAMMAD MALIK REDUAN*",
-    "NURUL SYAHIRAH BINTI MUHAMMAD EDDIE SUFIYAN*"
-  ],
-  "Year 4": [
-    "Aryan Anak Asmaddey*",
-    "Muhammad Afiq Ahnaf Bin Muhammad Saiful Syazwan*",
-    "Muhammad Aniq Izzuddin Bin Mohammad Sharul Azmi*",
-    "Muhammad Danish Al-Shafie Bin Norshahadani*",
-    "Muhammad Nur'raiyyan Ehsan Al-Ghazali Bin Abdullah*",
-    "Noreaddyratul Rafyikah Binti Remeoeaddy*",
-    "Nur Alisha Az-Zahara Binti Abdul Hadi*",
-    "Nur Amirah Qarirah Binti Abdullah*",
-    "Nurhaziqah Binti Hj Abdul Aziz*",
-    "Nurul Miasarah Binti Yan Sumardie*",
-    "Shareena Shaqirah Binti Sah Mohamad Pazan*"
-  ],
-  "Year 5": [
-    "AISYAH AZ-ZAHRA BINTI MUSLIM*",
-    "ARYAN ARDY BIN SAPERY*",
-    "MOHAMMAD NORANDIKA FARDY BIN HAJI MOHAMMAD NORDARWANDY*",
-    "NURUL RIZAWANINA BINTI MUHAMMAD MALIK REDUAN*",
-    "ROSHAMIZZAH BINTI ROSLAN*",
-    "SHAN ERINEO BIN SHANDRIN*",
-    "SITI NUR HAISYAH BINTI MOHAMMAD SHARUL AZMI*"
-  ],
-  "Year 6": [
-    "ALYSHA ANAK ASMADDEY",
-    "AZIRUL BIN HAJI ABDUL AZIZ",
-    "DANG ARYANA ARIESSA BINTI SAPERY",
-    "MOHAMMAD KHAIRUL AMINUDDIN BIN MOHAMMAD IBRAHEM",
-    "MUHAMMAD EDDY RIDZRUL BIN MUHAMMAD ERUWAN",
-    "MUHAMMAD KHAIRUL WAFIQ BIN EDURUL",
-    "MUHAMMAD NIRZA ERWAN SHAH BIN MUHAMMAD MALIK REDUAN",
-    "MUHAMMAD NUR SAFWAN HAZIQ BIN SA AHRILL",
-    "NORAZRIEZAH BINTI PUKUL",
-    "NORASHURANI BINTI NORAZMI"
-  ]
-};
+    const LEVELS = {
+      1: { label: 'Level 1', title: 'Practice Path', timer: 0, passScore: 80, questionCount: 5, mode: 'practice', color: 'from-green-400 to-emerald-500', icon: '1', subtitle: 'No timer. Warm up and learn the pattern.' },
+      2: { label: 'Level 2', title: 'Speed Round', timer: 8, passScore: 80, questionCount: 5, mode: 'speed', color: 'from-violet-400 to-purple-500', icon: '2', subtitle: '8 seconds per question.' },
+      3: { label: 'Level 3', title: 'Mixed Mode', timer: 7, passScore: 80, questionCount: 6, mode: 'mixed', color: 'from-red-400 to-orange-500', icon: '3', subtitle: 'Mixed questions under pressure.' },
+      4: { label: 'Level 4', title: 'Brain Blitz', timer: 5, passScore: 80, questionCount: 6, mode: 'blitz', color: 'from-indigo-400 to-blue-500', icon: '4', subtitle: 'Harder numbers and less time.' },
+      5: { label: 'Boss Level', title: 'Master The Table', timer: 4, passScore: 90, questionCount: 8, mode: 'boss', color: 'from-yellow-400 to-amber-500', icon: '👑', subtitle: 'Near-perfect required.' }
+    };
 
-window.SIP_SCORES = {
-  "arfan-anak-asmaddey__year-2":{ preTest:0, pt1:84 },
-  "muhammad-eddie-izyan-bin-muhammad-eddie-sufiyan__year-2":{ preTest:23, pt1:88 },
-  "mohammad-faris-adam-bin-azizol-faizan__year-2":{ preTest:87, pt1:100 },
-  "mohammad-nor-adie-azuwan-bin-mohammad-norikhwan__year-2":{ preTest:0, pt1:4 },
-  "nur-asyafia-binti-muhammad-saiful-syazwan__year-2":{ preTest:0, pt1:100 },
-  "nurul-faresya-aurora-binti-mohammad-fauzilah__year-2":{ preTest:30, pt1:96 },
-  "alvin-calin-bin-nooraslishah__year-3":{ preTest:100, pt1:100 },
-  "mohd-shafirul-malik-bin-mohd-hilmi__year-3":{ preTest:97, pt1:null },
-  "muhammad-khair-as-soleh-bin-abdullah__year-3":{ preTest:3, pt1:8 },
-  "ariesya-az-zahra-binti-muslim__year-3":{ preTest:100, pt1:100 },
-  "nur-arisha-binti-muhammad-fitri-zul-hilmi__year-3":{ preTest:100, pt1:100 },
-  "nur-falisha-dania-binti-muhammad-faizuren__year-3":{ preTest:90, pt1:100 },
-  "nurul-rizawanizah-binti-muhammad-malik-reduan__year-3":{ preTest:97, pt1:100 },
-  "nurul-syahirah-binti-muhammad-eddie-sufiyan__year-3":{ preTest:100, pt1:100 },
-  "aryan-anak-asmaddey__year-4":{ preTest:50, pt1:100 },
-  "muhammad-afiq-ahnaf-bin-muhammad-saiful-syazwan__year-4":{ preTest:37, pt1:80 },
-  "muhammad-aniq-izzuddin-bin-mohammad-sharul-azmi__year-4":{ preTest:65, pt1:72 },
-  "muhammad-danish-al-shafie-bin-norshahadani__year-4":{ preTest:55, pt1:96 },
-  "nur-alisha-az-zahara-binti-abdul-hadi__year-4":{ preTest:48, pt1:92 },
-  "nurul-miasarah-binti-yan-sumardie__year-4":{ preTest:45, pt1:84 },
-  "nur-amirah-qarirah-binti-abdullah__year-4":{ preTest:0, pt1:48 },
-  "noreaddyratul-rafyikah-binti-remeoeaddy__year-4":{ preTest:65, pt1:100 },
-  "shareena-shaqirah-binti-sah-mohamad-pazan__year-4":{ preTest:0, pt1:28 },
-  "muhammad-nur'raiyyan-ehsan-al-ghazali-bin-abdullah__year-4":{ preTest:15, pt1:48 },
-  "nurhaziqah-binti-hj-abdul-aziz__year-4":{ preTest:33, pt1:84 },
-  "aryan-ardy-bin-sapery__year-5":{ preTest:15, pt1:64 },
-  "mohammad-norandika-fardy-bin-haji-mohammad-nordarwandy__year-5":{ preTest:88, pt1:96 },
-  "shan-erineo-bin-shandrin__year-5":{ preTest:18, pt1:56 },
-  "aisyah-az-zahra-binti-muslim__year-5":{ preTest:93, pt1:92 },
-  "nurul-rizawanina-binti-muhammad-malik-reduan__year-5":{ preTest:78, pt1:92 },
-  "roshamizzah-binti-roslan__year-5":{ preTest:73, pt1:96 },
-  "siti-nur-haisyah-binti-mohammad-sharul-azmi__year-5":{ preTest:93, pt1:100 }
-};
+    let gameState = {
+      playerName: 'Explorer',
+      playerClass: 'No class',
+      practiceSource: 'Home Practice',
+      currentGrade: 2,
+      currentLevel: 1,
+      stars: 0,
+      coins: 0,
+      currentQuestion: 0,
+      totalQuestions: 5,
+      quizScore: 0,
+      streak: 0,
+      timerRemaining: 0,
+      timerId: null,
+      questionSet: [],
+      leaderboardMode: 'overall',
+      leaderboardTable: 2,
+      dailyChallenge: null,
+      dailyMode: false,
+      currentRecord: null
+    };
 
-window.populateNameDropdown = function(){
-  const yr = document.getElementById("studentClass").value;
-  const sel = document.getElementById("studentNameSelect");
-  const notInList = document.getElementById("notInListBox");
-  sel.innerHTML = '<option value="">— Select name —</option>';
-  if (!yr){ sel.disabled = true; return; }
-  sel.disabled = false;
-  (window.PUPIL_LISTS[yr] || []).forEach(p => {
-    const isSip = p.endsWith("*");
-    const name = p.replace("*","");
-    const opt = document.createElement("option");
-    opt.value = name;
-    opt.textContent = name + (isSip ? " ★" : "");
-    sel.appendChild(opt);
-  });
-  const other = document.createElement("option");
-  other.value = "__other__";
-  other.textContent = "My name is not listed…";
-  sel.appendChild(other);
-  notInList.style.display = "none";
-  sel.onchange = function(){
-    notInList.style.display = sel.value === "__other__" ? "block" : "none";
-  };
-};
-</script>
+    let allRecords = [];
+    let allSessions = [];
+    let teacherClassFilter = '__all__';
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import {
-  getFirestore, doc, setDoc, getDoc, getDocs, collection, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+    const seedQuestions = {
+      2: { 1: [
+        { type: 'mcq', question: '2 × 3 = ?', options: ['5','6','8','4'], correct: 1, emoji: '✖️' },
+        { type: 'mcq', question: '2 × 7 = ?', options: ['12','14','16','10'], correct: 1, emoji: '✖️' },
+        { type: 'fill', question: '2 × ___ = 10', correct: '5', emoji: '❓' },
+        { type: 'mcq', question: '2 × 9 = ?', options: ['16','18','20','17'], correct: 1, emoji: '✖️' },
+        { type: 'mcq', question: '2 × 6 = ?', options: ['10','14','12','8'], correct: 2, emoji: '✖️' }
+      ] },
+      3: { 1: [
+        { type: 'mcq', question: '3 × 2 = ?', options: ['5','6','8','4'], correct: 1, emoji: '✖️' },
+        { type: 'mcq', question: '3 × 4 = ?', options: ['12','10','15','9'], correct: 0, emoji: '✖️' },
+        { type: 'fill', question: '3 × ___ = 15', correct: '5', emoji: '❓' },
+        { type: 'mcq', question: '3 × 6 = ?', options: ['16','18','20','22'], correct: 1, emoji: '✖️' },
+        { type: 'mcq', question: '3 × 7 = ?', options: ['20','21','24','25'], correct: 1, emoji: '✖️' }
+      ] }
+    };
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDjql80paWm_GGDfPEDno-qGEntvVkdaf8",
-  authDomain: "multiplication-master-af330.firebaseapp.com",
-  projectId: "multiplication-master-af330",
-  storageBucket: "multiplication-master-af330.firebasestorage.app",
-  messagingSenderId: "211712026574",
-  appId: "1:211712026574:web:2ec75e6bcc0d3cfd2ded9f"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+    function shuffle(array) { return [...array].sort(() => Math.random() - 0.5); }
+    function normalize(v) { return String(v || '').trim().toLowerCase(); }
+    const STANDARD_CLASSES = ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6'];
+    function canonicalizeClass(value) {
+      const raw = normalize(value);
+      if (!raw) return 'Year 1';
+      const words = {
+        '1': ['1', 'one', 'satu'],
+        '2': ['2', 'two', 'dua'],
+        '3': ['3', 'three', 'tiga'],
+        '4': ['4', 'four', 'empat'],
+        '5': ['5', 'five', 'lima'],
+        '6': ['6', 'six', 'enam']
+      };
+      for (const [num, tokens] of Object.entries(words)) {
+        if (tokens.some(token => raw === token || raw.includes(`year ${token}`) || raw.includes(`year${token}`) || raw.includes(`yr ${token}`) || raw.includes(`yr${token}`) || raw.includes(`tahun ${token}`) || raw.includes(`tahun${token}`))) {
+          return `Year ${num}`;
+        }
+      }
+      const digitMatch = raw.match(/\b([1-6])\b/);
+      if (digitMatch) return `Year ${digitMatch[1]}`;
+      return value || 'Year 1';
+    }
+    function sameClass(a, b) { return normalize(canonicalizeClass(a)) === normalize(canonicalizeClass(b)); }
+    function safeIdPart(v) { return encodeURIComponent(normalize(v)).replace(/%/g, '_'); }
+    function makeRecordId(name, cls, table) { return `${safeIdPart(name)}__${safeIdPart(cls)}__${table}`; }
+    function pad2(n) { return String(n).padStart(2, '0'); }
+    function getDateKey(date = new Date()) { return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`; }
+    function getWeekKey(date = new Date()) {
+      const d = new Date(date);
+      const day = (d.getDay() + 6) % 7; // Monday = 0
+      d.setDate(d.getDate() - day);
+      return getDateKey(d);
+    }
+    function formatDateKey(value) {
+      if (!value) return '-';
+      const raw = String(value);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+      const d = new Date(raw);
+      return isNaN(d.getTime()) ? raw : getDateKey(d);
+    }
 
-// PUPIL_LISTS, SIP_SCORES and populateNameDropdown are defined in the
-// non-module script above so the dropdown works even if Firebase fails to load.
-// ─────────────────────────────────────────────────────────────────────────────
+    function readCache() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+      catch { return []; }
+    }
 
-// ── Teacher PIN ──────────────────────────────────────────────────────────────
-const TEACHER_PIN = "2026"; // ← change this to your preferred PIN
-let pinBuffer = "";
-let teacherUnlocked = false;
+    function writeCache(records) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+      allRecords = records;
+    }
 
-window.showPinOverlay = function(){
-  pinBuffer = "";
-  updatePinDots();
-  document.getElementById("pinError").textContent = "";
-  document.getElementById("pinOverlay").classList.add("show");
-};
-window.pinPress = function(val){
-  if (val === "cancel"){ document.getElementById("pinOverlay").classList.remove("show"); return; }
-  if (val === "del"){ pinBuffer = pinBuffer.slice(0,-1); updatePinDots(); return; }
-  if (pinBuffer.length >= 4) return;
-  pinBuffer += val;
-  updatePinDots();
-  if (pinBuffer.length === 4){
-    setTimeout(() => {
-      if (pinBuffer === TEACHER_PIN){
-        teacherUnlocked = true;
-        document.getElementById("pinOverlay").classList.remove("show");
-        document.getElementById("teacherLocked").classList.add("hidden");
-        document.getElementById("teacherContent").classList.remove("hidden");
-        loadTeacherDashboard();
+    function readSessionCache() {
+      try { return JSON.parse(localStorage.getItem(SESSION_STORAGE_KEY) || '[]'); }
+      catch { return []; }
+    }
+
+    function writeSessionCache(sessions) {
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessions));
+      allSessions = sessions;
+    }
+
+    function savePlayerPref() {
+      localStorage.setItem(PLAYER_PREF_KEY, JSON.stringify({ name: gameState.playerName, cls: gameState.playerClass, source: gameState.practiceSource }));
+    }
+
+    function loadPlayerPref() {
+      try {
+        const pref = JSON.parse(localStorage.getItem(PLAYER_PREF_KEY) || 'null');
+        if (pref) {
+          document.getElementById('student-name').value = pref.name || '';
+          document.getElementById('student-class').value = canonicalizeClass(pref.cls || 'Year 1');
+          const sourceEl = document.getElementById('practice-source');
+          if (sourceEl && pref.source) sourceEl.value = pref.source;
+        }
+      } catch {}
+    }
+
+    async function initFirebase() {
+      try {
+        if (!window.firebase) return false;
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        firebaseReady = true;
+        return true;
+      } catch (error) {
+        console.error('Firebase init error:', error);
+        firebaseReady = false;
+        return false;
+      }
+    }
+
+    async function loadAllRecords() {
+      if (!firebaseReady || !db) {
+        allRecords = readCache();
+        return allRecords;
+      }
+      try {
+        const snap = await db.collection('records').get();
+        const records = [];
+        snap.forEach(doc => records.push(doc.data()));
+        writeCache(records);
+        return records;
+      } catch (error) {
+        console.error('Load records error:', error);
+        allRecords = readCache();
+        return allRecords;
+      }
+    }
+
+    async function loadAllSessions() {
+      if (!firebaseReady || !db) {
+        allSessions = readSessionCache();
+        return allSessions;
+      }
+      try {
+        const snap = await db.collection('sessions').get();
+        const sessions = [];
+        snap.forEach(doc => sessions.push(doc.data()));
+        writeSessionCache(sessions);
+        return sessions;
+      } catch (error) {
+        console.error('Load sessions error:', error);
+        allSessions = readSessionCache();
+        return allSessions;
+      }
+    }
+
+    function makeSessionId(name, cls, table, iso) {
+      return `${makeRecordId(name, cls, table)}__${iso.replace(/[:.]/g, '-')}`;
+    }
+
+    async function saveSessionAttempt(session) {
+      const sessions = [...allSessions, session];
+      writeSessionCache(sessions);
+      if (firebaseReady && db) {
+        try {
+          await db.collection('sessions').doc(session.session_id).set(session);
+        } catch (error) {
+          console.error('Save session error:', error);
+        }
+      }
+      return session;
+    }
+
+    async function upsertRecord(updated) {
+      const records = [...allRecords];
+      const idx = records.findIndex(r => r.record_id === updated.record_id);
+      if (idx === -1) records.push(updated); else records[idx] = updated;
+      writeCache(records);
+      if (firebaseReady && db) {
+        try {
+          await db.collection('records').doc(updated.record_id).set(updated);
+        } catch (error) {
+          console.error('Save record error:', error);
+        }
+      }
+      return updated;
+    }
+
+    function getPlayerTableRecord(name, cls, table) {
+      return allRecords.find(r => r.record_id === makeRecordId(name, cls, table)) || null;
+    }
+
+    function createBlankRecord(table = gameState.currentGrade) {
+      return {
+        record_id: makeRecordId(gameState.playerName, gameState.playerClass, table),
+        player_name: gameState.playerName,
+        player_class: gameState.playerClass,
+        times_table: table,
+        total_stars: 0,
+        total_coins: 0,
+        levels_completed: 0,
+        unlocked_levels: 1,
+        best_score: 0,
+        best_time_seconds: null,
+        best_daily_score: 0,
+        best_daily_date: '',
+        total_sessions: 0,
+        weekly_sessions: 0,
+        week_key: getWeekKey(),
+        last_practiced_date: '',
+        latest_score: 0,
+        latest_correct: 0,
+        latest_total: 0,
+        latest_level: 0,
+        latest_source: '',
+        last_updated: new Date().toISOString()
+      };
+    }
+
+    function aggregatePlayerTotals(name, cls) {
+      const mine = allRecords.filter(r => normalize(r.player_name) === normalize(name) && normalize(r.player_class) === normalize(cls));
+      return {
+        stars: mine.reduce((s, r) => s + (parseInt(r.total_stars) || 0), 0),
+        coins: mine.reduce((s, r) => s + (parseInt(r.total_coins) || 0), 0)
+      };
+    }
+
+    function getUnlockedLevelsForCurrentTable() {
+      return gameState.currentRecord ? (parseInt(gameState.currentRecord.unlocked_levels) || 1) : 1;
+    }
+
+    function renderTableGrid() {
+      const grid = document.getElementById('table-grid');
+      grid.innerHTML = Object.keys(TABLE_META).map(Number).map(table => {
+        const [name, hint, bg, titleColor, hintColor] = TABLE_META[table];
+        const rec = getPlayerTableRecord(gameState.playerName, gameState.playerClass, table);
+        const unlocked = rec ? (parseInt(rec.unlocked_levels) || 1) : 1;
+        return `
+          <div onclick="selectGrade(${table})" class="bg-gradient-to-br ${bg} rounded-3xl p-5 text-center card-hover cursor-pointer border-4 border-transparent hover:border-violet-400">
+            <div class="text-4xl mb-2">×${table}</div>
+            <h3 class="text-xl font-bold ${titleColor}">${name}</h3>
+            <p class="${hintColor} text-sm mt-1">${hint}</p>
+            <p class="text-xs text-gray-500 mt-2">Unlocked to Level ${unlocked}</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getDailySeed() {
+      const d = new Date();
+      return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+    }
+
+    function pseudoRandom(seed) {
+      let hash = 0;
+      for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) % 2147483647;
+      return () => {
+        hash = (hash * 48271) % 2147483647;
+        return hash / 2147483647;
+      };
+    }
+
+    function buildDailyChallenge() {
+      const rand = pseudoRandom(getDailySeed());
+      return {
+        table: 2 + Math.floor(rand() * 11),
+        level: 2 + Math.floor(rand() * 4),
+        timer: 6,
+        questionCount: 7
+      };
+    }
+
+    function renderDailyScreen() {
+      gameState.dailyChallenge = buildDailyChallenge();
+      document.getElementById('daily-info').textContent = `Challenge date: ${getDailySeed()}`;
+      document.getElementById('daily-table').textContent = `×${gameState.dailyChallenge.table}`;
+      document.getElementById('daily-timer').textContent = `${gameState.dailyChallenge.timer}s`;
+    }
+
+    function generateLevelQuestions(grade, level, countOverride = null) {
+      const levelConfig = LEVELS[level];
+      const count = countOverride || levelConfig.questionCount;
+      const ranges = { 1: [2,7], 2: [4,11], 3: [5,12], 4: [6,12], 5: [2,12] };
+      const [min, max] = ranges[level] || [2, 12];
+      const nums = [];
+      for (let n = min; n <= max; n++) nums.push(n);
+      const picks = Array.from({ length: count }, () => nums[Math.floor(Math.random() * nums.length)]);
+      return picks.map((n, idx) => {
+        const answer = grade * n;
+        if ((levelConfig.mode === 'mixed' || levelConfig.mode === 'blitz' || levelConfig.mode === 'boss') && idx % 3 === 1) {
+          return { type: 'fill', question: `___ × ${grade} = ${answer}`, correct: String(n), emoji: level >= 4 ? '🧠' : '❓' };
+        }
+        if (levelConfig.mode === 'boss' && idx % 3 === 2) {
+          return { type: 'fill', question: `${n} × ${grade} = ?`, correct: String(answer), emoji: '👑' };
+        }
+        const wrongs = new Set();
+        const deltaMax = level >= 4 ? 8 : 5;
+        while (wrongs.size < 3) {
+          const delta = Math.floor(Math.random() * deltaMax) + 1;
+          const wrong = Math.max(1, answer + delta * (Math.random() > 0.5 ? 1 : -1));
+          if (wrong !== answer) wrongs.add(String(wrong));
+        }
+        const options = shuffle([String(answer), ...wrongs]);
+        return { type: 'mcq', question: `${grade} × ${n} = ?`, options, correct: options.indexOf(String(answer)), emoji: level >= 4 ? '🚀' : (level >= 2 ? '⚡' : '✖️') };
+      });
+    }
+
+    function getQuizQuestions() {
+      const staticQuestions = seedQuestions[gameState.currentGrade]?.[gameState.currentLevel];
+      if (staticQuestions && !gameState.dailyMode && gameState.currentLevel === 1) return staticQuestions;
+      return generateLevelQuestions(gameState.currentGrade, gameState.currentLevel, gameState.dailyMode ? gameState.dailyChallenge.questionCount : null);
+    }
+
+    function showScreen(id) {
+      document.querySelectorAll('#app > div').forEach(div => div.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function aggregatePracticeForPlayer(name, cls) {
+      const currentWeek = getWeekKey();
+      const mine = allRecords.filter(r => normalize(r.player_name) === normalize(name) && normalize(r.player_class) === normalize(cls));
+      let last = '';
+      mine.forEach(r => {
+        const value = r.last_practiced_date || r.last_updated || '';
+        if (value && (!last || new Date(value) > new Date(last))) last = value;
+      });
+      return {
+        totalSessions: mine.reduce((s, r) => s + (parseInt(r.total_sessions) || 0), 0),
+        weeklySessions: mine.reduce((s, r) => s + (r.week_key === currentWeek ? (parseInt(r.weekly_sessions) || 0) : 0), 0),
+        lastPractice: last
+      };
+    }
+
+    function updateStats() {
+      const totals = aggregatePlayerTotals(gameState.playerName, gameState.playerClass);
+      gameState.stars = totals.stars;
+      gameState.coins = totals.coins;
+      document.getElementById('star-count').textContent = gameState.stars;
+      document.getElementById('coin-count').textContent = gameState.coins;
+      document.getElementById('star-count-level').textContent = gameState.stars;
+      document.getElementById('coin-count-level').textContent = gameState.coins;
+      document.getElementById('player-name-display').textContent = gameState.playerName;
+      document.getElementById('player-class-display').textContent = gameState.playerClass;
+      const practice = aggregatePracticeForPlayer(gameState.playerName, gameState.playerClass);
+      const myWeek = document.getElementById('my-week-sessions');
+      const myLast = document.getElementById('my-last-practice');
+      if (myWeek) myWeek.textContent = `${practice.weeklySessions}/${WEEKLY_TARGET}`;
+      if (myLast) myLast.textContent = `Last practice: ${formatDateKey(practice.lastPractice)}`;
+    }
+
+    function updateQuizStats() {
+      document.getElementById('quiz-stars').textContent = gameState.quizScore;
+      document.getElementById('quiz-coins').textContent = gameState.coins;
+      document.getElementById('quiz-streak').textContent = gameState.streak;
+      document.getElementById('quiz-timer').textContent = gameState.timerRemaining > 0 ? `${gameState.timerRemaining}s` : '∞';
+    }
+
+    function startTimer() {
+      clearTimer();
+      const timer = gameState.dailyMode ? gameState.dailyChallenge.timer : LEVELS[gameState.currentLevel].timer;
+      if (!timer) {
+        gameState.timerRemaining = 0;
+        updateQuizStats();
+        return;
+      }
+      gameState.timerRemaining = timer;
+      updateQuizStats();
+      gameState.timerId = setInterval(() => {
+        gameState.timerRemaining--;
+        updateQuizStats();
+        if (gameState.timerRemaining <= 0) {
+          clearTimer();
+          showFeedback(false, true);
+        }
+      }, 1000);
+    }
+
+    function clearTimer() {
+      if (gameState.timerId) {
+        clearInterval(gameState.timerId);
+        gameState.timerId = null;
+      }
+    }
+
+    async function startAdventure() {
+      gameState.playerName = document.getElementById('student-name').value.trim() || 'Explorer';
+      gameState.playerClass = canonicalizeClass(document.getElementById('student-class').value || 'Year 1');
+      const sourceEl = document.getElementById('practice-source');
+      gameState.practiceSource = sourceEl ? sourceEl.value : 'Home Practice';
+      savePlayerPref();
+      await loadAllRecords();
+      await loadAllSessions();
+      updateStats();
+      renderTableGrid();
+      renderDailyScreen();
+      showScreen('grade-screen');
+    }
+
+    function selectGrade(grade) {
+      gameState.dailyMode = false;
+      gameState.currentGrade = grade;
+      gameState.leaderboardTable = grade;
+      gameState.currentRecord = getPlayerTableRecord(gameState.playerName, gameState.playerClass, grade) || createBlankRecord(grade);
+      document.getElementById('grade-title').textContent = `Times Table ${grade} - Levels`;
+      document.getElementById('level-subtitle').textContent = `${TABLE_META[grade][0]} · Unlocks are saved for this table only.`;
+      renderLevelPath();
+      openLeaderboard(false);
+      showScreen('level-screen');
+    }
+
+    function renderLevelPath() {
+      const unlockedLevels = getUnlockedLevelsForCurrentTable();
+      const holder = document.getElementById('level-path-holder');
+      holder.innerHTML = Object.keys(LEVELS).map(Number).map(level => {
+        const cfg = LEVELS[level];
+        const unlocked = level <= unlockedLevels;
+        const completed = level < unlockedLevels;
+        const circle = unlocked
+          ? `<div class="w-20 h-20 bg-gradient-to-br ${cfg.color} rounded-full flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform ${level === unlockedLevels ? 'pulse-glow' : ''}">${completed ? '✓' : cfg.icon}</div>`
+          : `<div class="w-20 h-20 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full flex items-center justify-center text-3xl shadow-lg">🔒</div>`;
+        const stars = completed ? '<span class="text-amber-400">⭐</span><span class="text-amber-400">⭐</span><span class="text-amber-400">⭐</span>' : unlocked ? '<span class="text-amber-400">⭐</span><span class="text-gray-300">⭐</span><span class="text-gray-300">⭐</span>' : '<span class="text-gray-300">⭐</span><span class="text-gray-300">⭐</span><span class="text-gray-300">⭐</span>';
+        return `
+          <div ${unlocked ? `onclick="startLevel(${level})"` : ''} class="${unlocked ? 'flex items-center gap-4 cursor-pointer group' : 'flex items-center gap-4 opacity-50'}">
+            <div class="flex-1 text-right"><span class="text-sm text-gray-500">${cfg.label}</span><p class="font-bold text-gray-700">${cfg.title}</p><p class="text-xs text-gray-500">${cfg.subtitle}</p></div>
+            ${circle}
+            <div class="flex-1"><div class="flex gap-1">${stars}</div><p class="text-xs text-gray-400 mt-1">Pass: ${cfg.passScore}%</p></div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function startLevel(level) {
+      const unlockedLevels = getUnlockedLevelsForCurrentTable();
+      if (!gameState.dailyMode && level > unlockedLevels) {
+        alert(`Level ${level === 5 ? 'Boss' : level} is locked for ×${gameState.currentGrade}.`);
+        return;
+      }
+      gameState.currentLevel = level;
+      gameState.currentQuestion = 0;
+      gameState.quizScore = 0;
+      gameState.streak = 0;
+      gameState.questionSet = getQuizQuestions();
+      gameState.totalQuestions = gameState.questionSet.length;
+      updateQuizStats();
+      showScreen('quiz-screen');
+      loadQuestion();
+    }
+
+    function startDailyChallenge() {
+      gameState.dailyMode = true;
+      gameState.dailyChallenge = buildDailyChallenge();
+      gameState.currentGrade = gameState.dailyChallenge.table;
+      gameState.currentLevel = gameState.dailyChallenge.level;
+      gameState.currentRecord = getPlayerTableRecord(gameState.playerName, gameState.playerClass, gameState.currentGrade) || createBlankRecord(gameState.currentGrade);
+      startLevel(gameState.currentLevel);
+    }
+
+    function getSelectedQuestion() { return gameState.questionSet[gameState.currentQuestion]; }
+
+    function loadQuestion() {
+      clearTimer();
+      const q = getSelectedQuestion();
+      const container = document.getElementById('quiz-container');
+      const progress = ((gameState.currentQuestion + 1) / gameState.totalQuestions) * 100;
+      document.getElementById('quiz-progress').style.width = `${progress}%`;
+      document.getElementById('question-num').textContent = gameState.currentQuestion + 1;
+      document.getElementById('total-questions').textContent = gameState.totalQuestions;
+      if (!q) {
+        container.innerHTML = '<div class="bg-white rounded-3xl p-8 shadow-xl text-center">No questions found.</div>';
+        return;
+      }
+      if (q.type === 'mcq') {
+        container.innerHTML = `
+          <div class="bg-white rounded-3xl p-8 shadow-xl text-center slide-up">
+            <div class="text-6xl mb-4">${q.emoji}</div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">${q.question}</h3>
+            <div class="grid grid-cols-2 gap-4">
+              ${q.options.map((opt, i) => `<button onclick="checkMCQ(${i}, ${q.correct})" class="bg-gradient-to-br from-violet-100 to-pink-100 hover:from-violet-200 hover:to-pink-200 text-gray-800 font-bold py-4 px-6 rounded-2xl text-xl transition-all btn-press card-hover">${opt}</button>`).join('')}
+            </div>
+          </div>`;
       } else {
-        document.getElementById("pinError").textContent = "Incorrect PIN. Try again.";
-        pinBuffer = "";
-        updatePinDots();
+        container.innerHTML = `
+          <div class="bg-white rounded-3xl p-8 shadow-xl text-center slide-up">
+            <div class="text-6xl mb-4">${q.emoji}</div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">${q.question}</h3>
+            <input id="fill-answer" type="number" class="w-24 h-24 text-4xl font-bold text-center border-4 border-violet-300 rounded-2xl focus:border-violet-500 focus:outline-none" placeholder="?">
+            <br>
+            <button onclick="checkFill('${q.correct}')" class="mt-6 bg-gradient-to-r from-violet-500 to-pink-500 text-white font-bold py-3 px-8 rounded-2xl shadow-lg btn-press">Check Answer ✓</button>
+          </div>`;
       }
-    }, 200);
-  }
-};
-function updatePinDots(){
-  for(let i=0;i<4;i++){
-    const dot = document.getElementById("pd"+i);
-    dot.classList.toggle("filled", i < pinBuffer.length);
-  }
-}
-window.lockTeacher = function(){
-  teacherUnlocked = false;
-  document.getElementById("teacherLocked").classList.remove("hidden");
-  document.getElementById("teacherContent").classList.add("hidden");
-};
-// ─────────────────────────────────────────────────────────────────────────────
-
-const WORLDS = [
-  {table:2, icon:"🌱", name:"Forest", boss:"Tiny Goblin"},
-  {table:3, icon:"🏝", name:"Island", boss:"Forest Beast"},
-  {table:4, icon:"⛰", name:"Mountain", boss:"Stone Golem"},
-  {table:5, icon:"🏜", name:"Desert", boss:"Pirate Captain"},
-  {table:6, icon:"🌋", name:"Volcano", boss:"Jungle Tiger"},
-  {table:7, icon:"🐉", name:"Dragon Valley", boss:"Ninja Master"},
-  {table:8, icon:"🌌", name:"Galaxy Gate", boss:"Dragon"},
-  {table:9, icon:"🧙", name:"Wizard Tower", boss:"Shadow Wizard"},
-  {table:10, icon:"⚙", name:"Robot Factory", boss:"Robot King"},
-  {table:11, icon:"👑", name:"Math Kingdom", boss:"Galaxy Guardian"},
-  {table:12, icon:"🏆", name:"Grand Palace", boss:"Math Emperor"}
-];
-
-const METHODS = [
-  { key:"repeatedAddition", name:"Repeated Addition", difficulty:"Easy" },
-  { key:"arrayMethod", name:"Array Method", difficulty:"Easy" },
-  { key:"numberLine", name:"Number Line", difficulty:"Easy" },
-  { key:"doublingStrategy", name:"Doubling Strategy", difficulty:"Easy-Medium" },
-  { key:"multipleChoice", name:"Multiple Choice", difficulty:"Medium" },
-  { key:"trueFalse", name:"True or False", difficulty:"Medium" },
-  { key:"fillBlank", name:"Fill in the Blank", difficulty:"Medium" },
-  { key:"missingEquation", name:"Missing Equation", difficulty:"Medium-Hard" },
-  { key:"dragDrop", name:"Drag & Drop", difficulty:"Hard" },
-  { key:"wordProblems", name:"Word Problems", difficulty:"Hard" }
-];
-
-const SHOP_ITEMS = [
-  { id:"avatar_blue", type:"avatar", name:"Blue Hero", price:20, preview:"🙂", previewClass:"avatar-blue", avatarEmoji:"🙂" },
-  { id:"avatar_ninja", type:"avatar", name:"Math Ninja", price:50, preview:"🥷", previewClass:"avatar-ninja", avatarEmoji:"🥷" },
-  { id:"avatar_robot", type:"avatar", name:"Robot Kid", price:80, preview:"🤖", previewClass:"avatar-robot", avatarEmoji:"🤖" },
-  { id:"frame_bronze", type:"frame", name:"Bronze Ring", price:20, preview:"🖼️", previewClass:"frame-bronze" },
-  { id:"frame_rainbow", type:"frame", name:"Rainbow Glow", price:60, preview:"🌈", previewClass:"frame-rainbow" },
-  { id:"frame_champion", type:"frame", name:"Champion Edge", price:100, preview:"🏆", previewClass:"frame-champion" },
-  { id:"bg_sky", type:"background", name:"Sky Blue", price:30, preview:"☁️", previewClass:"bg-sky", themeClass:"bg-sky-theme" },
-  { id:"bg_jungle", type:"background", name:"Jungle Math", price:70, preview:"🌿", previewClass:"bg-jungle", themeClass:"bg-jungle-theme" },
-  { id:"bg_galaxy", type:"background", name:"Galaxy Quest", price:120, preview:"🌌", previewClass:"bg-galaxy", themeClass:"bg-galaxy-theme" },
-  { id:"title_explorer", type:"title", name:"Table Explorer", price:25, preview:"Explorer" },
-  { id:"title_ninja", type:"title", name:"Number Ninja", price:60, preview:"Ninja" },
-  { id:"title_master", type:"title", name:"Multiplication Master", price:120, preview:"Master" },
-  { id:"sticker_fire", type:"sticker", name:"Fire Mind", price:25, preview:"🔥" },
-  { id:"sticker_brain", type:"sticker", name:"Brain Power", price:35, preview:"🧠" },
-  { id:"sticker_speed", type:"sticker", name:"Speed Solver", price:45, preview:"⚡" }
-];
-
-let state = {
-  currentStudentId:null,
-  currentStudent:null,
-  selectedTable:null,
-  selectedMethod:null,
-  quizQuestions:[],
-  quizIndex:0,
-  quizScore:0,
-  quizStars:0,
-  quizCoins:0,
-  bossMode:false
-};
-
-function studentId(name, studentClass){
-  return `${name.trim().toLowerCase().replace(/\s+/g,"-")}__${studentClass.trim().toLowerCase().replace(/\s+/g,"-")}`;
-}
-function todayKey(){
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-}
-function worldMultiplier(table){
-  return ({2:1,3:1.2,4:1.5,5:2,6:2.5,7:3,8:3.5,9:4,10:4.5,11:5,12:6})[table] || 1;
-}
-function completionBonus(table){
-  return ({2:20,3:25,4:35,5:50,6:60,7:80,8:100,9:120,10:150,11:180,12:250})[table] || 20;
-}
-function medalForScore(score, total=10){
-  const pct = (score/total) * 100;
-  if (pct === 100) return {level:"gold", icon:"🥇", label:"Gold"};
-  if (pct >= 90) return {level:"silver", icon:"🥈", label:"Silver"};
-  if (pct >= 75) return {level:"bronze", icon:"🥉", label:"Bronze"};
-  return {level:"none", icon:"⬜", label:"None"};
-}
-function defaultStudent(name, studentClass){
-  const completedMethods = {}, accuracies = {}, bosses = {}, chests = {}, medals = {};
-  WORLDS.forEach(w => {
-    completedMethods[w.table] = [];
-    accuracies[w.table] = {correct:0, total:0};
-    bosses[w.table] = false;
-    chests[w.table] = false;
-    medals[w.table] = "none";
-  });
-  return {
-    id: studentId(name, studentClass),
-    name, studentClass,
-    stars:0, coins:0, streak:0,
-    lastActiveDate:null, streakBonusClaimedDate:null,
-    practiceDates:[], totalSessions:0,
-    highestUnlockedTable:2,
-    completedMethods, accuracies, bosses, chests, medals,
-    inventory:{owned:[], equipped:{avatar:null,frame:null,background:null,title:null,sticker:null}},
-    dailyChallenge:{date:todayKey(), target:10, progress:0, reward:15, claimed:false},
-    updatedAt:null, createdAt:null
-  };
-}
-function normalizeStudent(s){
-  if (!s.completedMethods) s.completedMethods = {};
-  if (!s.accuracies) s.accuracies = {};
-  if (!s.bosses) s.bosses = {};
-  if (!s.chests) s.chests = {};
-  if (!s.medals) s.medals = {};
-  WORLDS.forEach(w => {
-    if (!Array.isArray(s.completedMethods[w.table])) s.completedMethods[w.table] = [];
-    if (!s.accuracies[w.table]) s.accuracies[w.table] = {correct:0,total:0};
-    if (typeof s.bosses[w.table] !== "boolean") s.bosses[w.table] = false;
-    if (typeof s.chests[w.table] !== "boolean") s.chests[w.table] = false;
-    if (!s.medals[w.table]) s.medals[w.table] = "none";
-  });
-  if (typeof s.coins !== "number") s.coins = 0;
-  if (typeof s.stars !== "number") s.stars = 0;
-  if (typeof s.streak !== "number") s.streak = 0;
-  if (!Array.isArray(s.practiceDates)) s.practiceDates = [];
-  if (!Array.isArray(s.sessionLog)) s.sessionLog = [];
-  if (typeof s.streakFreezeUsedWeek !== "string") s.streakFreezeUsedWeek = "";
-  if (typeof s.totalSessions !== "number") s.totalSessions = 0;
-  if (!s.inventory) s.inventory = {owned:[], equipped:{avatar:null,frame:null,background:null,title:null,sticker:null}};
-  if (!Array.isArray(s.inventory.owned)) s.inventory.owned = [];
-  if (!s.inventory.equipped) s.inventory.equipped = {avatar:null,frame:null,background:null,title:null,sticker:null};
-  ["avatar","frame","background","title","sticker"].forEach(k => { if (!(k in s.inventory.equipped)) s.inventory.equipped[k] = null; });
-  if (!s.dailyChallenge || s.dailyChallenge.date !== todayKey()){
-    s.dailyChallenge = {date:todayKey(), target:10, progress:0, reward:15, claimed:false};
-  }
-  return s;
-}
-async function saveStudent(){
-  if (!state.currentStudentId || !state.currentStudent) return;
-  try {
-    await setDoc(doc(db, "students", state.currentStudentId), {
-      ...state.currentStudent,
-      updatedAt: serverTimestamp(),
-      createdAt: state.currentStudent.createdAt || serverTimestamp()
-    }, {merge:true});
-    // Also cache locally as backup
-    try { localStorage.setItem("mmw_" + state.currentStudentId, JSON.stringify(state.currentStudent)); } catch(e){}
-  } catch(err) {
-    // Offline — save locally and show soft warning
-    try { localStorage.setItem("mmw_" + state.currentStudentId, JSON.stringify(state.currentStudent)); } catch(e){}
-    console.warn("Offline save:", err);
-  }
-}
-function getItem(id){ return SHOP_ITEMS.find(i => i.id === id) || null; }
-function owned(id){ return !!state.currentStudent?.inventory?.owned?.includes(id); }
-function equipped(type){ return state.currentStudent?.inventory?.equipped?.[type] || null; }
-
-function maybeUpdateStreak(student){
-  const today = todayKey();
-  // Record this day as a practice day (distinct days only)
-  if (!Array.isArray(student.practiceDates)) student.practiceDates = [];
-  if (!student.practiceDates.includes(today)) student.practiceDates.push(today);
-  if (!student.lastActiveDate){
-    student.streak = 1;
-    student.lastActiveDate = today;
-    student.streakBonusClaimedDate = null;
-    return;
-  }
-  const last = new Date(student.lastActiveDate + "T00:00:00");
-  const now = new Date(today + "T00:00:00");
-  const diff = Math.round((now - last) / 86400000);
-  const wk = startOfThisWeek().toISOString().slice(0,10);
-  if (diff === 1){
-    student.streak += 1;
-  } else if (diff === 2 && student.streakFreezeUsedWeek !== wk){
-    // Streak freeze: forgive one missed day per week instead of resetting
-    student.streak += 1;
-    student.streakFreezeUsedWeek = wk;
-    student.streakFreezeJustUsed = true;
-  } else if (diff > 1){
-    student.streak = 1;
-  }
-  student.lastActiveDate = today;
-  if (diff !== 0) student.streakBonusClaimedDate = null;
-}
-function claimStreakBonus(student){
-  const today = todayKey();
-  if (student.streakBonusClaimedDate === today) return 0;
-  const bonus = Math.min(3 + ((Math.max(1, student.streak)-1) * 2), 7);
-  student.coins += bonus;
-  student.streakBonusClaimedDate = today;
-  return bonus;
-}
-
-function daysPracticedInLast(student, n){
-  if (!Array.isArray(student.practiceDates)) return 0;
-  const cutoff = new Date();
-  cutoff.setHours(0,0,0,0);
-  cutoff.setDate(cutoff.getDate() - (n - 1));
-  return student.practiceDates.filter(d => {
-    const dt = new Date(d + "T00:00:00");
-    return dt >= cutoff;
-  }).length;
-}
-
-// Start of the current week (Monday 00:00)
-function startOfThisWeek(){
-  const d = new Date();
-  d.setHours(0,0,0,0);
-  const day = d.getDay();               // 0 = Sun, 1 = Mon, ... 6 = Sat
-  const diff = (day === 0) ? 6 : day - 1; // days since Monday
-  d.setDate(d.getDate() - diff);
-  return d;
-}
-
-// Days practised in the current Monday–Sunday week
-function daysPracticedThisWeek(student){
-  if (!Array.isArray(student.practiceDates)) return 0;
-  const weekStart = startOfThisWeek();
-  return student.practiceDates.filter(dStr => {
-    const dt = new Date(dStr + "T00:00:00");
-    return dt >= weekStart;
-  }).length;
-}
-
-window.loginStudent = async function(){
-  const studentClass = document.getElementById("studentClass").value.trim();
-  const sel = document.getElementById("studentNameSelect");
-  let name = "";
-  if (sel && sel.value && sel.value !== "__other__"){
-    name = sel.value.trim();
-  } else {
-    const typed = document.getElementById("studentName");
-    name = typed ? typed.value.trim() : "";
-  }
-  if (!name || !studentClass) { alert("Please select your year and name."); return; }
-
-  const id = studentId(name, studentClass);
-  let studentData = null;
-  try {
-    const snap = await getDoc(doc(db, "students", id));
-    studentData = snap.exists() ? normalizeStudent(snap.data()) : null;
-  } catch(err) {
-    const cached = localStorage.getItem("mmw_" + id);
-    if (cached) { try { studentData = normalizeStudent(JSON.parse(cached)); } catch(e){} }
-    document.getElementById("loginStatus").innerHTML = `<span style="color:#f59e0b;font-weight:700;">⚠ Offline mode — progress saved locally</span>`;
-  }
-  state.currentStudent = studentData || defaultStudent(name, studentClass);
-  // Attach SIP scores if available
-  const sipKey = id;
-  if (window.SIP_SCORES[sipKey] && !state.currentStudent.sipScores){
-    state.currentStudent.sipScores = window.SIP_SCORES[sipKey];
-    state.currentStudent.isSip = true;
-  }
-  state.currentStudentId = id;
-  maybeUpdateStreak(state.currentStudent);
-  const bonus = claimStreakBonus(state.currentStudent);
-  await saveStudent();
-
-  const sipBadge = state.currentStudent.isSip ? ' <span class="pill" style="background:#dbeafe;color:#1d4ed8;">★ SIP Pupil</span>' : "";
-  const freezeMsg = state.currentStudent.streakFreezeJustUsed ? ' • 🧊 Streak freeze used — your streak is safe!' : "";
-  state.currentStudent.streakFreezeJustUsed = false;
-  document.getElementById("loginStatus").innerHTML = `<span class="success">Logged in:</span> ${state.currentStudent.name} (${state.currentStudent.studentClass})${sipBadge}${bonus ? ` • streak bonus +${bonus} coins` : ""}${freezeMsg}`;
-  renderAll();
-  await loadLeaderboard();
-  if (teacherUnlocked) await loadTeacherDashboard();
-  showSection('worldsSection');
-};
-
-function renderAll(){
-  renderProfile();
-  renderWorldMap();
-  renderShop();
-}
-function renderProfile(){
-  const s = state.currentStudent;
-  const box = document.getElementById("profileBox");
-  const streakBox = document.getElementById("streakBox");
-  const challengeBox = document.getElementById("challengeBox");
-  const currentBox = document.getElementById("currentStudentBox");
-  const shopCoins = document.getElementById("shopCoins");
-  const medalSection = document.getElementById("medalSection");
-  const medalGrid = document.getElementById("medalGrid");
-
-  if (!s){
-    box.classList.add("hidden"); streakBox.classList.add("hidden"); challengeBox.classList.add("hidden"); medalSection.classList.add("hidden");
-    currentBox.textContent = "No student yet";
-    shopCoins.textContent = "🪙 0 coins";
-    document.getElementById("heroCard").classList.remove("bg-sky-theme","bg-jungle-theme","bg-galaxy-theme");
-    return;
-  }
-
-  const avatarItem = getItem(equipped("avatar"));
-  const frameItem = getItem(equipped("frame"));
-  const titleItem = getItem(equipped("title"));
-  const stickerItem = getItem(equipped("sticker"));
-  const bgItem = getItem(equipped("background"));
-
-  const avatar = document.getElementById("profileAvatar");
-  avatar.className = "avatar";
-  if (avatarItem?.previewClass) avatar.classList.add(avatarItem.previewClass);
-  if (frameItem?.previewClass) avatar.classList.add(frameItem.previewClass);
-  avatar.textContent = avatarItem?.avatarEmoji || "🙂";
-  document.getElementById("profileName").textContent = s.name;
-  document.getElementById("profileTitle").textContent = titleItem?.name || "No title equipped";
-  document.getElementById("profileSticker").textContent = stickerItem ? `Sticker: ${stickerItem.preview} ${stickerItem.name}` : "No sticker equipped";
-  document.getElementById("profileMeta").textContent = `${s.studentClass} • ⭐ ${s.stars} • 🪙 ${s.coins}`;
-  box.classList.remove("hidden");
-
-  const hero = document.getElementById("heroCard");
-  hero.classList.remove("bg-sky-theme","bg-jungle-theme","bg-galaxy-theme");
-  if (bgItem?.themeClass) hero.classList.add(bgItem.themeClass);
-
-  streakBox.textContent = `🔥 ${s.streak} day streak`;
-  streakBox.classList.remove("hidden");
-  challengeBox.textContent = s.dailyChallenge.claimed
-    ? `✅ Daily challenge complete (+${s.dailyChallenge.reward} coins claimed)`
-    : `🎯 Daily challenge: ${s.dailyChallenge.progress}/${s.dailyChallenge.target} correct answers for +${s.dailyChallenge.reward} coins`;
-  challengeBox.classList.remove("hidden");
-  currentBox.textContent = `${s.name} • ⭐ ${s.stars} • 🪙 ${s.coins} • x${s.highestUnlockedTable}`;
-  shopCoins.textContent = `🪙 ${s.coins} coins`;
-
-  // SIP test scores are tracked separately in the Excel report, not shown here.
-  const sipPanel = document.getElementById("sipScorePanel");
-  if (sipPanel) sipPanel.classList.add("hidden");
-
-  medalGrid.innerHTML = WORLDS.map(w => {
-    const medal = s.medals[w.table] || "none";
-    const icon = medal === "gold" ? "🥇" : medal === "silver" ? "🥈" : medal === "bronze" ? "🥉" : "⬜";
-    return `<div class="medal-card"><div class="medal-icon">${icon}</div><div class="small">×${w.table}</div></div>`;
-  }).join("");
-  medalSection.classList.remove("hidden");
-}
-
-window.showSection = function(id){
-  if (id === 'worldsSection') {
-    document.getElementById('methodsSection').classList.add('hidden');
-    document.getElementById('quizSection').classList.add('hidden');
-  }
-  document.getElementById(id).scrollIntoView({behavior:'smooth', block:'start'});
-};
-
-function renderWorldMap(){
-  const map = document.getElementById("worldMap");
-  map.innerHTML = "";
-  WORLDS.forEach(w => {
-    const doneCount = state.currentStudent ? state.currentStudent.completedMethods[w.table].length : 0;
-    const unlocked = state.currentStudent ? w.table <= state.currentStudent.highestUnlockedTable : w.table === 2;
-    const bossDone = state.currentStudent ? state.currentStudent.bosses[w.table] : false;
-    const allDone = doneCount === 10;
-    const chestDone = state.currentStudent ? state.currentStudent.chests[w.table] : false;
-    const medal = state.currentStudent ? state.currentStudent.medals[w.table] : "none";
-    const medalIcon = medal === "gold" ? "🥇" : medal === "silver" ? "🥈" : medal === "bronze" ? "🥉" : "⬜";
-
-    const card = document.createElement("div");
-    card.className = "world-card" + (unlocked ? "" : " locked") + (allDone ? " done" : "");
-    card.innerHTML = `
-      <div class="pill">${unlocked ? (allDone ? "World Open" : "Unlocked") : "Locked"}</div>
-      <div class="world-icon">${w.icon}</div>
-      <div class="world-table">×${w.table}</div>
-      <div style="font-weight:800">${w.name}</div>
-      <div class="small">${doneCount}/10 methods complete</div>
-      <div class="progress"><span style="width:${doneCount*10}%"></span></div>
-      <div class="small">${bossDone ? "Boss defeated" : allDone ? "Boss ready" : "Boss locked"}</div>
-      <div class="small">${chestDone ? "Chest opened" : bossDone ? "Chest ready" : "Chest locked"}</div>
-      <div class="small" style="margin-top:6px;">Medal: ${medalIcon}</div>
-    `;
-    if (unlocked) card.onclick = () => openWorld(w.table);
-    map.appendChild(card);
-  });
-}
-
-function openWorld(table){
-  state.selectedTable = table;
-  const world = WORLDS.find(w => w.table === table);
-  document.getElementById("methodsTitle").textContent = `${world.icon} ${world.name} of ×${table}`;
-  renderMethods();
-  document.getElementById("methodsSection").classList.remove("hidden");
-  document.getElementById("quizSection").classList.add("hidden");
-  showSection("methodsSection");
-}
-
-function renderMethods(){
-  const grid = document.getElementById("methodsGrid");
-  grid.innerHTML = "";
-  const methodsDone = state.currentStudent.completedMethods[state.selectedTable];
-  METHODS.forEach((m, idx) => {
-    const done = methodsDone.includes(m.key);
-    const card = document.createElement("div");
-    card.className = "method-card" + (done ? " done" : "");
-    card.innerHTML = `
-      <div class="method-head">
-        <div class="method-order">${done ? "✓" : idx+1}</div>
-        <div class="pill">${m.difficulty}</div>
-      </div>
-      <h4 style="margin:12px 0 8px;font-size:20px;">${m.name}</h4>
-      <div class="small">${done ? "Completed" : "Tap to start"}</div>
-    `;
-    card.onclick = () => startMethod(m.key);
-    grid.appendChild(card);
-  });
-
-  const world = WORLDS.find(w => w.table === state.selectedTable);
-  const allMethods = methodsDone.length === 10;
-  const bossDone = state.currentStudent.bosses[state.selectedTable];
-  const chestDone = state.currentStudent.chests[state.selectedTable];
-
-  document.getElementById("bossSection").classList.toggle("hidden", !allMethods || bossDone);
-  document.getElementById("bossName").textContent = `${world.boss} • 10 HP`;
-  document.getElementById("bossBar").style.width = "100%";
-
-  document.getElementById("chestSection").classList.toggle("hidden", !bossDone || chestDone);
-}
-
-function startMethod(methodKey){
-  state.selectedMethod = methodKey;
-  state.bossMode = false;
-  state.quizQuestions = generateQuestions(state.selectedTable, methodKey, 10, false);
-  state.quizIndex = 0; state.quizScore = 0; state.quizStars = 0; state.quizCoins = 0;
-  state.quizMissed = [];
-  state.quizStartedAt = new Date().toISOString();
-  document.getElementById("quizTitle").textContent = `World ×${state.selectedTable} • ${METHODS.find(m => m.key===methodKey).name}`;
-  document.getElementById("quizStudent").textContent = state.currentStudent.name;
-  document.getElementById("quizWorld").textContent = `×${state.selectedTable}`;
-  document.getElementById("quizMode").textContent = METHODS.find(m => m.key===methodKey).name;
-  document.getElementById("methodsSection").classList.add("hidden");
-  document.getElementById("quizSection").classList.remove("hidden");
-  renderQuizQuestion();
-  showSection("quizSection");
-}
-
-window.startBossBattle = function(){
-  state.bossMode = true;
-  state.quizQuestions = generateQuestions(state.selectedTable, "boss", 10, true);
-  state.quizIndex = 0; state.quizScore = 0; state.quizStars = 0; state.quizCoins = 0;
-  state.quizMissed = [];
-  state.quizStartedAt = new Date().toISOString();
-  document.getElementById("quizTitle").textContent = `⚔ Boss Battle • ×${state.selectedTable}`;
-  document.getElementById("quizStudent").textContent = state.currentStudent.name;
-  document.getElementById("quizWorld").textContent = `×${state.selectedTable}`;
-  document.getElementById("quizMode").textContent = "Boss Battle";
-  document.getElementById("methodsSection").classList.add("hidden");
-  document.getElementById("quizSection").classList.remove("hidden");
-  renderQuizQuestion();
-  showSection("quizSection");
-};
-
-window.backToMethods = function(){
-  document.getElementById("quizSection").classList.add("hidden");
-  document.getElementById("methodsSection").classList.remove("hidden");
-  renderMethods();
-  showSection("methodsSection");
-};
-
-function renderQuizQuestion(){
-  const q = state.quizQuestions[state.quizIndex];
-  document.getElementById("quizProgress").textContent = `${state.quizIndex+1} / ${state.quizQuestions.length}`;
-  document.getElementById("quizScore").textContent = state.quizScore;
-  document.getElementById("quizStars").textContent = state.quizStars;
-  document.getElementById("quizCoins").textContent = state.quizCoins;
-  document.getElementById("quizFeedback").textContent = "Choose the best answer";
-  document.getElementById("questionMeta").textContent = q.meta || "";
-  document.getElementById("questionText").innerHTML = q.prompt;
-  const area = document.getElementById("answersArea");
-  area.innerHTML = "";
-
-  if (q.type === "input"){
-    area.innerHTML = `<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;"><input id="typedAnswer" type="number" placeholder="Type answer" style="max-width:220px;margin:0;" /><button class="btn btn-primary" onclick="submitTypedAnswer()">Check ✓</button></div>`;
-    return;
-  }
-  if (q.type === "mcq"){
-    const wrap = document.createElement("div");
-    wrap.className = "answers";
-    q.options.forEach(opt => {
-      const btn = document.createElement("button");
-      btn.className = "answer-btn";
-      btn.textContent = opt;
-      btn.onclick = () => answerQuestion(opt);
-      wrap.appendChild(btn);
-    });
-    area.appendChild(wrap);
-    return;
-  }
-  if (q.type === "arrayVisual"){
-    area.innerHTML = buildArrayVisual(q) + `<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;"><input id="typedAnswer" type="number" placeholder="How many in total?" style="max-width:220px;margin:0;" /><button class="btn btn-primary" onclick="submitTypedAnswer()">Check ✓</button></div>`;
-    return;
-  }
-  if (q.type === "numberLineVisual"){
-    area.innerHTML = buildNumberLineVisual(q) + `<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;"><input id="typedAnswer" type="number" placeholder="Where do you land?" style="max-width:220px;margin:0;" /><button class="btn btn-primary" onclick="submitTypedAnswer()">Check ✓</button></div>`;
-    return;
-  }
-  if (q.type === "dragDropReal"){
-    area.innerHTML = buildDragDropVisual(q);
-    setupRealDragDrop();
-  }
-}
-
-window.submitTypedAnswer = function(){
-  const val = document.getElementById("typedAnswer").value.trim();
-  if (val === "") return;
-  answerQuestion(val);
-};
-
-window.submitDroppedAnswer = function(){
-  if (window.currentDroppedValue == null){
-    document.getElementById("quizFeedback").innerHTML = `<span class="danger">Drag an answer first.</span>`;
-    return;
-  }
-  answerQuestion(window.currentDroppedValue);
-};
-
-function answerQuestion(answer){
-  const q = state.quizQuestions[state.quizIndex];
-  const correct = String(answer).trim() === String(q.correct).trim();
-  const acc = state.currentStudent.accuracies[state.selectedTable];
-  acc.total += 1;
-
-  if (correct){
-    state.quizScore += 1;
-    state.quizStars += state.bossMode ? 2 : 1;
-    state.quizCoins += Math.max(1, Math.round(worldMultiplier(state.selectedTable)));
-    acc.correct += 1;
-    state.currentStudent.dailyChallenge.progress = Math.min(state.currentStudent.dailyChallenge.target, state.currentStudent.dailyChallenge.progress + 1);
-    document.getElementById("quizFeedback").innerHTML = `<span class="success">Correct!</span>`;
-  } else {
-    const mult = (typeof q.mult === "number") ? q.mult : Math.round(Number(q.correct) / state.selectedTable);
-    if (!Array.isArray(state.quizMissed)) state.quizMissed = [];
-    if (mult >= 1 && mult <= 12) state.quizMissed.push(`${state.selectedTable}×${mult}`);
-    document.getElementById("quizFeedback").innerHTML = `<span class="danger">Wrong.</span> Correct answer: ${q.correct}`;
-  }
-
-  if (state.bossMode){
-    const hp = Math.max(0, 10 - state.quizScore);
-    document.getElementById("bossBar").style.width = `${hp*10}%`;
-  }
-
-  setTimeout(() => {
-    state.quizIndex += 1;
-    if (state.quizIndex < state.quizQuestions.length){
-      renderQuizQuestion();
-    } else {
-      finishQuiz();
+      startTimer();
     }
-  }, 550);
-}
 
-async function finishQuiz(){
-  let extra = "";
-  let unlockNext = false;
+    function checkMCQ(selected, correct) { showFeedback(selected === correct); }
 
-  state.currentStudent.totalSessions = (state.currentStudent.totalSessions || 0) + 1;
-  state.currentStudent.stars += state.quizStars;
-  state.currentStudent.coins += state.quizCoins;
-
-  if (!state.bossMode){
-    const methodsDone = state.currentStudent.completedMethods[state.selectedTable];
-    if (!methodsDone.includes(state.selectedMethod)){
-      methodsDone.push(state.selectedMethod);
-      state.currentStudent.coins += Math.round(5 * worldMultiplier(state.selectedTable));
-      extra += `<div class="success" style="margin-top:8px;">First-time method bonus applied.</div>`;
-    } else {
-      extra += `<div class="small" style="margin-top:8px;">Repeat play: no extra method bonus.</div>`;
+    function checkFill(correct) {
+      const answer = document.getElementById('fill-answer').value.trim();
+      if (!answer) { alert('Please enter your answer first.'); return; }
+      showFeedback(answer === correct);
     }
-  } else {
-    if (state.quizScore >= 7){
-      state.currentStudent.bosses[state.selectedTable] = true;
-      state.currentStudent.coins += Math.round(15 * worldMultiplier(state.selectedTable));
-      const medalAward = medalForScore(state.quizScore, 10);
-      state.currentStudent.medals[state.selectedTable] = medalAward.level;
-      extra += `<div class="success" style="margin-top:8px;">Boss defeated! Boss reward added.</div>`;
-      extra += `<div class="success" style="margin-top:8px;">Medal earned: ${medalAward.icon} ${medalAward.label}</div>`;
-      if (state.selectedTable < 12 && state.currentStudent.highestUnlockedTable < state.selectedTable + 1){
-        state.currentStudent.highestUnlockedTable = state.selectedTable + 1;
-        state.currentStudent.coins += completionBonus(state.selectedTable);
-        state.currentStudent.stars += 10;
-        unlockNext = true;
-      }
-    } else {
-      extra += `<div class="danger" style="margin-top:8px;">Boss survived. Score at least 7/10 to defeat it.</div>`;
-    }
-  }
 
-  if (!state.currentStudent.dailyChallenge.claimed && state.currentStudent.dailyChallenge.progress >= state.currentStudent.dailyChallenge.target){
-    state.currentStudent.coins += state.currentStudent.dailyChallenge.reward;
-    state.currentStudent.dailyChallenge.claimed = true;
-    extra += `<div class="success" style="margin-top:8px;">Daily challenge complete! +${state.currentStudent.dailyChallenge.reward} coins</div>`;
-  }
-
-  // ── Session log (feeds the SIP sessions CSV export) ──
-  try {
-    const s = state.currentStudent;
-    if (!Array.isArray(s.sessionLog)) s.sessionLog = [];
-    const nowIso = new Date().toISOString();
-    const methodName = state.bossMode ? "Boss Battle" : (METHODS.find(m => m.key === state.selectedMethod)?.name || state.selectedMethod);
-    const methodLevel = state.bossMode ? 11 : (METHODS.findIndex(m => m.key === state.selectedMethod) + 1);
-    s.sessionLog.push({
-      ts: nowIso,
-      date: todayKey(),
-      week: startOfThisWeek().toISOString().slice(0,10),
-      table: state.selectedTable,
-      mode: methodName,
-      level: methodLevel,
-      correct: state.quizScore,
-      total: state.quizQuestions.length,
-      passed: (state.quizScore / state.quizQuestions.length) >= 0.75,
-      missed: (state.quizMissed || []).join(" ")
-    });
-    if (s.sessionLog.length > 400) s.sessionLog = s.sessionLog.slice(-400);
-  } catch(e){ console.warn("Session log skipped:", e); }
-
-  await saveStudent();
-  renderAll();
-  await loadLeaderboard();
-  if (teacherUnlocked) await loadTeacherDashboard();
-
-  document.getElementById("questionMeta").textContent = "Round Finished";
-  document.getElementById("questionText").innerHTML = `
-    Great job, ${state.currentStudent.name}!<br><br>
-    <div style="font-size:22px;font-weight:700;">
-      Score: ${state.quizScore}/10<br>
-      Stars earned: ⭐ ${state.quizStars}<br>
-      Coins earned: 🪙 ${state.quizCoins}
-    </div>
-  `;
-  document.getElementById("answersArea").innerHTML = `
-    <div style="text-align:center;padding:22px;border:2px dashed #c7d8fb;border-radius:20px;background:#f8fbff;">
-      ${extra}
-      <div style="margin-top:12px;">
-        <button class="btn btn-primary" onclick="backToMethods()">Back to Methods</button>
-      </div>
-    </div>
-  `;
-
-  if (unlockNext){
-    const next = state.selectedTable + 1;
-    const world = WORLDS.find(w => w.table === next);
-    showModal("🎉", `World ${world.icon} ×${next} Unlocked!`, `Amazing work. You finished the boss and unlocked ${world.name}. Bonus reward: +${completionBonus(state.selectedTable)} coins.`);
-  }
-}
-
-window.openTreasureChest = async function(){
-  if (!state.currentStudent || !state.currentStudent.bosses[state.selectedTable] || state.currentStudent.chests[state.selectedTable]) return;
-  const pool = [
-    {type:"coins", amount:20, text:"🪙 20 coins"},
-    {type:"coins", amount:35, text:"🪙 35 coins"},
-    {type:"item", itemId:"sticker_fire", text:"🔥 Sticker: Fire Mind"},
-    {type:"item", itemId:"sticker_brain", text:"🧠 Sticker: Brain Power"},
-    {type:"item", itemId:"avatar_ninja", text:"🥷 Avatar: Math Ninja"},
-    {type:"item", itemId:"title_explorer", text:"🏷 Title: Table Explorer"}
-  ];
-  const reward = pool[Math.floor(Math.random()*pool.length)];
-  if (reward.type === "coins"){
-    state.currentStudent.coins += reward.amount;
-  } else {
-    if (!state.currentStudent.inventory.owned.includes(reward.itemId)) {
-      state.currentStudent.inventory.owned.push(reward.itemId);
-    }
-    const item = getItem(reward.itemId);
-    state.currentStudent.inventory.equipped[item.type] = reward.itemId;
-  }
-  state.currentStudent.chests[state.selectedTable] = true;
-  await saveStudent();
-  renderAll();
-  renderMethods();
-  showModal("🎁", "Treasure Chest Opened!", `You received ${reward.text}`);
-};
-
-function showModal(icon, title, text){
-  document.getElementById("modalIcon").textContent = icon;
-  document.getElementById("modalTitle").textContent = title;
-  document.getElementById("modalText").textContent = text;
-  createConfetti();
-  document.getElementById("overlay").classList.add("show");
-}
-window.closeModal = function(){ document.getElementById("overlay").classList.remove("show"); };
-
-function createConfetti(){
-  const wrap = document.getElementById("confettiWrap");
-  wrap.innerHTML = "";
-  const colors = ["#60a5fa","#fbbf24","#34d399","#fb7185","#a78bfa"];
-  for (let i=0;i<42;i++){
-    const el = document.createElement("div");
-    el.className = "confetti";
-    el.style.left = `${Math.random()*100}%`;
-    el.style.background = colors[i%colors.length];
-    el.style.animationDelay = `${Math.random()*.6}s`;
-    wrap.appendChild(el);
-  }
-}
-
-function buildArrayVisual(q){
-  let rowsHtml = "", delay=0;
-  for(let r=0;r<q.rows;r++){
-    let dots="";
-    for(let c=0;c<q.cols;c++){
-      dots += `<div class="array-dot" style="animation-delay:${delay}ms"></div>`;
-      delay += 60;
-    }
-    rowsHtml += `<div class="array-row">${dots}</div>`;
-  }
-  return `<div class="visual-board"><div class="array-wrap">${rowsHtml}</div><div class="small">${q.rows} rows × ${q.cols} columns</div></div>`;
-}
-function buildNumberLineVisual(q){
-  const end=q.answer, step=q.step, jumps=q.jumps, width=620, startX=40, endX=580, y=90, usable=endX-startX;
-  const points=[];
-  for(let i=0;i<=jumps;i++){ const value=i*step; const x=startX+(usable*value/end); points.push({x,value}); }
-  let ticks="", paths="";
-  points.forEach(p=>{ ticks += `<line class="tick" x1="${p.x}" y1="${y-8}" x2="${p.x}" y2="${y+12}"></line><text class="tick-label" x="${p.x}" y="${y+34}" text-anchor="middle">${p.value}</text>`; });
-  for(let i=0;i<points.length-1;i++){ const p1=points[i],p2=points[i+1],mid=(p1.x+p2.x)/2; paths += `<path class="jump-path" style="animation-delay:${i*0.25}s" d="M ${p1.x} ${y} Q ${mid} ${y-42} ${p2.x} ${y}"></path>`; }
-  return `<div class="visual-board"><div class="numberline-wrap"><svg class="numberline-svg" viewBox="0 0 ${width} 150"><line class="line-base" x1="${startX}" y1="${y}" x2="${endX}" y2="${y}"></line>${ticks}${paths}</svg></div></div>`;
-}
-function buildDragDropVisual(q){
-  return `<div class="visual-board"><div class="dragdrop-wrap">
-    <div class="drag-equation">${q.left} × ${q.right} = <span id="dropAnswerText">?</span></div>
-    <div id="dropZone" class="drop-zone">Drop here</div>
-    <div class="drag-options">${q.options.map((opt,i)=>`<div class="drag-chip" draggable="true" data-value="${opt}" id="dragChip${i}">${opt}</div>`).join("")}</div>
-    <button class="btn btn-primary" onclick="submitDroppedAnswer()">Check ✓</button>
-  </div></div>`;
-}
-function setupRealDragDrop(){
-  window.currentDroppedValue = null;
-  const dropZone = document.getElementById("dropZone");
-  const answerText = document.getElementById("dropAnswerText");
-  const chips = document.querySelectorAll(".drag-chip");
-
-  // Mouse drag-and-drop
-  chips.forEach(chip => chip.addEventListener("dragstart", e => {
-    e.dataTransfer.setData("text/plain", chip.dataset.value);
-    e.dataTransfer.setData("chip-id", chip.id);
-  }));
-  dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("over"); });
-  dropZone.addEventListener("dragleave", () => dropZone.classList.remove("over"));
-  dropZone.addEventListener("drop", e => {
-    e.preventDefault(); dropZone.classList.remove("over");
-    const value = e.dataTransfer.getData("text/plain");
-    const chipId = e.dataTransfer.getData("chip-id");
-    window.currentDroppedValue = value;
-    answerText.textContent = value;
-    dropZone.textContent = "";
-    dropZone.appendChild(answerText);
-    chips.forEach(c => c.classList.remove("used"));
-    document.getElementById(chipId)?.classList.add("used");
-  });
-
-  // Touch support for mobile
-  let touchChip = null;
-  let touchClone = null;
-  chips.forEach(chip => {
-    chip.addEventListener("touchstart", e => {
-      touchChip = chip;
-      const rect = chip.getBoundingClientRect();
-      touchClone = chip.cloneNode(true);
-      touchClone.style.cssText = `position:fixed;top:${rect.top}px;left:${rect.left}px;width:${rect.width}px;opacity:0.75;z-index:9999;pointer-events:none;`;
-      document.body.appendChild(touchClone);
-    }, {passive:true});
-    chip.addEventListener("touchmove", e => {
-      if (!touchClone) return;
-      const t = e.touches[0];
-      touchClone.style.top = (t.clientY - 30) + "px";
-      touchClone.style.left = (t.clientX - 40) + "px";
-      const dz = dropZone.getBoundingClientRect();
-      if (t.clientX >= dz.left && t.clientX <= dz.right && t.clientY >= dz.top && t.clientY <= dz.bottom){
-        dropZone.classList.add("over");
+    function showFeedback(isCorrect, timedOut = false) {
+      clearTimer();
+      const overlay = document.getElementById('feedback-overlay');
+      const content = document.getElementById('feedback-content');
+      overlay.classList.remove('hidden');
+      if (isCorrect) {
+        gameState.quizScore++;
+        gameState.streak++;
+        let bonus = 10;
+        if (gameState.currentLevel >= 3) bonus = 15;
+        if (gameState.currentLevel >= 5) bonus = 20;
+        if (gameState.streak > 0 && gameState.streak % 3 === 0) bonus += 10;
+        gameState.coins += bonus;
+        content.innerHTML = `<div class="bounce-in"><div class="text-8xl mb-4">🎉</div><h2 class="text-3xl font-bold text-green-500">Brilliant! You've got it!</h2><p class="text-xl text-gray-600 mt-2">+${bonus} 🪙</p>${gameState.streak % 3 === 0 ? '<p class="text-sm text-orange-500 font-bold mt-2">🔥 Combo bonus!</p>' : ''}</div>`;
       } else {
-        dropZone.classList.remove("over");
+        gameState.streak = 0;
+        content.innerHTML = `<div class="shake"><div class="text-8xl mb-4">${timedOut ? '⏰' : '😅'}</div><h2 class="text-3xl font-bold text-orange-500">${timedOut ? "Time's up!" : 'Not quite! Try again!'}</h2></div>`;
       }
-    }, {passive:true});
-    chip.addEventListener("touchend", e => {
-      if (touchClone) { touchClone.remove(); touchClone = null; }
-      if (!touchChip) return;
-      const t = e.changedTouches[0];
-      const dz = dropZone.getBoundingClientRect();
-      dropZone.classList.remove("over");
-      if (t.clientX >= dz.left && t.clientX <= dz.right && t.clientY >= dz.top && t.clientY <= dz.bottom){
-        window.currentDroppedValue = touchChip.dataset.value;
-        answerText.textContent = touchChip.dataset.value;
-        dropZone.textContent = "";
-        dropZone.appendChild(answerText);
-        chips.forEach(c => c.classList.remove("used"));
-        touchChip.classList.add("used");
-      }
-      touchChip = null;
-    });
-  });
-}
-
-function generateQuestions(table, methodKey, count, boss=false){
-  const qs = [];
-  for(let i=0;i<count;i++){
-    let multiplier = rand(1,12);
-    if (boss) multiplier = rand(6,12);
-    const answer = table * multiplier;
-
-    if (methodKey === "repeatedAddition"){
-      const repeated = Array(multiplier).fill(table).join(" + ");
-      qs.push({prompt:`${repeated} = ?`, correct:answer, type:"input", meta:`Repeated Addition • ×${table}`});
-    } else if (methodKey === "arrayMethod"){
-      qs.push({prompt:`Show ${multiplier} rows of ${table}. How many total?`, correct:answer, answer, rows:multiplier, cols:table, type:"arrayVisual", meta:`Array Method • ×${table}`});
-    } else if (methodKey === "numberLine"){
-      qs.push({prompt:`Jump ${multiplier} times in groups of ${table}. Where do you land?`, correct:answer, answer, step:table, jumps:multiplier, type:"numberLineVisual", meta:`Number Line • ×${table}`});
-    } else if (methodKey === "doublingStrategy"){
-      const half = Math.floor(table/2);
-      const text = table % 2 === 0 ? `If ${half} × ${multiplier} = ${half*multiplier}, what is ${table} × ${multiplier}?` : `${table} × ${multiplier} = ?`;
-      qs.push({prompt:text, correct:answer, options:shuffle([answer, answer+table, Math.max(1,answer-table), answer+1]), type:"mcq", meta:`Doubling Strategy • ×${table}`});
-    } else if (methodKey === "multipleChoice" || methodKey === "boss"){
-      qs.push({prompt:`${table} × ${multiplier} = ?`, correct:answer, options:shuffle([answer, answer+1, Math.max(1,answer-1), answer+table]), type:"mcq", meta: boss ? `Boss Attack • ×${table}` : `Multiple Choice • ×${table}`});
-    } else if (methodKey === "trueFalse"){
-      const shown = Math.random() < 0.5 ? answer : answer + rand(1,3);
-      qs.push({prompt:`${table} × ${multiplier} = ${shown}`, correct: shown === answer ? "True" : "False", options:["True","False"], type:"mcq", meta:`True or False • ×${table}`});
-    } else if (methodKey === "fillBlank"){
-      qs.push({prompt:`${table} × ${multiplier} = __`, correct:answer, type:"input", meta:`Fill in the Blank • ×${table}`});
-    } else if (methodKey === "missingEquation"){
-      qs.push({prompt:`${table} × __ = ${answer}`, correct:multiplier, type:"input", meta:`Missing Equation • ×${table}`});
-    } else if (methodKey === "dragDrop"){
-      qs.push({prompt:`Match: ${table} × ${multiplier} = ?`, correct:answer, left:table, right:multiplier, options:shuffle([answer, answer+10, Math.max(1,answer-5), Math.max(1,answer-1)]), type:"dragDropReal", meta:`Drag & Drop • ×${table}`});
-    } else if (methodKey === "wordProblems"){
-      const items = ["apples","books","pencils","stickers","balls"];
-      const item = items[rand(0,items.length-1)];
-      qs.push({prompt:`A pupil has ${multiplier} bags. Each bag has ${table} ${item}. How many ${item} altogether?`, correct:answer, options:shuffle([answer, answer+1, Math.max(1,answer-1), answer+table]), type:"mcq", meta:`Word Problem • ×${table}`});
+      updateQuizStats();
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+        nextQuestion();
+      }, 1100);
     }
-    if (qs.length) qs[qs.length-1].mult = multiplier;
-  }
-  return qs;
-}
-function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
-function shuffle(arr){ return [...arr].sort(() => Math.random()-0.5); }
 
-window.buyItem = async function(itemId){
-  if (!state.currentStudent){ alert("Please log in first."); return; }
-  const item = getItem(itemId);
-  if (!item) return;
-  if (owned(itemId)){
-    state.currentStudent.inventory.equipped[item.type] = itemId;
-    await saveStudent(); renderAll(); await loadLeaderboard(); await loadTeacherDashboard();
-    return;
-  }
-  if (state.currentStudent.coins < item.price){ alert("Not enough coins yet."); return; }
-  state.currentStudent.coins -= item.price;
-  state.currentStudent.inventory.owned.push(itemId);
-  state.currentStudent.inventory.equipped[item.type] = itemId;
-  await saveStudent();
-  renderAll();
-  await loadLeaderboard();
-  await loadTeacherDashboard();
-};
+    function nextQuestion() {
+      gameState.currentQuestion++;
+      if (gameState.currentQuestion < gameState.totalQuestions) loadQuestion();
+      else showCelebration();
+    }
 
-function renderShop(){
-  const grid = document.getElementById("shopGrid");
-  const summary = document.getElementById("inventorySummary");
-  if (!state.currentStudent){
-    summary.textContent = "Login to view inventory.";
-    grid.innerHTML = `<div class="small">No student logged in yet.</div>`;
-    return;
-  }
-  const s = state.currentStudent;
-  summary.innerHTML = `Owned items: <b>${s.inventory.owned.length}</b> • Avatar: <b>${getItem(equipped("avatar"))?.name || "None"}</b> • Frame: <b>${getItem(equipped("frame"))?.name || "None"}</b> • Background: <b>${getItem(equipped("background"))?.name || "None"}</b> • Title: <b>${getItem(equipped("title"))?.name || "None"}</b> • Sticker: <b>${getItem(equipped("sticker"))?.name || "None"}</b>`;
-  grid.innerHTML = SHOP_ITEMS.map(item => {
-    const own = owned(item.id), equip = equipped(item.type) === item.id;
-    return `<div class="shop-item ${own ? "owned" : ""}">
-      <div class="item-preview ${item.previewClass || ""}">${item.preview}</div>
-      <div style="font-size:18px;font-weight:800;">${item.name}${own ? '<span class="owned-badge">Owned</span>' : ''}</div>
-      <div class="small" style="margin:6px 0 10px;">${item.type.charAt(0).toUpperCase()+item.type.slice(1)}</div>
-      <div class="pill" style="margin-bottom:12px;">🪙 ${item.price}</div>
-      <button class="btn ${equip ? "btn-green" : own ? "btn-secondary" : "btn-primary"}" style="width:100%" onclick="buyItem('${item.id}')">
-        ${equip ? "Equipped" : own ? "Equip" : "Buy"}
-      </button>
-    </div>`;
-  }).join("");
-}
+    async function showCelebration() {
+      clearTimer();
+      const levelCfg = LEVELS[gameState.currentLevel];
+      const percent = Math.round((gameState.quizScore / gameState.totalQuestions) * 100);
+      const passTarget = gameState.dailyMode ? 85 : levelCfg.passScore;
+      const passed = percent >= passTarget;
+      const perfect = percent === 100;
+      const bonusStars = passed ? 3 : 1;
+      const bonusCoins = gameState.currentLevel >= 4 ? 60 : 50;
+      const timerBase = gameState.dailyMode ? gameState.dailyChallenge.timer : levelCfg.timer;
+      const timeUsed = timerBase ? ((timerBase * gameState.totalQuestions) - Math.max(0, gameState.timerRemaining)) : 0;
 
-function renderPlayerCard(s, rank, highlight=false){
-  const avatarItem = getItem(s.inventory?.equipped?.avatar);
-  const frameItem = getItem(s.inventory?.equipped?.frame);
-  const titleItem = getItem(s.inventory?.equipped?.title);
-  const stickerItem = getItem(s.inventory?.equipped?.sticker);
-  const avatarEmoji = avatarItem?.avatarEmoji || "🙂";
-  const medalCount = Object.values(s.medals || {}).filter(v => v && v !== "none").length;
-  const medalIcons = WORLDS.map(w => { const m = s.medals?.[w.table] || "none"; return m === "gold" ? "🥇" : m === "silver" ? "🥈" : m === "bronze" ? "🥉" : ""; }).filter(Boolean).slice(0,4).join("");
-  return `
-    <div class="lb-row" style="${highlight ? 'background:#eff6ff;border-radius:16px;' : ''}">
-      <div class="lb-left">
-        <div class="lb-rank">${rank}</div>
-        <div class="lb-avatar ${avatarItem?.previewClass || ''} ${frameItem?.previewClass || ''}">${avatarEmoji}</div>
-        <div>
-          <div class="highlight-name">${s.name}</div>
-          <div class="small">${titleItem?.name || 'No title'} ${stickerItem ? '• ' + stickerItem.preview + ' ' + stickerItem.name : ''}</div>
-          <div class="small">${medalIcons || '⬜'} ${medalCount ? '• ' + medalCount + ' medals' : ''}</div>
-        </div>
-      </div>
-      <div style="text-align:right">
-        <div>⭐ ${s.stars || 0} • 🪙 ${s.coins || 0}</div>
-        <div class="small">×${s.highestUnlockedTable || 2} • ${accuracy(s)}%</div>
-      </div>
-    </div>
-  `;
-}
-function accuracy(s){
-  let correct=0,total=0;
-  Object.values(s.accuracies || {}).forEach(v => { correct += v.correct || 0; total += v.total || 0; });
-  return total ? Math.round((correct/total)*100) : 0;
-}
+      const record = gameState.currentRecord || createBlankRecord();
+      record.total_stars = (parseInt(record.total_stars) || 0) + bonusStars;
+      record.total_coins = (parseInt(record.total_coins) || 0) + bonusCoins + (gameState.coins - aggregatePlayerTotals(gameState.playerName, gameState.playerClass).coins);
+      record.levels_completed = Math.max(parseInt(record.levels_completed) || 0, gameState.currentLevel);
+      if (!gameState.dailyMode && passed && gameState.currentLevel < 5) record.unlocked_levels = Math.max(parseInt(record.unlocked_levels) || 1, gameState.currentLevel + 1);
+      record.best_score = Math.max(parseInt(record.best_score) || 0, percent);
+      if (passed && timerBase) {
+        const previous = record.best_time_seconds == null ? Number.MAX_SAFE_INTEGER : Number(record.best_time_seconds);
+        if (timeUsed < previous) record.best_time_seconds = timeUsed;
+      }
+      if (gameState.dailyMode && passed) {
+        record.best_daily_score = Math.max(parseInt(record.best_daily_score) || 0, percent);
+        record.best_daily_date = getDailySeed();
+      }
+      const now = new Date();
+      const nowIso = now.toISOString();
+      const currentWeekKey = getWeekKey(now);
+      const session = {
+        session_id: makeSessionId(gameState.playerName, gameState.playerClass, gameState.currentGrade, nowIso),
+        player_name: gameState.playerName,
+        player_class: gameState.playerClass,
+        practice_source: gameState.practiceSource || 'Home Practice',
+        times_table: gameState.currentGrade,
+        level: gameState.currentLevel,
+        mode: gameState.dailyMode ? 'Daily Challenge' : levelCfg.title,
+        correct: gameState.quizScore,
+        total: gameState.totalQuestions,
+        score_percent: percent,
+        passed: passed,
+        date_key: getDateKey(now),
+        week_key: currentWeekKey,
+        timestamp_iso: nowIso,
+        created_at: nowIso
+      };
+      await saveSessionAttempt(session);
 
-window.loadLeaderboard = async function(){
-  const top = document.getElementById("topLeaderboard");
-  const around = document.getElementById("aroundMe");
-  top.innerHTML = `<div class="small">Loading leaderboard...</div>`;
-  around.innerHTML = `<div class="small">Loading your rank...</div>`;
+      if (record.week_key !== currentWeekKey) {
+        record.week_key = currentWeekKey;
+        record.weekly_sessions = 0;
+      }
+      record.total_sessions = (parseInt(record.total_sessions) || 0) + 1;
+      record.weekly_sessions = (parseInt(record.weekly_sessions) || 0) + 1;
+      record.latest_score = percent;
+      record.latest_correct = gameState.quizScore;
+      record.latest_total = gameState.totalQuestions;
+      record.latest_level = gameState.currentLevel;
+      record.latest_source = gameState.practiceSource || 'Home Practice';
+      record.last_practiced_date = nowIso;
+      record.last_updated = nowIso;
+      gameState.currentRecord = await upsertRecord(record);
+      await loadAllRecords();
+      await loadAllSessions();
 
-  try{
-    const snap = await getDocs(collection(db, "students"));
-    let students = snap.docs.map(d => normalizeStudent(d.data()));
-    students.sort((a,b) => (b.stars||0)-(a.stars||0) || (b.highestUnlockedTable||2)-(a.highestUnlockedTable||2) || (a.name||"").localeCompare(b.name||""));
-    if (!students.length){ top.innerHTML = `<div class="small">No student data yet.</div>`; around.innerHTML = ""; return; }
+      updateStats();
+      renderTableGrid();
+      renderLevelPath();
+      updateLeaderboard();
+      renderTeacherDashboard();
 
-    top.innerHTML = students.slice(0,3).map((s,i)=>renderPlayerCard(s,["🥇","🥈","🥉"][i], false)).join("");
+      document.getElementById('celebration-message').textContent = passed ? `${gameState.playerName}, great job! ${gameState.dailyMode ? 'Daily challenge cleared.' : 'New level unlocked.'}` : `${gameState.playerName}, keep going! Reach ${passTarget}% to unlock the next level.`;
+      document.getElementById('celebration-score').textContent = `${percent}%`;
+      document.getElementById('celebration-time-text').textContent = timerBase ? `${timeUsed}s` : 'No timer';
+      document.getElementById('celebration-coins-text').textContent = `+${bonusCoins} Coins`;
+      document.getElementById('celebration-stars-text').textContent = `${bonusStars} Stars`;
+      document.getElementById('celebration-stars-visual').innerHTML = Array.from({ length: bonusStars }).map((_, i) => `<span class="text-3xl star-spin" style="animation-delay:${0.1 + i * 0.2}s">⭐</span>`).join('');
+      const practiceAfter = aggregatePracticeForPlayer(gameState.playerName, gameState.playerClass);
+      document.getElementById('new-badge').classList.toggle('hidden', !perfect);
+      document.getElementById('celebration-note').textContent = gameState.dailyMode ? `Daily challenge ×${gameState.currentGrade} · ${gameState.playerClass} · Practice recorded (${practiceAfter.weeklySessions}/${WEEKLY_TARGET} this week)` : `${levelCfg.title} · Target ${passTarget}% · Practice recorded (${practiceAfter.weeklySessions}/${WEEKLY_TARGET} this week)`;
 
-    if (state.currentStudent){
-      const idx = students.findIndex(s => s.id === state.currentStudent.id);
-      if (idx >= 0){
-        const slice = students.slice(Math.max(0,idx-2), Math.min(students.length, idx+3));
-        around.innerHTML = `<div style="font-weight:900;margin-bottom:8px;">Around You</div>` + slice.map((s, i) => renderPlayerCard(s, `#${Math.max(0,idx-2)+i+1}`, s.id === state.currentStudent.id)).join("");
+      const nextBtn = document.getElementById('next-level-btn');
+      if (gameState.dailyMode) {
+        nextBtn.textContent = '🏆 View Leaderboard';
+        nextBtn.onclick = () => { gameState.dailyMode = false; gameState.leaderboardTable = gameState.currentGrade; openLeaderboard(); };
+      } else if (passed && gameState.currentLevel < 5) {
+        nextBtn.textContent = `▶️ Go to ${gameState.currentLevel + 1 === 5 ? 'Boss Level' : 'Level ' + (gameState.currentLevel + 1)}`;
+        nextBtn.onclick = () => startLevel(gameState.currentLevel + 1);
       } else {
-        around.innerHTML = `<div class="small">Your rank will appear after your first saved result.</div>`;
+        nextBtn.textContent = '🔁 Retry Level';
+        nextBtn.onclick = () => startLevel(gameState.currentLevel);
       }
-    } else {
-      around.innerHTML = `<div class="small">Login to see your nearby rank.</div>`;
-    }
-  }catch(err){
-    console.error(err);
-    top.innerHTML = `<div class="small" style="color:#f59e0b;">⚠ Could not load leaderboard — check your connection.</div>`;
-    around.innerHTML = "";
-  }
-};
 
-window.exportSessionsCSV = function(){
-  const students = window.__sessionsExportStudents || [];
-  const rows = [];
-  students.forEach(s => {
-    (s.sessionLog || []).forEach(r => {
-      const pct = r.total ? Math.round((r.correct / r.total) * 100) : 0;
-      rows.push([
-        `"${(s.id || s.name) + "__" + r.ts}"`,
-        r.date, r.ts,
-        `"${s.name}"`, `"${s.studentClass || ""}"`,
-        "Home Practice",
-        r.table, r.level, `"${r.mode}"`,
-        r.correct, r.total, pct, r.passed,
-        `"${r.missed || ""}"`,
-        r.week
-      ].join(","));
-    });
-  });
-  if (!rows.length){ alert("No session data to export yet. Sessions are recorded each time a pupil finishes a round."); return; }
-  const headers = ["session_id","date_key","timestamp_iso","player_name","player_class","practice_source","times_table","level","mode","correct","total","score_percent","passed","missed_facts","week_key"];
-  const csv = headers.join(",") + "\n" + rows.join("\n");
-  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `multiplication_quest_sessions_v3_${todayKey()}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-};
-
-window.exportFrequencyCSV = function(){
-  const data = window.__freqExportData || [];
-  if (!data.length){ alert("No practice data to export yet."); return; }
-  const target = window.__weeklyTarget || 2;
-  const headers = ["Pupil","Year","Total Days Practised","Days This Week (Mon-Sun)",`Met Target (${target}+ days)`,"Total Sessions","Current Streak","Last Played","All Practice Dates"];
-  const rows = data.map(d => [
-    `"${d.name}"`, d.year, d.totalDays, d.thisWeek, d.targetMet, d.sessions, d.streak, d.lastPlayed, `"${d.allDates}"`
-  ].join(","));
-  const csv = headers.join(",") + "\n" + rows.join("\n");
-  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `home_practice_frequency_${todayKey()}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-};
-
-window.loadTeacherDashboard = async function(){
-  const teacherLb = document.getElementById("teacherLeaderboard");
-  const heatmap = document.getElementById("heatmap");
-  teacherLb.innerHTML = `<div class="small">Loading dashboard...</div>`;
-  heatmap.innerHTML = "";
-
-  try{
-    const snap = await getDocs(collection(db, "students"));
-    let students = snap.docs.map(d => normalizeStudent(d.data()));
-    const filterClass = document.getElementById("filterClass").value || "All";
-    const search = (document.getElementById("teacherSearch").value || "").trim().toLowerCase();
-    if (filterClass !== "All") students = students.filter(s => s.studentClass === filterClass);
-    if (search) students = students.filter(s => (s.name||"").toLowerCase().includes(search));
-    students.sort((a,b) => (b.stars||0)-(a.stars||0) || (b.highestUnlockedTable||2)-(a.highestUnlockedTable||2));
-    window.__sessionsExportStudents = students;
-
-    if (students.length){
-      teacherLb.innerHTML = students.slice(0,10).map((s,i)=>renderPlayerCard(s,`#${i+1}`,false)).join("");
-    } else {
-      teacherLb.innerHTML = `<div class="small" style="color:#6b7280;">No pupils have played yet. Game data and home practice frequency will appear once pupils start playing.</div>`;
+      showScreen('celebration-screen');
+      createConfetti();
+      gameState.dailyMode = false;
     }
 
-    // ── Home Practice Frequency table ──
-    if (students.length){
-      const weeklyTarget = parseInt(document.getElementById("weeklyTarget")?.value || "2", 10);
-      const freqStudents = [...students].sort((a,b) =>
-        (b.practiceDates?.length||0) - (a.practiceDates?.length||0));
+    function createConfetti() {
+      const container = document.getElementById('confetti-container');
+      container.innerHTML = '';
+      const colors = ['#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#3B82F6'];
+      for (let i = 0; i < 50; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + '%';
+        c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        c.style.animationDelay = Math.random() * 2 + 's';
+        c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+        container.appendChild(c);
+      }
+    }
 
-      let metCount = 0, belowCount = 0;
-      freqStudents.forEach(s => {
-        (daysPracticedThisWeek(s) >= weeklyTarget) ? metCount++ : belowCount++;
+    function setLeaderboardMode(mode) {
+      gameState.leaderboardMode = mode;
+      document.getElementById('lb-overall').className = mode === 'overall' ? 'bg-violet-500 text-white rounded-2xl px-4 py-2 shadow-md' : 'bg-white text-gray-700 rounded-2xl px-4 py-2 shadow-md';
+      document.getElementById('lb-class').className = mode === 'class' ? 'bg-violet-500 text-white rounded-2xl px-4 py-2 shadow-md' : 'bg-white text-gray-700 rounded-2xl px-4 py-2 shadow-md';
+      updateLeaderboard();
+    }
+
+    function setLeaderboardTable(value) {
+      const table = parseInt(value) || 2;
+      gameState.leaderboardTable = table;
+      updateLeaderboard();
+    }
+
+    function syncLeaderboardTableSelect() {
+      const select = document.getElementById('leaderboard-table-select');
+      if (select) select.value = String(gameState.leaderboardTable || gameState.currentGrade || 2);
+    }
+
+    function openLeaderboard(show = true) {
+      // Keep the leaderboard independent from the Teacher Dashboard.
+      // Opening from a selected table uses that table as the default, but changing the dropdown does not change currentGrade.
+      if (!gameState.leaderboardTable) gameState.leaderboardTable = gameState.currentGrade || 2;
+      syncLeaderboardTableSelect();
+      updateLeaderboard();
+      if (show) showScreen('leaderboard-screen');
+    }
+
+    function updateLeaderboard() {
+      const selectedTable = gameState.leaderboardTable || gameState.currentGrade || 2;
+      let filtered = allRecords.filter(r => (parseInt(r.times_table) || 2) === selectedTable);
+      if (gameState.leaderboardMode === 'class') filtered = filtered.filter(r => normalize(r.player_class) === normalize(gameState.playerClass));
+      const sorted = [...filtered].sort((a, b) => {
+        const scoreDiff = (parseInt(b.best_score) || 0) - (parseInt(a.best_score) || 0);
+        if (scoreDiff !== 0) return scoreDiff;
+        const starDiff = (parseInt(b.total_stars) || 0) - (parseInt(a.total_stars) || 0);
+        if (starDiff !== 0) return starDiff;
+        const timeA = a.best_time_seconds == null ? Number.MAX_SAFE_INTEGER : Number(a.best_time_seconds);
+        const timeB = b.best_time_seconds == null ? Number.MAX_SAFE_INTEGER : Number(b.best_time_seconds);
+        return timeA - timeB;
       });
 
-      let freq = `<div style="margin-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-        <span style="font-weight:900;">📅 Home Practice Frequency</span>
-        <span style="display:flex;gap:6px;flex-wrap:wrap;">
-        <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;" onclick="exportFrequencyCSV()">⬇ Frequency CSV</button>
-        <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;" onclick="exportSessionsCSV()">⬇ Sessions CSV (SIP)</button>
-        </span>
-      </div>`;
-      freq += `<div style="display:flex;gap:10px;margin:8px 0;flex-wrap:wrap;">
-        <span class="pill" style="background:#dcfce7;color:#166534;">✓ Met target (${weeklyTarget}+ days): ${metCount}</span>
-        <span class="pill" style="background:#fee2e2;color:#991b1b;">⚠ Below target: ${belowCount}</span>
-      </div>`;
-      freq += `<div class="heatmap-scroll"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:580px;margin-top:8px;">`;
-      freq += `<tr style="text-align:left;color:#6b7280;font-size:11px;">
-        <th style="padding:6px;">Pupil</th>
-        <th style="padding:6px;text-align:center;">Year</th>
-        <th style="padding:6px;text-align:center;">Total Days</th>
-        <th style="padding:6px;text-align:center;">This Week (Mon–Sun)</th>
-        <th style="padding:6px;text-align:center;">Target Met?</th>
-        <th style="padding:6px;text-align:center;">Sessions</th>
-        <th style="padding:6px;text-align:center;">Current Streak</th>
-        <th style="padding:6px;text-align:center;">Last Played</th></tr>`;
-      freqStudents.forEach(s => {
-        const totalDays = s.practiceDates?.length || 0;
-        const thisWeek = daysPracticedThisWeek(s);
-        const met = thisWeek >= weeklyTarget;
-        const weekCol = met ? "#10b981" : thisWeek >= 1 ? "#f59e0b" : "#ef4444";
-        const metCell = met
-          ? `<span style="color:#10b981;font-weight:700;">✓ Yes</span>`
-          : `<span style="color:#ef4444;font-weight:700;">✗ No</span>`;
-        freq += `<tr style="border-top:0.5px solid #eef2f7;${met ? "" : "background:#fff7f7;"}">
-          <td style="padding:6px;">${s.name}</td>
-          <td style="padding:6px;text-align:center;">${(s.studentClass||"").replace("Year ","")}</td>
-          <td style="padding:6px;text-align:center;font-weight:700;">${totalDays}</td>
-          <td style="padding:6px;text-align:center;font-weight:700;color:${weekCol};">${thisWeek}</td>
-          <td style="padding:6px;text-align:center;">${metCell}</td>
-          <td style="padding:6px;text-align:center;">${s.totalSessions||0}</td>
-          <td style="padding:6px;text-align:center;">🔥 ${s.streak||0}</td>
-          <td style="padding:6px;text-align:center;color:#6b7280;">${s.lastActiveDate||"—"}</td></tr>`;
-      });
-      freq += `</table></div>`;
-      freq += `<div class="small" style="color:#6b7280;margin-top:6px;">Target = ${weeklyTarget} day(s) of practice per week (change it using the Weekly Target control above). "This Week" counts days practised in the current Monday–Sunday week and resets every Monday. Rows highlighted pink are below target. Total Days = distinct days practised overall.</div>`;
-      teacherLb.innerHTML += freq;
-
-      // Stash data for CSV export
-      window.__freqExportData = freqStudents.map(s => ({
-        name: s.name,
-        year: (s.studentClass||"").replace("Year ",""),
-        totalDays: s.practiceDates?.length || 0,
-        thisWeek: daysPracticedThisWeek(s),
-        targetMet: daysPracticedThisWeek(s) >= weeklyTarget ? "Yes" : "No",
-        sessions: s.totalSessions || 0,
-        streak: s.streak || 0,
-        lastPlayed: s.lastActiveDate || "",
-        allDates: (s.practiceDates||[]).join(" | ")
-      }));
-      window.__weeklyTarget = weeklyTarget;
+      document.getElementById('leaderboard-title').textContent = gameState.leaderboardMode === 'class' ? `Top players in ${gameState.playerClass} for ×${selectedTable}` : `Top players overall for ×${selectedTable}`;
+      const podium = document.getElementById('podium');
+      const list = document.getElementById('leaderboard-list');
+      const podiumOrder = [1,0,2];
+      const medals = ['🥇','🥈','🥉'];
+      const topThree = sorted.slice(0, 3);
+      podium.innerHTML = podiumOrder.map(orderIndex => {
+        const p = topThree[orderIndex];
+        if (!p) return '';
+        const rank = orderIndex + 1;
+        const crown = rank === 1 ? '👑' : medals[rank - 1];
+        const size = rank === 1 ? 'w-24 h-24 text-4xl' : 'w-20 h-20 text-3xl';
+        const pillar = rank === 1 ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-white h-28' : rank === 2 ? 'bg-gray-200 text-gray-600 h-20' : 'bg-orange-200 text-orange-600 h-16';
+        return `<div class="text-center slide-up"><div class="${size} bg-gradient-to-br from-violet-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg mx-auto mb-2 ${rank === 1 ? 'pulse-glow' : ''}">${crown}</div><p class="font-bold text-gray-700">${normalize(p.player_name) === normalize(gameState.playerName) && normalize(p.player_class) === normalize(gameState.playerClass) ? 'You' : p.player_name}</p><p class="text-sm text-gray-500">${parseInt(p.best_score) || 0}%</p><div class="rounded-t-2xl w-24 mt-2 flex items-center justify-center ${pillar}"><span class="text-2xl font-bold">${rank}</span></div></div>`;
+      }).join('');
+      list.innerHTML = sorted.length ? sorted.map((p, idx) => {
+        const current = normalize(p.player_name) === normalize(gameState.playerName) && normalize(p.player_class) === normalize(gameState.playerClass);
+        return `<div class="flex items-center gap-4 p-4 ${current ? 'bg-violet-50' : ''}"><span class="w-8 text-center font-bold ${current ? 'text-violet-600' : 'text-gray-400'}">${idx + 1}</span><div class="w-12 h-12 bg-gradient-to-br from-violet-400 to-purple-500 rounded-full flex items-center justify-center text-xl">${['🧙','🦄','🐸','🐬','🦊','🐻','🦁','🐯'][idx % 8]}</div><div class="flex-1"><p class="font-bold text-gray-800">${current ? 'You' : p.player_name}</p><p class="text-sm text-gray-500">${p.player_class} · Best ${parseInt(p.best_score) || 0}%</p></div><div class="text-right"><p class="font-bold ${current ? 'text-violet-600' : 'text-gray-600'}">${parseInt(p.total_stars) || 0} ⭐</p><p class="text-xs text-green-500">Unlocked ${parseInt(p.unlocked_levels) || 1}</p></div></div>`;
+      }).join('') : '<div class="p-6 text-center text-gray-500">No records yet for this view.</div>';
     }
 
-    let header = `<div class="heatmap-grid">`;
-    header += `<div class="heatcell neutral">Student</div>`;
-    WORLDS.forEach(w => header += `<div class="heatcell neutral">×${w.table}</div>`);
-    header += `</div>`;
+    function getSessionScore(s) {
+      let score = 0;
+      if (s.score_percent != null) score = parseInt(s.score_percent) || 0;
+      else if (s.correct != null && s.total) score = Math.round((parseInt(s.correct) / parseInt(s.total)) * 100);
+      else score = parseInt(s.best_score) || parseInt(s.latest_score) || 0;
+      // Accuracy evidence for SIP must never exceed 100%. Older game records may contain bonus scores above 100.
+      return Math.max(0, Math.min(100, score));
+    }
 
-    let rows = students.map(s => {
-      let row = `<div class="heatmap-grid" style="margin-top:6px;">`;
-      row += `<div class="heatcell neutral" style="text-align:left">${s.name}</div>`;
-      WORLDS.forEach(w => {
-        const a = s.accuracies[w.table];
-        const pct = a.total ? Math.round((a.correct/a.total)*100) : 0;
-        const cls = a.total === 0 ? "neutral" : pct >= 80 ? "green" : pct >= 50 ? "yellow" : "red";
-        row += `<div class="heatcell ${cls}">${a.total ? pct + '%' : '-'}</div>`;
+    function getSessionTimestamp(s) {
+      return s.timestamp_iso || s.created_at || s.last_practiced_date || s.last_updated || '';
+    }
+
+    function getAnalyticsSessions() {
+      // Combine new full session-history data with older aggregate records.
+      // Important: once one new session exists, we must NOT hide older records that
+      // do not yet have session-history entries.
+      const sessionRows = Array.isArray(allSessions) ? [...allSessions] : [];
+      const sessionRecordKeys = new Set(sessionRows.map(s => makeRecordId(
+        s.player_name || 'Unknown',
+        canonicalizeClass(s.player_class || 'Year 1'),
+        parseInt(s.times_table) || 0
+      )));
+
+      const legacyRows = (Array.isArray(allRecords) ? allRecords : [])
+        .filter(r => {
+          const key = makeRecordId(
+            r.player_name || 'Unknown',
+            canonicalizeClass(r.player_class || 'Year 1'),
+            parseInt(r.times_table) || 0
+          );
+          return !sessionRecordKeys.has(key);
+        })
+        .map(r => ({
+          session_id: r.record_id,
+          player_name: r.player_name,
+          player_class: canonicalizeClass(r.player_class || 'Year 1'),
+          times_table: r.times_table,
+          score_percent: r.latest_score || r.best_score || 0,
+          correct: r.latest_correct || '',
+          total: r.latest_total || '',
+          week_key: r.week_key,
+          date_key: formatDateKey(r.last_practiced_date || r.last_updated),
+          timestamp_iso: r.last_practiced_date || r.last_updated,
+          practice_source: r.latest_source || 'Legacy record',
+          _legacy_sessions: parseInt(r.weekly_sessions) || 0
+        }));
+
+      return [...sessionRows, ...legacyRows];
+    }
+
+
+    function buildTeacherAnalytics(classFilter = '__all__') {
+      const currentWeek = getWeekKey();
+      const all = getAnalyticsSessions();
+      const sessions = classFilter === '__all__' ? all : all.filter(s => sameClass(s.player_class || 'Year 1', classFilter));
+      const playerMap = new Map();
+      const classMap = new Map();
+      const tableMap = new Map();
+
+      sessions.forEach(s => {
+        const name = s.player_name || 'Unknown';
+        const cls = canonicalizeClass(s.player_class || 'Year 1');
+        const table = parseInt(s.times_table) || 0;
+        const score = getSessionScore(s);
+        const ts = getSessionTimestamp(s);
+        const week = s.week_key || (ts ? getWeekKey(new Date(ts)) : '');
+        const sessionCount = s._legacy_sessions != null ? s._legacy_sessions : 1;
+        const key = `${normalize(name)}__${normalize(cls)}`;
+
+        if (!playerMap.has(key)) {
+          playerMap.set(key, { name, cls, weekly: 0, total: 0, last: '', best: 0, latest: 0, latestTs: '', tables: new Map(), sources: new Set() });
+        }
+        const p = playerMap.get(key);
+        p.total += sessionCount;
+        if (week === currentWeek) p.weekly += sessionCount;
+        p.best = Math.max(p.best, score);
+        p.sources.add(s.practice_source || 'Not stated');
+        if (ts && (!p.last || new Date(ts) > new Date(p.last))) p.last = ts;
+        if (ts && (!p.latestTs || new Date(ts) > new Date(p.latestTs))) { p.latestTs = ts; p.latest = score; }
+
+        if (table) {
+          if (!p.tables.has(table)) p.tables.set(table, { table, attempts: 0, best: 0, latest: 0, latestTs: '', totalScore: 0 });
+          const pt = p.tables.get(table);
+          pt.attempts += sessionCount;
+          pt.best = Math.max(pt.best, score);
+          pt.totalScore += score;
+          if (ts && (!pt.latestTs || new Date(ts) > new Date(pt.latestTs))) { pt.latestTs = ts; pt.latest = score; }
+
+          if (!tableMap.has(table)) tableMap.set(table, { table, attempts: 0, totalScore: 0, mastered: 0, below: 0 });
+          const tm = tableMap.get(table);
+          tm.attempts += sessionCount;
+          tm.totalScore += score;
+          if (score >= 90) tm.mastered += sessionCount; else tm.below += sessionCount;
+        }
+
+        if (!classMap.has(cls)) classMap.set(cls, { className: cls, weekly: 0, total: 0, pupils: new Set(), totalScore: 0, attempts: 0 });
+        const c = classMap.get(cls);
+        c.total += sessionCount;
+        if (week === currentWeek) c.weekly += sessionCount;
+        c.pupils.add(key);
+        c.totalScore += score;
+        c.attempts += sessionCount;
       });
-      row += `</div>`;
-      return row;
-    }).join("");
-    heatmap.innerHTML = header + rows;
-  }catch(err){
-    console.error(err);
-    teacherLb.innerHTML = `<div class="small" style="color:#f59e0b;">⚠ Could not load dashboard — check your connection.</div>`;
-  }
-};
 
-renderAll();
-loadLeaderboard();
-// Teacher dashboard loads only after PIN unlock
-</script>
+      const playerRows = [...playerMap.values()].map(p => {
+        const tableRows = [...p.tables.values()].sort((a,b) => a.table - b.table);
+        const weakTables = tableRows.filter(t => t.latest < 90).map(t => `×${t.table}`);
+        const practisedTables = tableRows.map(t => `×${t.table}`);
+        let status = 'Not active yet';
+        if (p.weekly >= WEEKLY_TARGET && p.latest >= 90) status = 'On Track';
+        else if (p.weekly < WEEKLY_TARGET && p.latest < 90) status = 'Priority Support';
+        else if (p.weekly < WEEKLY_TARGET) status = 'Needs Reminder';
+        else if (p.latest < 90) status = 'Needs Support';
+        if (p.weekly > WEEKLY_TARGET && p.best >= 90) status = 'Challenge Group';
+        return { ...p, tableRows, weakTables, practisedTables, status, sourceText: [...p.sources].join(', ') };
+      }).sort((a,b) => b.weekly - a.weekly || b.latest - a.latest || a.name.localeCompare(b.name));
+
+      const classRows = [...classMap.values()].map(c => ({ ...c, pupilCount: c.pupils.size, avgScore: c.attempts ? c.totalScore / c.attempts : 0 })).sort((a,b) => b.weekly - a.weekly || b.avgScore - a.avgScore);
+      const tableRows = [...tableMap.values()].map(t => ({ ...t, avgScore: t.attempts ? t.totalScore / t.attempts : 0 })).sort((a,b) => b.avgScore - a.avgScore);
+      return { currentWeek, sessions, playerRows, classRows, tableRows };
+    }
+
+    function masteryChip(t) {
+      const cls = t.latest >= 90 ? 'bg-emerald-100 text-emerald-700' : t.latest >= 70 ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700';
+      return `<span class="${cls} rounded-xl px-2 py-1 text-xs font-bold">×${t.table}: ${t.latest}% (${t.attempts})</span>`;
+    }
+
+    function getAllClassOptions() {
+      return STANDARD_CLASSES;
+    }
+
+    function renderTeacherClassFilterOptions() {
+      const select = document.getElementById('teacher-class-filter');
+      if (!select) return;
+      const classes = getAllClassOptions();
+      const current = teacherClassFilter;
+      select.innerHTML = `<option value="__all__">Overall - All Classes</option>` + classes.map(cls => `<option value="${String(cls).replace(/"/g, '&quot;')}">${cls}</option>`).join('');
+      select.value = classes.some(cls => sameClass(cls, current)) ? canonicalizeClass(current) : '__all__';
+      if (select.value !== current) teacherClassFilter = '__all__';
+    }
+
+    function setTeacherClassFilter(value) {
+      teacherClassFilter = value === '__all__' ? '__all__' : canonicalizeClass(value || 'Year 1');
+      renderTeacherDashboard();
+    }
+
+    function downloadSessionsCSV() {
+      const sessions = teacherClassFilter === '__all__' ? getAnalyticsSessions() : getAnalyticsSessions().filter(s => sameClass(s.player_class || 'Year 1', teacherClassFilter));
+      const headers = ['session_id','date_key','timestamp_iso','player_name','player_class','practice_source','times_table','level','mode','correct','total','score_percent','passed','week_key'];
+      const rows = [headers.join(',')];
+      sessions.forEach(s => {
+        rows.push(headers.map(h => `"${String(s[h] ?? '').replace(/"/g, '""')}"`).join(','));
+      });
+      const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const filterSuffix = teacherClassFilter === '__all__' ? 'overall' : safeIdPart(teacherClassFilter);
+      a.download = `multiplication_quest_sessions_${filterSuffix}_${getDateKey()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function renderTeacherDashboard() {
+      renderTeacherClassFilterOptions();
+      const overallAnalytics = buildTeacherAnalytics('__all__');
+      const { sessions, playerRows, classRows, tableRows } = buildTeacherAnalytics(teacherClassFilter);
+      const filterNote = document.getElementById('teacher-filter-note');
+      if (filterNote) filterNote.textContent = teacherClassFilter === '__all__' ? 'Showing: Overall - All Classes' : `Showing: ${teacherClassFilter}`;
+      const totalPlayers = playerRows.length;
+      const activeThisWeek = playerRows.filter(p => p.weekly > 0).length;
+      const metTarget = playerRows.filter(p => p.weekly >= WEEKLY_TARGET).length;
+      const topTable = tableRows[0]?.table || 0;
+      const weakTable = tableRows.length ? [...tableRows].sort((a,b) => a.avgScore - b.avgScore)[0].table : 0;
+
+      document.getElementById('teacher-total-players').textContent = totalPlayers;
+      document.getElementById('teacher-active-week').textContent = activeThisWeek;
+      document.getElementById('teacher-met-target').textContent = metTarget;
+      document.getElementById('teacher-total-classes').textContent = classRows.length;
+      document.getElementById('teacher-top-table').textContent = `×${topTable}`;
+      document.getElementById('teacher-weak-table').textContent = `×${weakTable}`;
+
+      document.getElementById('teacher-frequency-list').innerHTML = playerRows.length ? playerRows.map(p => {
+        const bg = p.status === 'On Track' || p.status === 'Challenge Group' ? 'bg-emerald-50' : p.status === 'Needs Reminder' ? 'bg-amber-50' : 'bg-rose-50';
+        return `<div class="${bg} rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap"><div><p class="font-bold text-gray-800">${p.name}</p><p class="text-sm text-gray-500">${p.cls} · Last practice: ${formatDateKey(p.last)} · ${p.sourceText}</p></div><div class="text-right"><p class="font-bold text-violet-600">This week: ${p.weekly}/${WEEKLY_TARGET}</p><p class="text-xs text-gray-500">Total: ${p.total} sessions · ${p.status}</p></div></div>`;
+      }).join('') : '<p class="text-gray-500">No practice frequency data yet.</p>';
+
+      document.getElementById('teacher-class-list').innerHTML = classRows.length ? classRows.map((r, i) => `<div class="bg-violet-50 rounded-2xl p-4 flex items-center justify-between gap-4"><div><p class="font-bold text-gray-800">${i + 1}. ${r.className}</p><p class="text-sm text-gray-500">${r.pupilCount} pupils · ${r.total} total sessions</p></div><div class="text-right"><p class="font-bold text-violet-600">${r.weekly} sessions this week</p><p class="text-xs text-gray-500">Avg score ${r.avgScore.toFixed(1)}%</p></div></div>`).join('') : '<p class="text-gray-500">No class data yet.</p>';
+
+      document.getElementById('teacher-table-list').innerHTML = tableRows.length ? tableRows.map(r => `<div class="bg-sky-50 rounded-2xl p-4 flex items-center justify-between gap-4"><div><p class="font-bold text-gray-800">Times Table ×${r.table}</p><p class="text-sm text-gray-500">${r.attempts} attempts · ${r.mastered} at 90%+</p></div><div class="text-right"><p class="font-bold text-sky-600">${r.avgScore.toFixed(1)}%</p><p class="text-xs text-gray-500">${r.below} below 90%</p></div></div>`).join('') : '<p class="text-gray-500">No table data yet.</p>';
+
+      const topStudents = [...playerRows].sort((a,b) => b.best - a.best || b.weekly - a.weekly).slice(0,8);
+      document.getElementById('teacher-student-list').innerHTML = topStudents.length ? topStudents.map((p, i) => `<div class="bg-emerald-50 rounded-2xl p-4 flex items-center justify-between gap-4"><div><p class="font-bold text-gray-800">${i + 1}. ${p.name}</p><p class="text-sm text-gray-500">${p.cls} · Tables: ${p.practisedTables.join(', ') || '-'}</p></div><div class="text-right"><p class="font-bold text-emerald-600">Best ${p.best}%</p><p class="text-xs text-gray-500">Latest ${p.latest}% · ${p.weekly}/${WEEKLY_TARGET}</p></div></div>`).join('') : '<p class="text-gray-500">No pupil data yet.</p>';
+
+      const support = playerRows.filter(p => p.weekly < WEEKLY_TARGET || p.latest < 90).sort((a,b) => a.weekly - b.weekly || a.latest - b.latest).slice(0,10);
+      document.getElementById('teacher-support-list').innerHTML = support.length ? support.map(p => {
+        const issue = p.weekly < WEEKLY_TARGET && p.latest < 90 ? 'Low frequency + score below 90%' : p.weekly < WEEKLY_TARGET ? 'Below weekly target' : 'Score below 90%';
+        return `<div class="bg-rose-50 rounded-2xl p-4 flex items-center justify-between gap-4"><div><p class="font-bold text-gray-800">${p.name}</p><p class="text-sm text-gray-500">${p.cls} · ${issue} · Weak: ${p.weakTables.join(', ') || '-'}</p></div><div class="text-right"><p class="font-bold text-rose-600">${p.weekly}/${WEEKLY_TARGET} sessions</p><p class="text-xs text-gray-500">Latest ${p.latest}% · Best ${p.best}%</p></div></div>`;
+      }).join('') : '<p class="text-gray-500">No priority support pupils yet.</p>';
+
+      const masteryList = document.getElementById('teacher-mastery-list');
+      if (masteryList) {
+        masteryList.innerHTML = playerRows.length ? playerRows.map(p => {
+          const weakText = p.weakTables.length ? p.weakTables.join(', ') : 'No weak table recorded';
+          const sourceNote = p.sourceText.includes('Legacy') ? 'Legacy data: wait for new V2 sessions for full table-by-table history.' : 'Session history recorded.';
+          return `<div class="bg-gray-50 rounded-2xl p-4"><div class="flex items-center justify-between gap-4 flex-wrap mb-3"><div><p class="font-bold text-gray-800">${p.name}</p><p class="text-sm text-gray-500">${p.cls} · ${p.status} · ${sourceNote}</p></div><div class="text-right"><p class="font-bold text-violet-600">This week: ${p.weekly}/${WEEKLY_TARGET}</p><p class="text-xs text-gray-500">Best ${p.best}% · Latest ${p.latest}% · Weak: ${weakText}</p></div></div><div class="flex gap-2 flex-wrap">${p.tableRows.length ? p.tableRows.map(masteryChip).join('') : '<span class="text-sm text-gray-500">No table attempted yet.</span>'}</div></div>`;
+        }).join('') : '<p class="text-gray-500">No individual mastery data yet.</p>';
+      }
+
+      const badgeList = document.getElementById('teacher-badge-list');
+      if (badgeList) {
+        const exceeded = playerRows.filter(p => p.weekly > WEEKLY_TARGET).slice(0, 8);
+        badgeList.innerHTML = exceeded.length ? exceeded.map(p => `<div class="bg-amber-50 rounded-2xl p-4 flex items-center justify-between gap-4"><div><p class="font-bold text-gray-800">⭐ ${p.name}</p><p class="text-sm text-gray-500">${p.cls}</p></div><div class="text-right"><p class="font-bold text-amber-600">${p.weekly}/${WEEKLY_TARGET}</p><p class="text-xs text-gray-500">Target exceeded</p></div></div>`).join('') : '<p class="text-gray-500">No pupils exceeded the weekly target yet.</p>';
+      }
+    }
+
+    function exitQuiz() {
+      clearTimer();
+      gameState.dailyMode = false;
+      showScreen('level-screen');
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      loadPlayerPref();
+      await initFirebase();
+      await loadAllRecords();
+      await loadAllSessions();
+      renderTableGrid();
+      renderDailyScreen();
+      renderTeacherDashboard();
+      updateStats();
+    });
+  </script>
 </body>
 </html>
